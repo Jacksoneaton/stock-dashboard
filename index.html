@@ -6,79 +6,163 @@
 <title>顺运宝库存看板</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e17;color:#e0e6ef}
-.container{max-width:1400px;margin:0 auto;padding:16px}
-.header{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:24px;flex-wrap:wrap;gap:12px}
-.header-left h1{font-size:24px;font-weight:700;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-left p{font-size:13px;color:#6b7280;margin-top:4px}
-.time-badge{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:8px;padding:8px 16px;font-size:13px;color:#38bdf8}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:20px}
-.stat-card::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--c,#38bdf8),transparent);margin:-20px -20px 12px}
-.stat-card .l{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
-.stat-card .v{font-size:28px;font-weight:700;color:#fff}
-.stat-card .s{font-size:12px;color:#6b7280;margin-top:4px}
-.status-bar{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
-.status-tag{padding:6px 14px;border-radius:20px;font-size:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#9ca3af;cursor:pointer;transition:all .2s}
-.status-tag.a{background:rgba(56,189,248,.15);border-color:#38bdf8;color:#38bdf8}
-.status-tag .c{margin-left:6px;opacity:.6;font-size:11px}
-.table-wrap{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0e17;color:#e0e6ef}
+.c{max-width:1400px;margin:0 auto;padding:16px}
+.h{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.h1{font-size:24px;font-weight:700;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.p{font-size:13px;color:#6b7280;margin-top:4px}
+.tb{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:8px;padding:8px 16px;font-size:13px;color:#38bdf8}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.scard{background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:20px}
+.scard .l{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.scard .v{font-size:28px;font-weight:700;color:#fff}
+.scard .s{font-size:12px;color:#6b7280;margin-top:4px}
+.sb{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.st{padding:6px 14px;border-radius:20px;font-size:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#9ca3af;cursor:pointer}
+.sta{background:rgba(56,189,248,.15);border-color:#38bdf8;color:#38bdf8}
+.tw{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;overflow:hidden}
 .th{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
-.th h3{font-size:14px;color:#9ca3af}
+.th h3{font-size:14px;color:#9ca3af;font-weight:500}
 .th input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 12px;color:#e0e6ef;font-size:13px;width:200px;outline:none}
 .th input:focus{border-color:#38bdf8}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;padding:12px 16px;color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,.04);position:sticky;top:0;background:#0a0e17}
-td{padding:10px 16px;vertical-align:middle;border-bottom:1px solid rgba(255,255,255,.03)}
+td{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.03)}
 tr:hover{background:rgba(56,189,248,.04)}
-.sb{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600}
-.sb.c{background:rgba(239,68,68,.15);color:#ef4444}
-.sb.l{background:rgba(251,191,36,.15);color:#fbbf24}
-.sb.o{background:rgba(34,197,94,.1);color:#22c55e}
-.sc{display:inline-flex;padding:2px 10px;border-radius:12px;font-size:11px;background:rgba(255,255,255,.04);color:#9ca3af}
-.sc.s{background:rgba(34,197,94,.1);color:#22c55e}
-.sc.u{background:rgba(251,191,36,.1);color:#fbbf24}
-.sc.e{background:rgba(107,114,128,.15);color:#6b7280}
+.b{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600}
+.bc{background:rgba(239,68,68,.15);color:#ef4444}
+.bl{background:rgba(251,191,36,.15);color:#fbbf24}
+.bo{background:rgba(34,197,94,.1);color:#22c55e}
+.ch{display:inline-flex;padding:2px 10px;border-radius:12px;font-size:11px;background:rgba(255,255,255,.04);color:#9ca3af}
+.chs{background:rgba(34,197,94,.1);color:#22c55e}
+.chu{background:rgba(251,191,36,.1);color:#fbbf24}
+.che{background:rgba(107,114,128,.15);color:#6b7280}
 a{color:#38bdf8;text-decoration:none;font-size:12px}
 a:hover{text-decoration:underline}
 .tc{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#d1d5db}
-@media(max-width:600px){.header-left h1{font-size:18px}.stats-grid{grid-template-columns:1fr 1fr}.stat-card{padding:14px}.stat-card .v{font-size:22px}table{font-size:12px}th,td{padding:8px 10px}.tc{max-width:120px}}
-footer{text-align:center;padding:24px 0 12px;font-size:11px;color:#374151}
+@media(max-width:600px){.h1{font-size:18px}.sg{grid-template-columns:1fr 1fr}.scard{padding:14px}.scard .v{font-size:22px}table{font-size:12px}th,td{padding:8px 10px}.tc{max-width:120px}}
+.ft{text-align:center;padding:24px 0 12px;font-size:11px;color:#374151}
 </style>
 </head>
 <body>
-<div class="container">
-<div class="header">
-<div><h1>&#9889; 顺运宝库存看板</h1><p>Wearing Notes &middot; 实时监控</p></div>
-<div class="time-badge" id="t">&#128197; 加载中...</div>
+<div class="c">
+<div class="h">
+<div><div class="h1">⚡ 顺运宝库存看板</div><div class="p">Wearing Notes · 实时监控</div></div>
+<div class="tb" id="ts">📅 加载中...</div>
 </div>
-<div class="stats-grid" id="sg"></div>
-<div class="status-bar" id="sbar"></div>
-<div class="table-wrap">
-<div class="th"><h3 id="tt">&#128203; 全部商品明细</h3><input type="text" id="q" placeholder="&#128269; 搜索" oninput="f()"></div>
+<div class="sg" id="sg"></div>
+<div class="sb" id="stb"></div>
+<div class="tw">
+<div class="th"><h3 id="tt">📋 全部商品明细</h3><input type="text" id="q" placeholder="🔍 搜索" oninput="rf()"></div>
 <div style="overflow-x:auto"><table><thead><tr><th>SKU</th><th>商品名称</th><th>规格</th><th style="text-align:center">库存</th><th style="text-align:center">在途</th><th style="text-align:center">合计</th><th style="text-align:center">状态</th></tr></thead><tbody id="tb"></tbody></table></div>
 </div>
-<footer>顺运宝 &middot; 库存监控</footer>
+<div class="ft">顺运宝 · 库存监控 · GH Pages</div>
 </div>
 <script>
-var D=[{"sku": "QTW00275-01", "invCode": "QTW00275", "title": "✨夏季必備✨辣妹穿搭✨吊帶背心 韓系上衣 假兩件上衣 短版上衣 疊穿背心 短袖襯衫 撞色不規則 修身緊身 防曬上衣", "spec": "均碼", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00274-06", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩 3XL", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00274-05", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩 2XL", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00274-04", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩 XL", "stock": 1, "transit": 0, "total": 1, "status": "已入仓", "available": 1}, {"sku": "QTW00274-03", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩 L", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00274-02", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩 M", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00274-01", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩  S", "stock": 1, "transit": 0, "total": 1, "status": "已入仓", "available": 1}, {"sku": "QTW00272-09", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "黑色 M", "stock": 3, "transit": 0, "total": 3, "status": "已入仓", "available": 3}, {"sku": "QTW00272-06", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色  5XL", "stock": 1, "transit": 0, "total": 1, "status": "已入仓", "available": 1}, {"sku": "QTW00272-05", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色  2XL", "stock": 1, "transit": 0, "total": 1, "status": "已入仓", "available": 1}, {"sku": "QTW00272-04", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色  XL", "stock": 4, "transit": 0, "total": 4, "status": "已入仓", "available": 4}, {"sku": "QTW00272-03", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色 M", "stock": 4, "transit": 0, "total": 4, "status": "已入仓", "available": 4}, {"sku": "QTW00272-02", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色 S", "stock": 1, "transit": 0, "total": 1, "status": "已入仓", "available": 1}, {"sku": "QTW00273-04", "invCode": "QTW00273", "title": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "spec": "黑色星星字母印花 XL", "stock": 6, "transit": 0, "total": 6, "status": "已拆包", "available": 6}, {"sku": "QTW00273-03", "invCode": "QTW00273", "title": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "spec": "黑色星星字母印花 L", "stock": 2, "transit": 0, "total": 2, "status": "已入仓", "available": 2}, {"sku": "QTW00273-02", "invCode": "QTW00273", "title": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "spec": "黑色星星字母印花 M", "stock": 4, "transit": 0, "total": 4, "status": "已入仓", "available": 4}, {"sku": "QTW00273-01", "invCode": "QTW00273", "title": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "spec": "黑色星星字母印花  S", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00267-12", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "米白色 L", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00267-11", "invCode": "QTW00267", "title": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "黑色 S", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00272-01", "invCode": "QTW00272", "title": "現貨🌟隔日到貨🔥大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色  L", "stock": 2, "transit": 0, "total": 2, "status": "已拆包", "available": 2}, {"sku": "QTW00271-01", "invCode": "QTW00271", "title": "實拍✨辣妹必備💯吊帶背心 橘色背心 條紋撞色吊帶背心 修身顯瘦 露背上衣 短版上衣 露肩上衣 短版背心 細肩帶上衣 女裝", "spec": "橘色  S", "stock": 1, "transit": 0, "total": 1, "status": "已入仓", "available": 1}, {"sku": "QTW00266-05", "invCode": "QTW00266", "title": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "spec": "黑色  XL", "stock": 2, "transit": 0, "total": 2, "status": "已入仓", "available": 2}, {"sku": "QTW00267-10", "invCode": "QTW00267", "title": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "黑色  XL", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00267-09", "invCode": "QTW00267", "title": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "黑色  L", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00267-08", "invCode": "QTW00267", "title": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "黑色  M", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00270-07", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "蓝色 2XL", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00270-06", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "蓝色 L", "stock": 1, "transit": 0, "total": 1, "status": "已入仓", "available": 1}, {"sku": "QTW00270-05", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "粉色 3XL", "stock": 3, "transit": 0, "total": 3, "status": "已入仓", "available": 3}, {"sku": "QTW00270-04", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "粉色 2XL", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00270-03", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "粉色 XL", "stock": 2, "transit": 0, "total": 2, "status": "已拆包", "available": 2}, {"sku": "QTW00270-02", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "粉色 L", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00270-01", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "粉色 M", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00269-05", "invCode": "QTW00269", "title": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "spec": "黑色 2XL", "stock": 9, "transit": 0, "total": 9, "status": "已拆包", "available": 9}, {"sku": "QTW00269-04", "invCode": "QTW00269", "title": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "spec": "黑色 XL", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00269-03", "invCode": "QTW00269", "title": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "spec": "黑色 M", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00269-02", "invCode": "QTW00269", "title": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "spec": "黑色  S", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00267-07", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "米白色 XL", "stock": 3, "transit": 0, "total": 3, "status": "已拆包", "available": 3}, {"sku": "QTW00267-06", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "米白色  S", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00261-06", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 3XL码", "stock": 3, "transit": 0, "total": 3, "status": "已拆包", "available": 3}, {"sku": "QTW00261-05", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 S码", "stock": 2, "transit": 0, "total": 2, "status": "已拆包", "available": 2}, {"sku": "QTW00261-04", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 M码", "stock": 5, "transit": 0, "total": 5, "status": "已拆包", "available": 5}, {"sku": "QTW00261-03", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 L码", "stock": 10, "transit": 0, "total": 10, "status": "已拆包", "available": 10}, {"sku": "QTW00261-02", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 XL码", "stock": 12, "transit": 0, "total": 12, "status": "已拆包", "available": 12}, {"sku": "QTW00269-01", "invCode": "QTW00269", "title": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "spec": "黑色   L", "stock": 7, "transit": 0, "total": 7, "status": "已拆包", "available": 7}, {"sku": "QTW00268-05", "invCode": "QTW00268", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "spec": "白色  2XL", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00268-04", "invCode": "QTW00268", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "spec": "白色  XL", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00268-03", "invCode": "QTW00268", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "spec": "白色   L", "stock": 3, "transit": 0, "total": 3, "status": "已拆包", "available": 3}, {"sku": "QTW00268-02", "invCode": "QTW00268", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "spec": "白色    M", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00268-01", "invCode": "QTW00268", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "spec": "白色 S", "stock": 2, "transit": 0, "total": 2, "status": "已拆包", "available": 2}, {"sku": "QTW00267-05", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "米白色 M", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00267-04", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "粉色 S", "stock": 3, "transit": 0, "total": 3, "status": "已拆包", "available": 3}, {"sku": "QTW00267-03", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "粉色 M", "stock": 5, "transit": 0, "total": 5, "status": "已拆包", "available": 5}, {"sku": "QTW00267-02", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "粉色 L", "stock": 4, "transit": 0, "total": 4, "status": "已拆包", "available": 4}, {"sku": "QTW00267-01", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "粉色 XL", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00266-04", "invCode": "QTW00266", "title": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "spec": "紅色 S", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00266-03", "invCode": "QTW00266", "title": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "spec": "紅色 M", "stock": 2, "transit": 0, "total": 2, "status": "已入仓", "available": 2}, {"sku": "QTW00266-02", "invCode": "QTW00266", "title": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "spec": "紅色 L", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00266-01", "invCode": "QTW00266", "title": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "spec": "紅色 XL", "stock": 12, "transit": 0, "total": 12, "status": "已拆包", "available": 12}, {"sku": "QTW00265-04", "invCode": "QTW00265", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "spec": "棕色  XL码", "stock": 3, "transit": 0, "total": 3, "status": "已拆包", "available": 3}, {"sku": "QTW00265-03", "invCode": "QTW00265", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "spec": "棕色  L码", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00265-02", "invCode": "QTW00265", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "spec": "棕色  M码", "stock": 3, "transit": 0, "total": 3, "status": "已拆包", "available": 3}, {"sku": "QTW00265-01", "invCode": "QTW00265", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "spec": "棕色  S码", "stock": 4, "transit": 0, "total": 4, "status": "已拆包", "available": 4}, {"sku": "QTW00264-06", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  L码", "stock": 2, "transit": 0, "total": 2, "status": "已拆包", "available": 2}, {"sku": "QTW00264-05", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  M码", "stock": 4, "transit": 0, "total": 4, "status": "已拆包", "available": 4}, {"sku": "QTW00264-04", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  S码", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00263-06", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色  3XL码", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00263-05", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色  2XL码", "stock": 1, "transit": 0, "total": 1, "status": "已拆包", "available": 1}, {"sku": "QTW00263-04", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色  M码", "stock": 3, "transit": 0, "total": 3, "status": "已拆包", "available": 3}, {"sku": "QTW00263-03", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色  S码", "stock": 5, "transit": 0, "total": 5, "status": "已拆包", "available": 5}, {"sku": "QTW00263-02", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色 L码", "stock": 2, "transit": 0, "total": 2, "status": "已拆包", "available": 2}, {"sku": "QTW00264-03", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  3XL", "stock": 0, "transit": 0, "total": 0, "status": "已寄出", "available": 0}, {"sku": "QTW00264-02", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  2XL", "stock": 5, "transit": 0, "total": 5, "status": "已拆包", "available": 5}, {"sku": "QTW00264-01", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  XL", "stock": 3, "transit": 0, "total": 3, "status": "已拆包", "available": 3}, {"sku": "QTW00263-01", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色  XL", "stock": 2, "transit": 0, "total": 2, "status": "已拆包", "available": 2}, {"sku": "QTW00261-01", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 2XL码", "stock": 10, "transit": 0, "total": 10, "status": "已拆包", "available": 10}];
-var I=D.length,K=D.reduce(function(s,d){return s+d.stock},0),Z=D.filter(function(d){return d.stock===0}).length,L=D.filter(function(d){return d.stock>0&&d.stock<=3}).length,P=new Set(D.map(function(d){return d.invCode})).size,A=D.filter(function(d){return d.available>0}).length;
-document.getElementById('sg').innerHTML='<div class="stat-card"><div class="l">总SKU</div><div class="v">'+I+'</div><div class="s">'+P+'款</div></div><div class="stat-card"><div class="l">库存</div><div class="v">'+K+'</div><div class="s">可发货</div></div><div class="stat-card"><div class="l">预警</div><div class="v">'+(Z+L)+'</div><div class="s">缺货'+Z+',低库存'+L+'</div></div><div class="stat-card"><div class="l">有货率</div><div class="v">'+Math.round(A/I*100)+'%</div><div class="s">'+A+'/'+I+'有货</div></div>';
-var SC={};D.forEach(function(d){SC[d.status]=(SC[d.status]||0)+1});
-var SK=Object.keys(SC).sort();
-var sb='<div class="status-tag a" data-f="all" onclick="sf('all')">全部 <span class="c">'+I+'</span></div>';
-SK.forEach(function(k){sb+='<div class="status-tag" data-f="'+k+'" onclick="sf(''+k+'')">'+k+' <span class="c">'+SC[k]+'</span></div>'});
-document.getElementById('sbar').innerHTML=sb;
-var F='all';
-function sf(f){F=f;var els=document.querySelectorAll('.status-tag');for(var i=0;i<els.length;i++){els[i].classList.toggle('a',els[i].getAttribute('data-f')===f)}r()}
-function r(){var sq=document.getElementById('q').value.toLowerCase();var fd=[];for(var i=0;i<D.length;i++){var d=D[i];if(F!=='all'&&d.status!==F)continue;if(sq&&d.sku.toLowerCase().indexOf(sq)<0&&d.title.toLowerCase().indexOf(sq)<0&&d.invCode.toLowerCase().indexOf(sq)<0)continue;fd.push(d)}
-var h='';for(var i=0;i<fd.length;i++){var d=fd[i];var bc,bi;if(d.stock===0){bc='c';bi='&#128308;'}else if(d.stock<=3){bc='l';bi='&#128993;'}else{bc='o';bi='&#9989;'}
-var scl='sc';if(d.status==='已入仓')scl+=' s';else if(d.status==='已拆包')scl+=' u';else if(d.status==='已寄出')scl+=' e';
-h+='<tr><td><a href="https://shopee.tw/search?keyword='+encodeURIComponent(d.sku)+'" target="_blank">'+d.sku+'</a></td><td class="tc" title="'+d.title.replace(/'/g,'&#39;')+'">'+d.title+'</td><td>'+d.spec+'</td><td style="text-align:center"><span class="sb '+bc+'">'+bi+' '+d.stock+'</span></td><td style="text-align:center;color:'+(d.transit>0?'#fbbf24':'#6b7280')+'">'+(d.transit||'-')+'</td><td style="text-align:center;font-weight:600">'+d.total+'</td><td style="text-align:center"><span class="'+scl+'">'+d.status+'</span></td></tr>'}
-document.getElementById('tb').innerHTML=h;document.getElementById('tt').textContent='&#128203; 全部 ('+fd.length+')'}
-function f(){r()}
-function u(){var n=new Date();document.getElementById('t').textContent='&#128197; '+n.getFullYear()+'-'+(n.getMonth()+1).toString().padStart(2,'0')+'-'+n.getDate().toString().padStart(2,'0')+' '+n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0')}
-u();setInterval(u,30000);r();
+var D = [{"s": "QTW00275-01", "c": "QTW00275", "t": "✨夏季必備✨辣妹穿搭✨吊帶背心 韓系上衣 假兩件上衣 短版上衣 疊穿背心 短袖襯衫 撞色不規則 修身緊身 防曬上衣", "p": "均碼", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00274-06", "c": "QTW00274", "t": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "p": "迷彩 3XL", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00274-05", "c": "QTW00274", "t": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "p": "迷彩 2XL", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00274-04", "c": "QTW00274", "t": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "p": "迷彩 XL", "k": 1, "r": 0, "l": 1, "x": "已入仓"}, {"s": "QTW00274-03", "c": "QTW00274", "t": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "p": "迷彩 L", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00274-02", "c": "QTW00274", "t": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "p": "迷彩 M", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00274-01", "c": "QTW00274", "t": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "p": "迷彩  S", "k": 1, "r": 0, "l": 1, "x": "已入仓"}, {"s": "QTW00272-09", "c": "QTW00272", "t": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "p": "黑色 M", "k": 3, "r": 0, "l": 3, "x": "已入仓"}, {"s": "QTW00272-06", "c": "QTW00272", "t": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "p": "杏色  5XL", "k": 1, "r": 0, "l": 1, "x": "已入仓"}, {"s": "QTW00272-05", "c": "QTW00272", "t": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "p": "杏色  2XL", "k": 1, "r": 0, "l": 1, "x": "已入仓"}, {"s": "QTW00272-04", "c": "QTW00272", "t": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "p": "杏色  XL", "k": 4, "r": 0, "l": 4, "x": "已入仓"}, {"s": "QTW00272-03", "c": "QTW00272", "t": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "p": "杏色 M", "k": 4, "r": 0, "l": 4, "x": "已入仓"}, {"s": "QTW00272-02", "c": "QTW00272", "t": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "p": "杏色 S", "k": 1, "r": 0, "l": 1, "x": "已入仓"}, {"s": "QTW00273-04", "c": "QTW00273", "t": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "p": "黑色星星字母印花 XL", "k": 6, "r": 0, "l": 6, "x": "已拆包"}, {"s": "QTW00273-03", "c": "QTW00273", "t": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "p": "黑色星星字母印花 L", "k": 2, "r": 0, "l": 2, "x": "已入仓"}, {"s": "QTW00273-02", "c": "QTW00273", "t": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "p": "黑色星星字母印花 M", "k": 4, "r": 0, "l": 4, "x": "已入仓"}, {"s": "QTW00273-01", "c": "QTW00273", "t": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "p": "黑色星星字母印花  S", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00267-12", "c": "QTW00267", "t": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "米白色 L", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00267-11", "c": "QTW00267", "t": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "黑色 S", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00272-01", "c": "QTW00272", "t": "現貨🌟隔日到貨🔥大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "p": "杏色  L", "k": 2, "r": 0, "l": 2, "x": "已拆包"}, {"s": "QTW00271-01", "c": "QTW00271", "t": "實拍✨辣妹必備💯吊帶背心 橘色背心 條紋撞色吊帶背心 修身顯瘦 露背上衣 短版上衣 露肩上衣 短版背心 細肩帶上衣 女裝", "p": "橘色  S", "k": 1, "r": 0, "l": 1, "x": "已入仓"}, {"s": "QTW00266-05", "c": "QTW00266", "t": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "p": "黑色  XL", "k": 2, "r": 0, "l": 2, "x": "已入仓"}, {"s": "QTW00267-10", "c": "QTW00267", "t": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "黑色  XL", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00267-09", "c": "QTW00267", "t": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "黑色  L", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00267-08", "c": "QTW00267", "t": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "黑色  M", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00270-07", "c": "QTW00270", "t": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "p": "蓝色 2XL", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00270-06", "c": "QTW00270", "t": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "p": "蓝色 L", "k": 1, "r": 0, "l": 1, "x": "已入仓"}, {"s": "QTW00270-05", "c": "QTW00270", "t": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "p": "粉色 3XL", "k": 3, "r": 0, "l": 3, "x": "已入仓"}, {"s": "QTW00270-04", "c": "QTW00270", "t": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "p": "粉色 2XL", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00270-03", "c": "QTW00270", "t": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "p": "粉色 XL", "k": 2, "r": 0, "l": 2, "x": "已拆包"}, {"s": "QTW00270-02", "c": "QTW00270", "t": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "p": "粉色 L", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00270-01", "c": "QTW00270", "t": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "p": "粉色 M", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00269-05", "c": "QTW00269", "t": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "p": "黑色 2XL", "k": 9, "r": 0, "l": 9, "x": "已拆包"}, {"s": "QTW00269-04", "c": "QTW00269", "t": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "p": "黑色 XL", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00269-03", "c": "QTW00269", "t": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "p": "黑色 M", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00269-02", "c": "QTW00269", "t": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "p": "黑色  S", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00267-07", "c": "QTW00267", "t": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "米白色 XL", "k": 3, "r": 0, "l": 3, "x": "已拆包"}, {"s": "QTW00267-06", "c": "QTW00267", "t": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "米白色  S", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00261-06", "c": "QTW00261", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "卡其色 3XL码", "k": 3, "r": 0, "l": 3, "x": "已拆包"}, {"s": "QTW00261-05", "c": "QTW00261", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "卡其色 S码", "k": 2, "r": 0, "l": 2, "x": "已拆包"}, {"s": "QTW00261-04", "c": "QTW00261", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "卡其色 M码", "k": 5, "r": 0, "l": 5, "x": "已拆包"}, {"s": "QTW00261-03", "c": "QTW00261", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "卡其色 L码", "k": 10, "r": 0, "l": 10, "x": "已拆包"}, {"s": "QTW00261-02", "c": "QTW00261", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "卡其色 XL码", "k": 12, "r": 0, "l": 12, "x": "已拆包"}, {"s": "QTW00269-01", "c": "QTW00269", "t": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "p": "黑色   L", "k": 7, "r": 0, "l": 7, "x": "已拆包"}, {"s": "QTW00268-05", "c": "QTW00268", "t": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "p": "白色  2XL", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00268-04", "c": "QTW00268", "t": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "p": "白色  XL", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00268-03", "c": "QTW00268", "t": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "p": "白色   L", "k": 3, "r": 0, "l": 3, "x": "已拆包"}, {"s": "QTW00268-02", "c": "QTW00268", "t": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "p": "白色    M", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00268-01", "c": "QTW00268", "t": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "p": "白色 S", "k": 2, "r": 0, "l": 2, "x": "已拆包"}, {"s": "QTW00267-05", "c": "QTW00267", "t": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "米白色 M", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00267-04", "c": "QTW00267", "t": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "粉色 S", "k": 3, "r": 0, "l": 3, "x": "已拆包"}, {"s": "QTW00267-03", "c": "QTW00267", "t": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "粉色 M", "k": 5, "r": 0, "l": 5, "x": "已拆包"}, {"s": "QTW00267-02", "c": "QTW00267", "t": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "粉色 L", "k": 4, "r": 0, "l": 4, "x": "已拆包"}, {"s": "QTW00267-01", "c": "QTW00267", "t": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "p": "粉色 XL", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00266-04", "c": "QTW00266", "t": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "p": "紅色 S", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00266-03", "c": "QTW00266", "t": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "p": "紅色 M", "k": 2, "r": 0, "l": 2, "x": "已入仓"}, {"s": "QTW00266-02", "c": "QTW00266", "t": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "p": "紅色 L", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00266-01", "c": "QTW00266", "t": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "p": "紅色 XL", "k": 12, "r": 0, "l": 12, "x": "已拆包"}, {"s": "QTW00265-04", "c": "QTW00265", "t": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "p": "棕色  XL码", "k": 3, "r": 0, "l": 3, "x": "已拆包"}, {"s": "QTW00265-03", "c": "QTW00265", "t": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "p": "棕色  L码", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00265-02", "c": "QTW00265", "t": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "p": "棕色  M码", "k": 3, "r": 0, "l": 3, "x": "已拆包"}, {"s": "QTW00265-01", "c": "QTW00265", "t": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "p": "棕色  S码", "k": 4, "r": 0, "l": 4, "x": "已拆包"}, {"s": "QTW00264-06", "c": "QTW00264", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "軍綠色  L码", "k": 2, "r": 0, "l": 2, "x": "已拆包"}, {"s": "QTW00264-05", "c": "QTW00264", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "軍綠色  M码", "k": 4, "r": 0, "l": 4, "x": "已拆包"}, {"s": "QTW00264-04", "c": "QTW00264", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "軍綠色  S码", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00263-06", "c": "QTW00263", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "深灰色  3XL码", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00263-05", "c": "QTW00263", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "深灰色  2XL码", "k": 1, "r": 0, "l": 1, "x": "已拆包"}, {"s": "QTW00263-04", "c": "QTW00263", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "深灰色  M码", "k": 3, "r": 0, "l": 3, "x": "已拆包"}, {"s": "QTW00263-03", "c": "QTW00263", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "深灰色  S码", "k": 5, "r": 0, "l": 5, "x": "已拆包"}, {"s": "QTW00263-02", "c": "QTW00263", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "深灰色 L码", "k": 2, "r": 0, "l": 2, "x": "已拆包"}, {"s": "QTW00264-03", "c": "QTW00264", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "軍綠色  3XL", "k": 0, "r": 0, "l": 0, "x": "已寄出"}, {"s": "QTW00264-02", "c": "QTW00264", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "軍綠色  2XL", "k": 5, "r": 0, "l": 5, "x": "已拆包"}, {"s": "QTW00264-01", "c": "QTW00264", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "軍綠色  XL", "k": 3, "r": 0, "l": 3, "x": "已拆包"}, {"s": "QTW00263-01", "c": "QTW00263", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "深灰色  XL", "k": 2, "r": 0, "l": 2, "x": "已拆包"}, {"s": "QTW00261-01", "c": "QTW00261", "t": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "p": "卡其色 2XL码", "k": 10, "r": 0, "l": 10, "x": "已拆包"}];
+
+var total = D.length;
+var allStock = 0;
+var zeroCount = 0;
+var lowCount = 0;
+var prodSet = {};
+var availCount = 0;
+for (var i = 0; i < D.length; i++) {
+  allStock += D[i].k;
+  if (D[i].k === 0) zeroCount++;
+  else if (D[i].k <= 3) lowCount++;
+  prodSet[D[i].c] = 1;
+  if (D[i].k > 0) availCount++;
+}
+var prodCount = Object.keys(prodSet).length;
+
+var html = '';
+html += '<div class="scard"><div class="l">总 SKU</div><div class="v">' + total + '</div><div class="s">' + prodCount + ' 款商品</div></div>';
+html += '<div class="scard"><div class="l">可用库存</div><div class="v">' + allStock + '</div><div class="s">合计可发货</div></div>';
+html += '<div class="scard"><div class="l">预警数量</div><div class="v">' + (zeroCount + lowCount) + '</div><div class="s">缺货 ' + zeroCount + ' · 低库存 ' + lowCount + '</div></div>';
+html += '<div class="scard"><div class="l">有货率</div><div class="v">' + Math.round(availCount / total * 100) + '%</div><div class="s">' + availCount + '/' + total + ' 有货</div></div>';
+document.getElementById('sg').innerHTML = html;
+
+var statusCounts = {};
+for (var i = 0; i < D.length; i++) {
+  var s = D[i].x;
+  statusCounts[s] = (statusCounts[s] || 0) + 1;
+}
+var statusKeys = Object.keys(statusCounts).sort();
+
+var sbHtml = '<div class="st sta" onclick="setFilter('')">全部 <span style="opacity:.6;font-size:11px">' + total + '</span></div>';
+for (var i = 0; i < statusKeys.length; i++) {
+  var k = statusKeys[i];
+  sbHtml += '<div class="st" onclick="setFilter('' + k + '')">' + k + ' <span style="opacity:.6;font-size:11px">' + statusCounts[k] + '</span></div>';
+}
+document.getElementById('stb').innerHTML = sbHtml;
+
+var currentFilter = '';
+function setFilter(f) {
+  currentFilter = f;
+  var els = document.querySelectorAll('.st');
+  for (var i = 0; i < els.length; i++) {
+    if (els[i].getAttribute('onclick').indexOf("'" + f + "'") > -1 || (f === '' && els[i].getAttribute('onclick').indexOf("('')") > -1)) {
+      els[i].className = 'st sta';
+    } else {
+      els[i].className = 'st';
+    }
+  }
+  renderTable();
+}
+
+function renderTable() {
+  var sq = document.getElementById('q').value.toLowerCase();
+  var fd = [];
+  for (var i = 0; i < D.length; i++) {
+    var d = D[i];
+    if (currentFilter && d.x !== currentFilter) continue;
+    if (sq && d.s.toLowerCase().indexOf(sq) < 0 && d.t.toLowerCase().indexOf(sq) < 0 && d.c.toLowerCase().indexOf(sq) < 0) continue;
+    fd.push(d);
+  }
+  
+  var h = '';
+  for (var i = 0; i < fd.length; i++) {
+    var d = fd[i];
+    var bc, bi;
+    if (d.k === 0) { bc = 'bc'; bi = '🔴'; }
+    else if (d.k <= 3) { bc = 'bl'; bi = '🟡'; }
+    else { bc = 'bo'; bi = '✅'; }
+    
+    var scl = 'ch';
+    if (d.x === '已入仓') scl += ' chs';
+    else if (d.x === '已拆包') scl += ' chu';
+    else if (d.x === '已寄出') scl += ' che';
+    
+    h += '<tr>';
+    h += '<td><a href="https://shopee.tw/search?keyword=' + encodeURIComponent(d.s) + '" target="_blank">' + d.s + '</a></td>';
+    h += '<td class="tc" title="' + d.t.replace(/'/g, '&#39;') + '">' + d.t + '</td>';
+    h += '<td>' + d.p + '</td>';
+    h += '<td style="text-align:center"><span class="b ' + bc + '">' + bi + ' ' + d.k + '</span></td>';
+    h += '<td style="text-align:center;color:' + (d.r > 0 ? '#fbbf24' : '#6b7280') + '">' + (d.r || '-') + '</td>';
+    h += '<td style="text-align:center;font-weight:600">' + d.l + '</td>';
+    h += '<td style="text-align:center"><span class="' + scl + '">' + d.x + '</span></td>';
+    h += '</tr>';
+  }
+  document.getElementById('tb').innerHTML = h;
+  document.getElementById('tt').textContent = '📋 全部商品明细 (' + fd.length + ')';
+}
+
+function rf() { renderTable(); }
+
+function updateTime() {
+  var n = new Date();
+  var y = n.getFullYear();
+  var mo = (n.getMonth()+1).toString().padStart(2,'0');
+  var d = n.getDate().toString().padStart(2,'0');
+  var h = n.getHours().toString().padStart(2,'0');
+  var mi = n.getMinutes().toString().padStart(2,'0');
+  document.getElementById('ts').textContent = '📅 ' + y + '-' + mo + '-' + d + ' ' + h + ':' + mi;
+}
+
+updateTime();
+setInterval(updateTime, 30000);
+renderTable();
 </script>
 </body>
 </html>
