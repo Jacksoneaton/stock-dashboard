@@ -2,335 +2,855 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>📦 顺运宝库存看板</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>📊 顺运宝 · 实时库存看板</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg: #0a0e17;
+    --card: #111827;
+    --card-hover: #1a2332;
+    --border: #1e293b;
+    --text: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59,130,246,0.15);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.12);
+    --orange: #f59e0b;
+    --orange-bg: rgba(245,158,11,0.12);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.12);
+    --purple: #8b5cf6;
+    --gradient-1: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    --gradient-2: linear-gradient(135deg, #ef4444, #f59e0b);
+    --gradient-3: linear-gradient(135deg, #22c55e, #10b981);
+  }
+
   body {
-    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    background: #f0f2f5;
-    padding: 16px;
-    color: #1a1a2e;
+    font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
   }
+
+  /* 背景粒子效果 */
+  .bg-grid {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: 
+      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bg-glow {
+    position: fixed;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 顶部 */
   .header {
-    text-align: center;
-    padding: 20px 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px 0 30px;
+    flex-wrap: wrap;
+    gap: 16px;
   }
-  .header h1 { font-size: 22px; font-weight: 700; }
-  .header .time { font-size: 13px; color: #888; margin-top: 4px; }
-  .stats-row {
+
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(59,130,246,0.2);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    width: fit-content;
+  }
+
+  .header-badge .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse-dot 2s infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .header-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .update-time {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .update-time .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  /* 统计卡片 */
+  .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-    margin-bottom: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
   }
+
   .stat-card {
-    background: white;
-    border-radius: 14px;
-    padding: 16px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
   }
-  .stat-card .num { font-size: 28px; font-weight: 700; }
-  .stat-card .label { font-size: 12px; color: #888; margin-top: 4px; }
-  .stat-card.alert { border-left: 4px solid #ef4444; }
-  .stat-card.low { border-left: 4px solid #f59e0b; }
-  .stat-card.ok { border-left: 4px solid #22c55e; }
-  .stat-card.total { border-left: 4px solid #6366f1; }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(59,130,246,0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .stat-card .stat-icon {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .stat-card .stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-card .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-card .stat-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .stat-card.total .stat-bar { background: var(--gradient-1); }
+  .stat-card.total .stat-value { color: var(--accent); }
+  .stat-card.alert .stat-bar { background: var(--gradient-2); }
+  .stat-card.alert .stat-value { color: var(--red); }
+  .stat-card.low .stat-bar { background: var(--orange); }
+  .stat-card.low .stat-value { color: var(--orange); }
+  .stat-card.zero .stat-bar { background: var(--text-muted); }
+  .stat-card.zero .stat-value { color: var(--text-secondary); }
+  .stat-card.ok .stat-bar { background: var(--gradient-3); }
+  .stat-card.ok .stat-value { color: var(--green); }
+
+  /* 图表区域 */
   .charts-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 16px;
+    margin-bottom: 24px;
   }
-  @media (max-width: 640px) {
+
+  @media (max-width: 768px) {
     .charts-grid { grid-template-columns: 1fr; }
   }
+
   .chart-card {
-    background: white;
-    border-radius: 14px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
   }
-  .chart-card h3 { font-size: 14px; color: #555; margin-bottom: 12px; }
-  .chart-card canvas { max-height: 240px; }
-  .table-wrap {
-    background: white;
-    border-radius: 14px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    overflow-x: auto;
+
+  .chart-card .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 16px;
   }
-  .table-wrap h3 { font-size: 14px; color: #555; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
-  .badge-alert { background: #fee2e2; color: #dc2626; }
-  .badge-low { background: #fef3c7; color: #d97706; }
-  .badge-ok { background: #dcfce7; color: #16a34a; }
-  .badge-off { background: #f3f4f6; color: #9ca3af; }
-  .badge-count { background: #e0e7ff; color: #4f46e5; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; padding: 8px 6px; color: #888; font-weight: 500; border-bottom: 1px solid #eee; white-space: nowrap; }
-  td { padding: 8px 6px; border-bottom: 1px solid #f5f5f5; }
-  tr.alert-row { background: #fef2f2; }
-  tr.low-row { background: #fffbeb; }
-  .bar-cell { display: flex; align-items: center; gap: 6px; }
-  .bar { height: 8px; border-radius: 4px; min-width: 4px; transition: width 0.5s; }
-  .bar-green { background: #22c55e; }
-  .bar-yellow { background: #eab308; }
-  .bar-red { background: #ef4444; }
-  .prod-header { display: flex; align-items: center; gap: 4px; }
-  .prod-header .name { font-weight: 600; }
-  .prod-header .code { color: #888; font-size: 12px; font-weight: 400; }
-  .footer { text-align: center; color: #bbb; font-size: 12px; padding: 20px 0; }
-  .sku-detail-toggle { color: #6366f1; cursor: pointer; font-size: 12px; text-decoration: underline; }
-  .sku-detail { display: none; margin-top: 8px; }
-  .sku-detail.show { display: block; }
-  .sku-table { font-size: 12px; }
-  .sku-table td { padding: 4px 6px; }
-  .last-update { font-size: 12px; color: #888; text-align: right; margin-top: 8px; }
+
+  .chart-card .chart-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .chart-card .chart-badge {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.04);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .chart-card canvas { max-height: 260px; max-width: 100%; }
+
+  /* 表格 */
+  .table-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .table-header h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .table-header .count-badge {
+    background: var(--accent-glow);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    text-align: left;
+    padding: 10px 8px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(30,41,59,0.5);
+  }
+
+  tr:hover td {
+    background: rgba(255,255,255,0.02);
+  }
+
+  tr.alert-row td { background: var(--red-bg); }
+  tr.low-row td { background: var(--orange-bg); }
+  tr.zero-row td { background: rgba(100,116,139,0.05); }
+
+  .code-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .code-cell .code { font-weight: 600; font-size: 13px; }
+  .code-cell .name { font-size: 11px; color: var(--text-muted); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-alert { background: var(--red-bg); color: var(--red); }
+  .badge-low { background: var(--orange-bg); color: var(--orange); }
+  .badge-ok { background: var(--green-bg); color: var(--green); }
+  .badge-off { background: rgba(100,116,139,0.1); color: var(--text-muted); }
+  .badge-zero { background: rgba(100,116,139,0.1); color: var(--text-secondary); }
+
+  .bar-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    min-width: 60px;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  .bar-green .bar-fill { background: var(--green); }
+  .bar-yellow .bar-fill { background: var(--orange); }
+  .bar-red .bar-fill { background: var(--red); }
+
+  .bar-label { font-size: 11px; color: var(--text-muted); min-width: 35px; }
+
+  .sku-toggle {
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 11px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    user-select: none;
+  }
+
+  .sku-toggle:hover { opacity: 1; }
+
+  .sku-detail { display: none; }
+  .sku-detail.open { display: table-row; }
+
+  .sku-detail .inner {
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    margin: 4px;
+  }
+
+  .sku-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 6px;
+  }
+
+  .sku-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    font-size: 12px;
+  }
+
+  .sku-item .spec { color: var(--text-secondary); }
+  .sku-item .stock { font-weight: 600; }
+  .sku-item .stock.alert { color: var(--red); }
+  .sku-item .stock.low { color: var(--orange); }
+  .sku-item .stock.ok { color: var(--green); }
+
+  /* 预警面板 */
+  .alert-panel {
+    background: var(--card);
+    border: 1px solid var(--red-bg);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .alert-panel h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--red);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .alert-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .alert-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--red-bg);
+    border: 1px solid rgba(239,68,68,0.15);
+    border-radius: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .alert-item .left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .alert-item .sku-tag {
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .alert-item .spec-tag {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .alert-item .stock-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .alert-item .stock-num {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--red);
+  }
+
+  .alert-item .threshold {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* 底部 */
+  .footer {
+    text-align: center;
+    padding: 30px 0 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .footer a:hover { text-decoration: underline; }
+
+  .footer .divider { color: var(--border); }
+
+  /* 动画 */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-card { animation: fadeInUp 0.5s ease forwards; }
+  .stat-card:nth-child(2) { animation-delay: 0.05s; }
+  .stat-card:nth-child(3) { animation-delay: 0.1s; }
+  .stat-card:nth-child(4) { animation-delay: 0.15s; }
+  .stat-card:nth-child(5) { animation-delay: 0.2s; }
+  .stat-card:nth-child(6) { animation-delay: 0.25s; }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* 空状态 */
+  .no-alert {
+    text-align: center;
+    padding: 20px;
+    color: var(--green);
+    font-size: 14px;
+  }
+
+  /* 响应式 */
+  @media (max-width: 640px) {
+    .container { padding: 12px; }
+    .header h1 { font-size: 22px; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-card { padding: 14px; }
+    .stat-card .stat-value { font-size: 24px; }
+    .stat-card .stat-label { font-size: 10px; }
+    .sku-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>📦 顺运宝库存看板</h1>
-  <div class="time" id="updateTime">加载中...</div>
-</div>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
 
-<div class="stats-row" id="statsRow">
-  <div class="stat-card total"><div class="num" id="totalStock">-</div><div class="label">总库存(件)</div></div>
-  <div class="stat-card total"><div class="num" id="totalSku">-</div><div class="label">SKU总数</div></div>
-  <div class="stat-card alert"><div class="num" id="alertCount">-</div><div class="label">🚨 预警</div></div>
-  <div class="stat-card low"><div class="num" id="lowCount">-</div><div class="label">⚠️ 偏低</div></div>
-  <div class="stat-card ok"><div class="num" id="zeroStock">-</div><div class="label">零库存</div></div>
-</div>
+<div class="container">
+  <!-- 头部 -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-badge">
+        <span class="dot"></span>
+        <span>LIVE</span>
+        <span style="opacity:0.4">|</span>
+        <span>REALTIME</span>
+      </div>
+      <h1>📊 库存监控</h1>
+      <div class="header-sub">
+        <span>顺运宝ERP</span>
+        <span style="opacity:0.3">·</span>
+        <span>Wearing Notes ｜ 日常女裝選集</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="update-time">
+        <span class="live">●</span>
+        <span id="updateTime">加载中...</span>
+      </div>
+    </div>
+  </div>
 
-<div class="charts-grid">
-  <div class="chart-card"><h3>📊 各商品库存分布</h3><canvas id="stockChart"></canvas></div>
-  <div class="chart-card"><h3>🥧 SKU状态占比</h3><canvas id="pieChart"></canvas></div>
-</div>
+  <!-- 统计卡片 -->
+  <div class="stats-grid" id="statsGrid"></div>
 
-<div class="table-wrap">
-  <h3>📋 商品概览 <span class="badge badge-count" id="productCount">-</span></h3>
-  <table><thead><tr>
-    <th>商品</th><th>SKU数</th><th>总库存</th><th>在途</th><th>可用</th><th>库存率</th><th>预警</th><th></th>
-  </tr></thead><tbody id="productTable"></tbody></table>
-</div>
+  <!-- 图表 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">📊 各商品库存分布</span>
+        <span class="chart-badge">件</span>
+      </div>
+      <canvas id="stockChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">🥧 SKU 状态占比</span>
+        <span class="chart-badge">75 SKU</span>
+      </div>
+      <canvas id="pieChart"></canvas>
+    </div>
+  </div>
 
-<div class="footer">
-  数据来源：顺运宝ERP &nbsp;|&nbsp; 每30分钟自动更新
+  <!-- 预警面板 -->
+  <div class="alert-panel" id="alertPanel">
+    <h3>🚨 库存预警</h3>
+    <div class="alert-items" id="alertItems"></div>
+  </div>
+
+  <!-- 商品表格 -->
+  <div class="table-section">
+    <div class="table-header">
+      <h3>📋 商品库存明细</h3>
+      <span class="count-badge" id="productCount">-</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>商品</th>
+            <th>SKU</th>
+            <th>总库存</th>
+            <th>库存率</th>
+            <th>状态</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="productTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 底部 -->
+  <div class="footer">
+    <span>📦 顺运宝 · 库存监控系统</span>
+    <span class="divider">|</span>
+    <span>数据每 30 分钟自动更新</span>
+    <span class="divider">|</span>
+    <span>Powered by Hermes Agent</span>
+  </div>
 </div>
 
 <script>
-// ====== 全部数据 ======
-const DATA = {
-  "products": [
-    {"code":"QTW00261","name":"美式複古 廓形設計感 卡其色彎刀褲","totalStock":23,"inTransit":0,"available":23,"skuCount":6,"inStock":6,"zeroStock":0,"rate":100.0,"skus":[
-      {"sku":"QTW00261-01","spec":"卡其色 2XL码","stock":7,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00261-02","spec":"卡其色 XL码","stock":7,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00261-03","spec":"卡其色 L码","stock":3,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00261-04","spec":"卡其色 M码","stock":2,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00261-05","spec":"卡其色 S码","stock":2,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00261-06","spec":"卡其色 3XL码","stock":2,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00263","name":"美式複古 廓形設計感 卡其色彎刀褲 深灰色","totalStock":5,"inTransit":0,"available":5,"skuCount":6,"inStock":3,"zeroStock":3,"rate":50.0,"skus":[
-      {"sku":"QTW00263-01","spec":"深灰色 XL","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00263-02","spec":"深灰色 L码","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00263-03","spec":"深灰色 S码","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00263-04","spec":"深灰色 M码","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00263-05","spec":"深灰色 2XL码","stock":2,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00263-06","spec":"深灰色 3XL码","stock":0,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00264","name":"美式複古 廓形設計感 卡其色彎刀褲 軍綠色","totalStock":1,"inTransit":0,"available":1,"skuCount":6,"inStock":1,"zeroStock":5,"rate":16.7,"skus":[
-      {"sku":"QTW00264-01","spec":"軍綠色 XL","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00264-02","spec":"軍綠色 2XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00264-03","spec":"軍綠色 3XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00264-04","spec":"軍綠色 S码","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00264-05","spec":"軍綠色 M码","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00264-06","spec":"軍綠色 L码","stock":0,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00265","name":"彎刀褲 西部牛仔🤠漸變棕色","totalStock":7,"inTransit":0,"available":7,"skuCount":4,"inStock":4,"zeroStock":0,"rate":100.0,"skus":[
-      {"sku":"QTW00265-01","spec":"棕色 S码","stock":2,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00265-02","spec":"棕色 M码","stock":3,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00265-03","spec":"棕色 L码","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00265-04","spec":"棕色 XL码","stock":1,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00266","name":"紅色斜肩上衣 燙鑽吊帶設計","totalStock":15,"inTransit":0,"available":15,"skuCount":5,"inStock":5,"zeroStock":0,"rate":100.0,"skus":[
-      {"sku":"QTW00266-01","spec":"紅色 XL","stock":12,"inTransit":0,"status":"low","threshold":10},
-      {"sku":"QTW00266-02","spec":"紅色 L","stock":0,"inTransit":0,"status":"alert","threshold":10},
-      {"sku":"QTW00266-03","spec":"紅色 M","stock":2,"inTransit":0,"status":"alert","threshold":5},
-      {"sku":"QTW00266-04","spec":"紅色 S","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00266-05","spec":"黑色 XL","stock":0,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00267","name":"韓系 法式波點 不規則係帶 短袖 T恤","totalStock":1,"inTransit":0,"available":1,"skuCount":12,"inStock":1,"zeroStock":11,"rate":8.3,"skus":[
-      {"sku":"QTW00267-01","spec":"粉色 XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-02","spec":"粉色 L","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-03","spec":"粉色 M","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-04","spec":"粉色 S","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-05","spec":"米白色 M","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-06","spec":"米白色 S","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-07","spec":"米白色 XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-08","spec":"黑色 M","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-09","spec":"黑色 L","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-10","spec":"黑色 XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-11","spec":"黑色 S","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00267-12","spec":"米白色 L","stock":0,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00268","name":"彎刀褲 雛菊塗鴉印花 牛仔","totalStock":1,"inTransit":0,"available":1,"skuCount":5,"inStock":1,"zeroStock":4,"rate":20.0,"skus":[
-      {"sku":"QTW00268-01","spec":"白色 S","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00268-02","spec":"白色 M","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00268-03","spec":"白色 L","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00268-04","spec":"白色 XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00268-05","spec":"白色 2XL","stock":0,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00269","name":"彎刀傘兵褲 格子飄帶 格紋屁簾","totalStock":0,"inTransit":0,"available":0,"skuCount":5,"inStock":0,"zeroStock":5,"rate":0.0,"skus":[
-      {"sku":"QTW00269-01","spec":"黑色 L","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00269-02","spec":"黑色 S","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00269-03","spec":"黑色 M","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00269-04","spec":"黑色 XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00269-05","spec":"黑色 2XL","stock":0,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00270","name":"寬褲 彎月褲 褶皺垂感傘兵褲","totalStock":3,"inTransit":0,"available":3,"skuCount":7,"inStock":2,"zeroStock":5,"rate":28.6,"skus":[
-      {"sku":"QTW00270-01","spec":"粉色 M","stock":2,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00270-02","spec":"粉色 L","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00270-03","spec":"粉色 XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00270-04","spec":"粉色 2XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00270-05","spec":"粉色 3XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00270-06","spec":"蓝色 L","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00270-07","spec":"蓝色 2XL","stock":1,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00271","name":"吊帶背心 橘色背心 條紋撞色","totalStock":2,"inTransit":0,"available":2,"skuCount":1,"inStock":1,"zeroStock":0,"rate":100.0,"skus":[
-      {"sku":"QTW00271-01","spec":"橘色 S","stock":2,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00272","name":"大尺碼 彎刀褲 字母條紋 棉褲","totalStock":11,"inTransit":0,"available":11,"skuCount":7,"inStock":7,"zeroStock":0,"rate":100.0,"skus":[
-      {"sku":"QTW00272-01","spec":"杏色 L","stock":2,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00272-02","spec":"杏色 S","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00272-03","spec":"杏色 M","stock":4,"inTransit":0,"status":"alert","threshold":20},
-      {"sku":"QTW00272-04","spec":"杏色 XL","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00272-05","spec":"杏色 2XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00272-06","spec":"杏色 5XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00272-09","spec":"黑色 M","stock":3,"inTransit":0,"status":"low","threshold":2}]},
-    {"code":"QTW00273","name":"輕亞風 正肩款 短袖t恤 星星字母印花","totalStock":1,"inTransit":0,"available":1,"skuCount":4,"inStock":1,"zeroStock":3,"rate":25.0,"skus":[
-      {"sku":"QTW00273-01","spec":"黑色星星字母印花 S","stock":1,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00273-02","spec":"黑色星星字母印花 M","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00273-03","spec":"黑色星星字母印花 L","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00273-04","spec":"黑色星星字母印花 XL","stock":0,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00274","name":"迷彩褶皺工裝牛仔褲 彎刀褲","totalStock":0,"inTransit":0,"available":0,"skuCount":6,"inStock":0,"zeroStock":6,"rate":0.0,"skus":[
-      {"sku":"QTW00274-01","spec":"迷彩 S","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00274-02","spec":"迷彩 M","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00274-03","spec":"迷彩 L","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00274-04","spec":"迷彩 XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00274-05","spec":"迷彩 2XL","stock":0,"inTransit":0,"status":"unmonitored"},
-      {"sku":"QTW00274-06","spec":"迷彩 3XL","stock":0,"inTransit":0,"status":"unmonitored"}]},
-    {"code":"QTW00275","name":"吊帶背心 韓系上衣 假兩件上衣 短版上衣","totalStock":110,"inTransit":0,"available":110,"skuCount":1,"inStock":1,"zeroStock":0,"rate":100.0,"skus":[
-      {"sku":"QTW00275-01","spec":"均碼","stock":110,"inTransit":0,"status":"unmonitored"}]}
-  ]
-};
+// ====== 数据 (脚本执行时动态注入) ======
+const DATA = {};
 
-// ====== 渲染 ======
-const products = DATA.products;
-const totalStock = products.reduce((s, p) => s + p.totalStock, 0);
-const totalSku = products.reduce((s, p) => s + p.skuCount, 0);
-const totalAlert = products.reduce((s, p) => s + p.skus.filter(x => x.status === 'alert').length, 0);
-const totalLow = products.reduce((s, p) => s + p.skus.filter(x => x.status === 'low').length, 0);
-const totalZero = products.reduce((s, p) => s + p.skus.filter(x => x.stock === 0).length, 0);
-
-document.getElementById('totalStock').textContent = totalStock;
-document.getElementById('totalSku').textContent = totalSku;
-document.getElementById('alertCount').textContent = totalAlert;
-document.getElementById('lowCount').textContent = totalLow;
-document.getElementById('zeroStock').textContent = totalZero;
-document.getElementById('productCount').textContent = products.length + '个商品';
-document.getElementById('updateTime').textContent = '更新于 ' + new Date().toLocaleString('zh-CN');
-
-// 商品表格
-const tbody = document.getElementById('productTable');
-products.forEach(p => {
-  const alertSku = p.skus.filter(s => s.status === 'alert').length;
-  const lowSku = p.skus.filter(s => s.status === 'low').length;
-  const barPct = Math.min(p.rate, 100);
-  const barColor = p.rate === 0 ? 'red' : p.rate < 50 ? 'yellow' : 'green';
-
-  let alertBadge = '';
-  if (alertSku > 0) alertBadge = `<span class="badge badge-alert">${alertSku}预警</span>`;
-  else if (lowSku > 0) alertBadge = `<span class="badge badge-low">${lowSku}偏低</span>`;
-  else alertBadge = `<span class="badge badge-ok">正常</span>`;
-
-  const row = document.createElement('tr');
-  row.className = alertSku > 0 ? 'alert-row' : lowSku > 0 ? 'low-row' : '';
-  row.innerHTML = `
-    <td><div class="prod-header"><span class="code">${p.code}</span></div><div class="name">${p.name.slice(0, 18)}</div></td>
-    <td>${p.skuCount}</td>
-    <td>${p.totalStock}</td>
-    <td>${p.inTransit}</td>
-    <td><strong>${p.available}</strong></td>
-    <td><div class="bar-cell"><div class="bar bar-${barColor}" style="width:${barPct}%"></div>${p.rate}%</div></td>
-    <td>${alertBadge}</td>
-    <td><span class="sku-detail-toggle" onclick="toggleSku('${p.code}')">▼ 展开</span></td>
+// ====== 渲染引擎 ======
+function render() {
+  const { products, totalStock, totalSku, alerts, lows, zeros, updatedAt } = DATA;
+  
+  // 更新时间
+  document.getElementById('updateTime').textContent = '更新于 ' + (updatedAt || new Date().toLocaleString('zh-CN'));
+  
+  // 统计卡片
+  const statsGrid = document.getElementById('statsGrid');
+  statsGrid.innerHTML = `
+    <div class="stat-card total">
+      <div class="stat-icon">📦</div>
+      <div class="stat-value">${totalStock}</div>
+      <div class="stat-label">总库存</div>
+      <div class="stat-bar"></div>
+    </div>
+    <div class="stat-card total">
+      <div class="stat-icon">🏷️</div>
+      <div class="stat-value">${totalSku}</div>
+      <div class="stat-label">SKU 总数</div>
+      <div class="stat-bar"></div>
+    </div>
+    <div class="stat-card ${alerts > 0 ? 'alert' : 'ok'}">
+      <div class="stat-icon">🚨</div>
+      <div class="stat-value">${alerts}</div>
+      <div class="stat-label">预警</div>
+      <div class="stat-bar"></div>
+    </div>
+    <div class="stat-card ${lows > 0 ? 'low' : 'ok'}">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-value">${lows}</div>
+      <div class="stat-label">偏低</div>
+      <div class="stat-bar"></div>
+    </div>
+    <div class="stat-card ${zeros > 0 ? 'zero' : 'ok'}">
+      <div class="stat-icon">🔴</div>
+      <div class="stat-value">${zeros}</div>
+      <div class="stat-label">零库存</div>
+      <div class="stat-bar"></div>
+    </div>
+    <div class="stat-card ok">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value">${products.length}</div>
+      <div class="stat-label">商品数</div>
+      <div class="stat-bar"></div>
+    </div>
   `;
-  tbody.appendChild(row);
-
-  // SKU明细行
-  const detailRow = document.createElement('tr');
-  detailRow.id = `detail-${p.code}`;
-  detailRow.className = 'sku-detail';
-  detailRow.innerHTML = `<td colspan="8"><div class="sku-detail-content"><table class="sku-table" style="width:100%"><thead><tr><th>子编码</th><th>规格</th><th>库存</th><th>状态</th></tr></thead><tbody>${p.skus.map(s => {
-    let badge = '<span class="badge badge-ok">正常</span>';
-    if (s.status === 'alert') badge = `<span class="badge badge-alert">预警</span>`;
-    else if (s.status === 'low') badge = `<span class="badge badge-low">偏低</span>`;
-    else if (s.status === 'unmonitored') badge = '<span class="badge badge-off">未监控</span>';
-    return `<tr class="${s.status === 'alert' ? 'alert-row' : s.status === 'low' ? 'low-row' : ''}"><td>${s.sku}</td><td>${s.spec}</td><td>${s.stock}</td><td>${badge}</td></tr>`;
-  }).join('')}</tbody></table></div></td>`;
-  tbody.appendChild(detailRow);
-});
+  
+  document.getElementById('productCount').textContent = products.length + ' 个商品';
+  
+  // 预警面板
+  const alertItems = document.getElementById('alertItems');
+  const alertSkus = products.flatMap(p => 
+    p.skus.filter(s => s.status === 'alert').map(s => ({ ...s, code: p.code, name: p.name }))
+  );
+  
+  if (alertSkus.length === 0) {
+    alertItems.innerHTML = '<div class="no-alert">✅ 暂无预警，库存状态良好</div>';
+    document.getElementById('alertPanel').style.borderColor = 'rgba(34,197,94,0.2)';
+    document.getElementById('alertPanel').querySelector('h3').style.color = 'var(--green)';
+    document.getElementById('alertPanel').querySelector('h3').innerHTML = '✅ 库存状态正常';
+  } else {
+    alertItems.innerHTML = alertSkus.map(s => `
+      <div class="alert-item">
+        <div class="left">
+          <span>🚨</span>
+          <span class="sku-tag">${s.code}</span>
+          <span class="spec-tag">${s.sku}</span>
+          <span class="spec-tag">${s.spec}</span>
+        </div>
+        <div class="stock-info">
+          <span class="stock-num">${s.stock}</span>
+          <span class="threshold">件</span>
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  // 商品表格
+  const tbody = document.getElementById('productTable');
+  tbody.innerHTML = products.map(p => {
+    const alertCount = p.skus.filter(s => s.status === 'alert').length;
+    const lowCount = p.skus.filter(s => s.status === 'low').length;
+    const zeroCount = p.skus.filter(s => s.stock === 0).length;
+    
+    let badge = '<span class="badge badge-ok">✅ 正常</span>';
+    let rowClass = '';
+    if (alertCount > 0) { 
+      badge = `<span class="badge badge-alert">🚨 ${alertCount} 预警</span>`;
+      rowClass = 'alert-row';
+    } else if (zeroCount === p.skuCount) {
+      badge = '<span class="badge badge-zero">🔴 全部零库存</span>';
+      rowClass = 'zero-row';
+    } else if (lowCount > 0) {
+      badge = `<span class="badge badge-low">⚠️ ${lowCount} 偏低</span>`;
+      rowClass = 'low-row';
+    }
+    
+    const barColor = p.rate === 0 ? 'red' : p.rate < 50 ? 'yellow' : 'green';
+    
+    return `
+    <tr class="${rowClass}">
+      <td><div class="code-cell"><span class="code">${p.code}</span><span class="name">${p.name}</span></div></td>
+      <td>${p.skuCount}</td>
+      <td><strong>${p.available}</strong></td>
+      <td><div class="bar-cell"><div class="bar-track bar-${barColor}"><div class="bar-fill" style="width:${p.rate}%"></div></div><span class="bar-label">${p.rate}%</span></div></td>
+      <td>${badge}</td>
+      <td><span class="sku-toggle" onclick="toggleSku('${p.code}')">▸ SKU</span></td>
+    </tr>
+    <tr class="sku-detail" id="detail-${p.code}">
+      <td colspan="6">
+        <div class="inner">
+          <div class="sku-grid">
+            ${p.skus.map(s => {
+              let cls = 'ok';
+              let dot = '🟢';
+              if (s.status === 'alert') { cls = 'alert'; dot = '🔴'; }
+              else if (s.status === 'low') { cls = 'low'; dot = '🟡'; }
+              else if (s.stock === 0) { dot = '⚪'; }
+              return `<div class="sku-item"><span class="spec">${dot} ${s.spec}</span><span class="stock ${cls}">${s.stock}</span></div>`;
+            }).join('')}
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  
+  // 条形图
+  const ctx1 = document.getElementById('stockChart').getContext('2d');
+  new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: products.map(p => p.code),
+      datasets: [{
+        data: products.map(p => p.available),
+        backgroundColor: products.map(p => {
+          const a = p.skus.filter(s => s.status === 'alert').length;
+          const z = p.skus.filter(s => s.stock === 0).length;
+          return a > 0 ? '#ef4444' : z === p.skuCount ? '#64748b' : '#3b82f6';
+        }),
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { 
+          beginAtZero: true, 
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#64748b', font: { size: 10 } }
+        },
+        x: { 
+          grid: { display: false },
+          ticks: { color: '#64748b', font: { size: 9 } }
+        }
+      }
+    }
+  });
+  
+  // 饼图
+  const ctx2 = document.getElementById('pieChart').getContext('2d');
+  const inStock = totalSku - zeros;
+  
+  new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: ['有库存', '零库存'],
+      datasets: [{
+        data: [inStock, zeros],
+        backgroundColor: ['#3b82f6', '#1e293b'],
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { 
+            color: '#94a3b8', 
+            font: { size: 11 },
+            padding: 16,
+            usePointStyle: true,
+            pointStyle: 'circle'
+          }
+        }
+      }
+    }
+  });
+}
 
 function toggleSku(code) {
   const el = document.getElementById('detail-' + code);
-  el.classList.toggle('show');
+  el.classList.toggle('open');
 }
 
-// 库存条形图
-const ctx1 = document.getElementById('stockChart').getContext('2d');
-new Chart(ctx1, {
-  type: 'bar',
-  data: {
-    labels: products.map(p => p.code),
-    datasets: [{
-      label: '可用库存',
-      data: products.map(p => p.available),
-      backgroundColor: products.map(p => {
-        const a = p.skus.filter(s => s.status === 'alert').length;
-        const l = p.skus.filter(s => s.status === 'low').length;
-        return a > 0 ? '#ef4444' : l > 0 ? '#f59e0b' : '#22c55e';
-      }),
-      borderRadius: 4
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
-    }
-  }
-});
-
-// 饼图
-const ctx2 = document.getElementById('pieChart').getContext('2d');
-const inStock = totalSku - totalZero;
-new Chart(ctx2, {
-  type: 'doughnut',
-  data: {
-    labels: ['有库存', '零库存'],
-    datasets: [{
-      data: [inStock, totalZero],
-      backgroundColor: ['#22c55e', '#e5e7eb'],
-      borderWidth: 0
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'bottom', labels: { font: { size: 12 } } }
-    },
-    cutout: '65%'
-  }
-});
+// 启动
+document.addEventListener('DOMContentLoaded', render);
 </script>
 </body>
 </html>
