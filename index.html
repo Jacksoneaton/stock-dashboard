@@ -13,7 +13,7 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .top h1{font-size:20px;font-weight:800;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .top h1 span{font-weight:400;font-size:13px;color:#6b7280;margin-left:8px;-webkit-text-fill-color:#6b7280;background:none}
 .ts{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.12);border-radius:8px;padding:6px 12px;font-size:11px;color:#38bdf8}
-.sg{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.sg{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
 .sc{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:12px;padding:18px;position:relative;overflow:hidden;transition:all .3s}
 .sc:hover{border-color:rgba(56,189,248,.15);transform:translateY(-1px)}
 .sc .hl{position:absolute;top:0;left:0;right:0;height:2px;background:var(--c)}
@@ -21,15 +21,6 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .sc .lb{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin-bottom:8px}
 .sc .vl{font-size:28px;font-weight:800;color:#fff;letter-spacing:-.5px}
 .sc .sl{font-size:11px;color:#6b7280;margin-top:4px}
-.pr{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-.pn{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:12px;padding:18px}
-.pn .pt{font-size:13px;font-weight:600;color:#e0e6ef;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.pn .pt span{font-size:11px;font-weight:400;color:#6b7280}
-.br{height:6px;border-radius:3px;margin-bottom:8px;background:rgba(255,255,255,.04);overflow:hidden}
-.br .fl{height:100%;border-radius:3px;transition:width 1s ease}
-.leg{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
-.leg .it{display:flex;align-items:center;gap:6px;font-size:11px;color:#6b7280}
-.leg .dt{width:8px;height:8px;border-radius:2px}
 .tsc{position:relative;z-index:1;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:12px;overflow:hidden;margin-bottom:0}
 .stb{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.03);display:flex;justify-content:space-between;align-items:center}
 .stb .lft{display:flex;align-items:center;gap:12px}
@@ -60,8 +51,9 @@ td.bto{font-weight:600;color:#e0e6ef}
 .ft{position:relative;z-index:1;text-align:center;padding:20px 0 4px;font-size:10px;color:#374151;letter-spacing:.5px;text-transform:uppercase}
 @media(max-width:900px){
 body{padding:16px}
-.sg{grid-template-columns:1fr 1fr}
-.pr{grid-template-columns:1fr}
+.sg{grid-template-columns:1fr 1fr;gap:8px}
+.sc{padding:14px;border-radius:10px}
+.sc .vl{font-size:22px}
 th,td{padding:7px 10px;font-size:11px}
 td.t{max-width:100px}
 .srch{width:140px}
@@ -79,35 +71,6 @@ td.t{max-width:100px}
 <div class="sc"><div class="hl" style="--c:#22c55e"></div><div class="ic">📊</div><div class="lb">可用库存</div><div class="vl">180</div><div class="sl">在途 0 件</div></div>
 <div class="sc"><div class="hl" style="--c:#f59e0b"></div><div class="ic">⚠️</div><div class="lb">预警</div><div class="vl">58</div><div class="sl">缺货 18 · 偏低 40</div></div>
 <div class="sc"><div class="hl" style="--c:#a78bfa"></div><div class="ic">📈</div><div class="lb">有货率</div><div class="vl">76%</div><div class="sl">57/75 有货</div></div>
-</div>
-
-<div class="pr">
-<div class="pn">
-<div class="pt">📊 仓储状态分布 <span>按 SKU 数量</span></div>
-<div>
-<div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px"><span>已入仓</span><span>15</span></div>
-<div class="br"><div class="fl" style="width:20.0%;background:#22c55e"></div></div>
-<div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px;margin-top:10px"><span>已拆包</span><span>42</span></div>
-<div class="br"><div class="fl" style="width:56.00000000000001%;background:#fbbf24"></div></div>
-<div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px;margin-top:10px"><span>已寄出</span><span>18</span></div>
-<div class="br"><div class="fl" style="width:24.0%;background:#6b7280"></div></div>
-</div>
-</div>
-
-<div class="pn">
-<div class="pt">📦 库存概览 <span>实时分布</span></div>
-<div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px"><span>正常库存</span><span>17</span></div>
-<div class="br"><div class="fl" style="width:22.666666666666664%;background:#22c55e"></div></div>
-<div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px;margin-top:10px"><span>偏低 (&le;3)</span><span>40</span></div>
-<div class="br"><div class="fl" style="width:53.333333333333336%;background:#fbbf24"></div></div>
-<div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px;margin-top:10px"><span>缺货 (0)</span><span>18</span></div>
-<div class="br"><div class="fl" style="width:24.0%;background:#ef4444"></div></div>
-<div class="leg">
-<div class="it"><div class="dt" style="background:#22c55e"></div>正常</div>
-<div class="it"><div class="dt" style="background:#fbbf24"></div>偏低</div>
-<div class="it"><div class="dt" style="background:#ef4444"></div>缺货</div>
-</div>
-</div>
 </div>
 
 <div class="tsc">
