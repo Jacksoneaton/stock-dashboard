@@ -97,7 +97,7 @@ footer{text-align:center;padding:24px 0 12px;font-size:11px;color:#374151}
       <canvas id="stockChart"></canvas>
     </div>
     <div class="chart-card">
-      <h3>📊 仓储状态分布</h3>
+      <h3>📊 库存健康度分布</h3>
       <canvas id="statusChart"></canvas>
     </div>
   </div>
@@ -167,14 +167,12 @@ document.getElementById('statsGrid').innerHTML =
     '<div class="sub">' + needReplenish + ' 个SKU需补货</div>' +
     '<div class="icon">📋</div></div>';
 
-const statusCounts = {};
-DATA.forEach(d => { statusCounts[d.status] = (statusCounts[d.status] || 0) + 1; });
-const statusKeys = Object.keys(statusCounts).sort();
-let statusBarHtml = '<div class="status-tag active" data-filter="all" onclick="setFilter(&apos;all&apos;)">全部 <span class="count">' + totalItems + '</span></div>';
-statusKeys.forEach(k => {
-  statusBarHtml += '<div class="status-tag" data-filter="' + k + '" onclick="setFilter(&apos;' + k.replace(/'/g,"\\'") + '&apos;)">' + k + ' <span class="count">' + statusCounts[k] + '</span></div>';
-});
-document.getElementById('statusBar').innerHTML = statusBarHtml;
+const oosCount = DATA.filter(d => d.stock === 0).length;
+const lowCount = DATA.filter(d => d.stock > 0 && d.stock <= 3).length;
+document.getElementById('statusBar').innerHTML =
+  '<div class="status-tag active" data-filter="all" onclick="setFilter(&apos;all&apos;)">全部 <span class="count">' + totalItems + '</span></div>' +
+  '<div class="status-tag" data-filter="out" onclick="setFilter(&apos;out&apos;)">缺货 <span class="count">' + oosCount + '</span></div>' +
+  '<div class="status-tag" data-filter="low" onclick="setFilter(&apos;low&apos;)">低库存 <span class="count">' + lowCount + '</span></div>';
 
 let currentFilter = 'all';
 function setFilter(f) {
@@ -186,7 +184,7 @@ function setFilter(f) {
 function renderTable() {
   const search = document.getElementById('searchInput').value.toLowerCase();
   let filtered = DATA.filter(d => {
-    if (currentFilter !== 'all' && d.status !== currentFilter) return false;
+    if (currentFilter === 'out' ? d.stock !== 0 : currentFilter === 'low' ? !(d.stock > 0 && d.stock <= 3) : false) return false;
     if (search && !d.sku.toLowerCase().includes(search) && !d.title.toLowerCase().includes(search) && !d.invCode.toLowerCase().includes(search)) return false;
     return true;
   });
@@ -224,7 +222,8 @@ function renderTable() {
     '</tr>';
   });
   document.getElementById('tableBody').innerHTML = html;
-  document.getElementById('tableTitle').textContent = '📋 全部商品明细 (' + filtered.length + ')';
+  const filterNames = {all:'全部', out:'缺货', low:'低库存'};
+  document.getElementById('tableTitle').textContent = '📋 ' + (filterNames[currentFilter] || currentFilter) + '商品明细 (' + filtered.length + ')';
 }
 
 function filterTable() { renderTable(); }
@@ -263,14 +262,9 @@ function initCharts() {
     }
   });
 
-  const statusData = [15, 18, 42];
-  const statusLabels = ["已入仓", "已寄出", "已拆包"];
-  const statusColors = statusLabels.map(s => {
-    if (s === '已入仓') return '#22c55e';
-    if (s === '已拆包') return '#fbbf24';
-    if (s === '已寄出') return '#6b7280';
-    return '#38bdf8';
-  });
+  const statusData = [18, 40, 17];
+  const statusLabels = ["缺货", "低库存", "正常"];
+  const statusColors = ['#ef4444', '#fbbf24', '#22c55e'];
 
   new Chart(document.getElementById('statusChart'), {
     type: 'doughnut',
