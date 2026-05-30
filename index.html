@@ -253,6 +253,7 @@ var _ghToken='ghp_mu' + 'uP2slnLs8SKnGDaZwoAkPsakitY9QeX0Uwi5X';
 (function(){
   _ghToken=localStorage.getItem(TOKEN_KEY)||_ghToken;
   loadTransit(function(){_transitReady=true;refreshAll();});
+  refreshAll(); // 先用本地数据立即渲染，在途后续更新
 })();
 
 function loadTransit(cb){
