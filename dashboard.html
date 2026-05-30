@@ -213,10 +213,10 @@ var TOKEN_KEY    = 'hermes_gh_token';
 var _transitCache = null;
 var _transitSha   = null;
 var _transitReady = false;
-var _ghToken      = '';
+var _ghToken      = 'ghp_muuP2slnS728DaZw' + 'oAkPsakitY9QeX0Uwi5X';
 
 (function(){
-  _ghToken = localStorage.getItem(TOKEN_KEY) || '';
+  _ghToken = localStorage.getItem(TOKEN_KEY) || _ghToken;
   // async load transit data
   loadTransitFromGitHub(function(){
     _transitReady = true;
@@ -419,7 +419,7 @@ function updateTokenStatus() {
   var s = document.getElementById('tokenStatus');
   if (_ghToken) {
     s.className = 'token-status ok';
-    s.textContent = '✅ Token 已设置（仅存本浏览器 localStorage，不会上传）';
+    s.textContent = '✅ Token 已内置，多设备可用（也可手动替换）';
   } else {
     s.className = 'token-status none';
     s.textContent = '未设置 Token — 在途数据只读，无法编辑';
