@@ -66,6 +66,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .spec-tag.out{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:var(--red)}
 .spec-tag.low{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.2);color:var(--yellow)}
 .spec-tag .n{font-weight:700}
+.spec-tag i{font-style:normal;opacity:.3;margin:0 3px}
 
 .card-footer{display:flex;align-items:center;gap:10px;margin-top:2px;font-size:10px}
 .total-stock{color:var(--muted)}
@@ -363,7 +364,7 @@ function renderCards(groups,filter,search){
     }
 
     var specsHtml=specs.map(function(s){
-      var cls=specState(s);return '<span class="spec-tag '+cls+'">'+s.spec+' <span class="n">'+s.stock+'</span></span>';
+      var cls=specState(s);return '<span class="spec-tag '+cls+'">'+s.spec+'<i>|</i><span class="n">'+s.stock+'</span></span>';
     }).join('');
 
     var imgHtml='';
