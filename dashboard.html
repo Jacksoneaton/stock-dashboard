@@ -74,6 +74,27 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .replenish-tag.need{background:rgba(251,191,36,.1);color:var(--yellow);border:1px solid rgba(251,191,36,.2)}
 .replenish-tag.ok{background:rgba(34,197,94,.06);color:var(--green)}
 
+/* Charts */
+.chart-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:700px){.chart-row{grid-template-columns:1fr}}
+.chart-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.chart-card h3{font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:500}
+.bar-list{display:flex;flex-direction:column;gap:4px}
+.bar-row{display:flex;align-items:center;gap:6px;font-size:10px}
+.bar-label{width:65px;text-align:right;color:var(--muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:9px}
+.bar-track{flex:1;height:12px;background:rgba(255,255,255,.04);border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;transition:width .5s ease}
+.bar-fill.danger{background:var(--red)}
+.bar-fill.warn{background:var(--yellow)}
+.bar-fill.ok{background:var(--blue)}
+.bar-fill.sales{background:linear-gradient(90deg,var(--purple),var(--blue))}
+.bar-val{width:36px;font-size:9px;color:var(--muted);text-align:right;flex-shrink:0}
+.donut-list{display:flex;flex-direction:column;gap:6px}
+.donut-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.donut-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.donut-num{font-weight:700;color:var(--text);min-width:20px;text-align:right}
+.donut-pct{color:var(--muted);font-size:10px;margin-left:auto}
+
 /* ====== 在途页 ====== */
 .transit-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .transit-head h2{font-size:17px;font-weight:600}
@@ -169,6 +190,11 @@ footer a{color:var(--dim);text-decoration:none}
   <!-- ═══ 库存看板 ═══ -->
   <div class="page active" id="page-dash">
     <div class="stats-row" id="statsRow"></div>
+    <div class="chart-row" id="chartRow">
+      <div class="chart-card"><h3>🚨 急补货 Top 10</h3><div class="bar-list" id="restockBars"></div></div>
+      <div class="chart-card"><h3>🔥 销售 Top 10</h3><div class="bar-list" id="salesBars"></div></div>
+      <div class="chart-card"><h3>📊 库存分布</h3><div class="donut-list" id="statusDonut"></div></div>
+    </div>
     <div class="filter-bar" id="filterBar"></div>
     <div class="card-grid" id="cardGrid"></div>
     <footer>顺运宝 · 库存监控系统 · 数据自动同步</footer>
@@ -349,6 +375,57 @@ function renderDashboard(groups){
 
   // Cards
   renderCards(groups,'all','');
+  renderCharts();
+}
+
+// ====== 图表 ======
+function renderCharts(){
+  var items=DATA.map(function(d){
+    var rep=REPLENISH[d.sku]||{};
+    return {sku:d.sku,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest||0};
+  });
+
+  // 急补货 Top 10 — 按库存天数升序
+  var restock=items.filter(function(s){return s.daily>0;}).map(function(s){
+    return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10,suggest:s.suggest};
+  }).sort(function(a,b){return a.days-b.days;}).slice(0,10);
+  var maxDays=Math.max.apply(null,restock.map(function(s){return s.days;}).concat([1]));
+  var restockHtml='';
+  restock.forEach(function(s){
+    var pct=Math.max(3,(s.days/maxDays)*100);
+    var cls=s.days<1?'danger':s.days<3?'warn':'ok';
+    restockHtml+='<div class=\"bar-row\"><span class=\"bar-label\">'+s.sku+'</span><div class=\"bar-track\"><div class=\"bar-fill '+cls+'\" style=\"width:'+pct+'%\"></div></div><span class=\"bar-val\">'+s.days+'天</span></div>';
+  });
+  document.getElementById('restockBars').innerHTML=restockHtml||'<span style=\"color:var(--dim);font-size:11px\">暂无数据</span>';
+
+  // 销售 Top 10
+  var sales=items.filter(function(s){return s.daily>0;}).sort(function(a,b){return b.daily-a.daily;}).slice(0,10);
+  var maxDaily=Math.max.apply(null,sales.map(function(s){return s.daily;}).concat([1]));
+  var salesHtml='';
+  sales.forEach(function(s){
+    var pct=Math.max(3,(s.daily/maxDaily)*100);
+    salesHtml+='<div class=\"bar-row\"><span class=\"bar-label\">'+s.sku+'</span><div class=\"bar-track\"><div class=\"bar-fill sales\" style=\"width:'+pct+'%\"></div></div><span class=\"bar-val\">'+s.daily+'/天</span></div>';
+  });
+  document.getElementById('salesBars').innerHTML=salesHtml||'<span style=\"color:var(--dim);font-size:11px\">暂无数据</span>';
+
+  // 库存分布
+  var withSales=items.filter(function(s){return s.daily>0;});
+  var buckets=[
+    {label:'<3天',color:'var(--red)',min:0,max:3},
+    {label:'3~7天',color:'var(--yellow)',min:3,max:7},
+    {label:'7~14天',color:'var(--blue)',min:7,max:14},
+    {label:'>14天',color:'var(--green)',min:14,max:9999}
+  ];
+  var donutHtml='';
+  buckets.forEach(function(b){
+    var n=withSales.filter(function(s){
+      var days=s.daily>0?Math.round(s.stock/s.daily*10)/10:999;
+      return days>=b.min&&days<b.max;
+    }).length;
+    var pct=withSales.length>0?Math.round(n/withSales.length*100):0;
+    donutHtml+='<div class=\"donut-row\"><div class=\"donut-dot\" style=\"background:'+b.color+'\"></div><span style=\"color:var(--muted)\">'+b.label+'</span><span class=\"donut-num\">'+n+'</span><span class=\"donut-pct\">'+pct+'%</span></div>';
+  });
+  document.getElementById('statusDonut').innerHTML=donutHtml||'<span style=\"color:var(--dim);font-size:11px\">暂无数据</span>';
 }
 
 function renderCards(groups,filter,search){
