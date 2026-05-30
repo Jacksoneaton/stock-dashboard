@@ -95,13 +95,17 @@ footer{text-align:center;padding:24px 0 12px;font-size:11px;color:#374151}
 
   <div class="stats-grid" id="statsGrid"></div>
 
-  <div class="chart-row">
+  <div class="chart-row" style="grid-template-columns:1fr 1fr 1fr">
     <div class="chart-card">
-      <h3>📦 各商品总库存</h3>
-      <canvas id="stockChart"></canvas>
+      <h3>🚨 急需补货 Top 10</h3>
+      <canvas id="restockChart"></canvas>
     </div>
     <div class="chart-card">
-      <h3>📊 库存健康度分布</h3>
+      <h3>🔥 销售排行 Top 10</h3>
+      <canvas id="salesChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>📊 库存天数分布</h3>
       <canvas id="statusChart"></canvas>
     </div>
   </div>
@@ -249,59 +253,89 @@ function copySKU(text, btn) {
 }
 
 function initCharts() {
-  const byInv = {};
-  DATA.forEach(d => {
-    byInv[d.invCode] = (byInv[d.invCode] || 0) + d.stock;
+  // ---- data prep ----
+  const skuDays = DATA.map(d => {
+    const rep = REPLENISH[d.sku] || {};
+    const daily = rep.daily || 0;
+    const days = daily > 0 ? Math.round((d.stock / daily) * 10) / 10 : 999;
+    return { sku: d.sku, title: d.title, stock: d.stock, daily: daily, days: days, suggest: rep.suggest || 0 };
   });
-  const sorted = Object.entries(byInv).sort((a,b) => b[1] - a[1]);
-  const labels = sorted.map(s => s[0]);
-  const values = sorted.map(s => s[1]);
-  const colors = ['#38bdf8','#818cf8','#f472b6','#34d399','#fbbf24','#f97316','#a78bfa','#22d3ee','#e879f9','#fb7185','#2dd4bf','#fde047','#c084fc','#60a5fa'];
 
-  new Chart(document.getElementById('stockChart'), {
+  // ---- 🚨 急需补货 Top 10 ----
+  const restock = skuDays.filter(s => s.daily > 0).sort((a,b) => a.days - b.days).slice(0, 10);
+  new Chart(document.getElementById('restockChart'), {
     type: 'bar',
     data: {
-      labels: labels,
+      labels: restock.map(s => s.sku),
       datasets: [{
-        label: '总库存',
-        data: values,
-        backgroundColor: colors.slice(0, labels.length).map((c,i) => c + '80'),
-        borderColor: colors.slice(0, labels.length),
-        borderWidth: 1,
-        borderRadius: 4
+        label: '可卖天数',
+        data: restock.map(s => s.days),
+        backgroundColor: restock.map(s => s.days < 1 ? '#ef4444aa' : s.days < 3 ? '#fbbf24aa' : '#38bdf8aa'),
+        borderColor: restock.map(s => s.days < 1 ? '#ef4444' : s.days < 3 ? '#fbbf24' : '#38bdf8'),
+        borderWidth: 1, borderRadius: 4
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: { legend: { display: false } },
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `可卖 ${ctx.raw} 天 · 库存${restock[ctx.dataIndex].stock}` } } },
       scales: {
-        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7280', stepSize: 5 } },
-        x: { grid: { display: false }, ticks: { color: '#9ca3af', maxRotation: 45 } }
+        x: { title: { display: true, text: '天', color: '#6b7280' }, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7280' } },
+        y: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 11 } } }
       }
     }
   });
 
-  const statusData = [18, 40, 17];
-  const statusLabels = ["缺货", "低库存", "正常"];
-  const statusColors = ['#ef4444', '#fbbf24', '#22c55e'];
-
-  new Chart(document.getElementById('statusChart'), {
-    type: 'doughnut',
+  // ---- 🔥 销售排行 Top 10 ----
+  const sales = skuDays.filter(s => s.daily > 0).sort((a,b) => b.daily - a.daily).slice(0, 10);
+  new Chart(document.getElementById('salesChart'), {
+    type: 'bar',
     data: {
-      labels: statusLabels,
+      labels: sales.map(s => s.sku),
       datasets: [{
-        data: statusData,
-        backgroundColor: statusColors.map(c => c + 'cc'),
-        borderColor: '#0a0e17',
-        borderWidth: 2
+        label: '日均销量',
+        data: sales.map(s => s.daily),
+        backgroundColor: '#818cf8aa',
+        borderColor: '#818cf8',
+        borderWidth: 1, borderRadius: 4
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: true,
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `日均 ${ctx.raw} 件 · 库存${sales[ctx.dataIndex].stock}` } } },
+      scales: {
+        x: { title: { display: true, text: '件/天', color: '#6b7280' }, grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#6b7280' } },
+        y: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 11 } } }
+      }
+    }
+  });
+
+  // ---- 📊 库存天数分布 ----
+  const dayBuckets = { '<3天': 0, '3~7天': 0, '7~14天': 0, '>14天': 0 };
+  skuDays.forEach(s => {
+    if (s.daily === 0) return;
+    if (s.days < 3) dayBuckets['<3天']++;
+    else if (s.days < 7) dayBuckets['3~7天']++;
+    else if (s.days < 14) dayBuckets['7~14天']++;
+    else dayBuckets['>14天']++;
+  });
+  const bucketLabels = Object.keys(dayBuckets);
+  const bucketData = Object.values(dayBuckets);
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: bucketLabels,
+      datasets: [{
+        data: bucketData,
+        backgroundColor: ['#ef4444cc','#fbbf24cc','#38bdf8cc','#22c55ecc'],
+        borderColor: '#0a0e17', borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#9ca3af', padding: 12, usePointStyle: true, pointStyle: 'circle' } }
+        legend: { position: 'bottom', labels: { color: '#9ca3af', padding: 10, usePointStyle: true, pointStyle: 'circle', font: { size: 11 } } }
       }
     }
   });
