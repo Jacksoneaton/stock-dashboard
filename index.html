@@ -117,8 +117,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .pkg-toggle{font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0}
 .pkg-card.open .pkg-toggle{transform:rotate(90deg)}
 .pkg-info{flex:1;min-width:0}
-.pkg-name{font-size:13px;font-weight:600;color:var(--text)}
-.pkg-date{font-size:10px;color:var(--muted);margin-top:1px}
+.pkg-name{font-size:13px;font-weight:600;color:var(--text);cursor:pointer}
+.pkg-name:hover{color:var(--cyan)}
+.pkg-name-edit{font-size:13px;font-weight:600;color:var(--cyan);background:#fff;border:1px solid var(--cyan);border-radius:6px;padding:2px 8px;width:200px;font-family:inherit;outline:none}
+.pkg-date{font-size:10px;color:var(--muted);margin-top:1px;cursor:pointer}
+.pkg-date:hover{color:var(--cyan)}
+.pkg-date-edit{font-size:10px;background:#fff;border:1px solid var(--cyan);border-radius:4px;padding:1px 6px;color:var(--cyan);outline:none;width:140px}
 .pkg-summary{font-size:10px;color:var(--muted);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;white-space:nowrap}
 .pkg-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
 .pkg-rec-btn{padding:5px 14px;border-radius:6px;border:1px solid rgba(5,150,105,.2);background:rgba(5,150,105,.05);color:var(--green);font-size:10px;cursor:pointer;font-weight:600;transition:all .15s;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
@@ -617,8 +621,8 @@ function renderTransitTab(){
       '<div class="pkg-header" onclick="togglePackage(\''+p.id+'\')">'+
         '<span class="pkg-toggle">▶</span>'+
         '<div class="pkg-info">'+
-          '<div class="pkg-name">📦 '+p.name+'</div>'+
-          '<div class="pkg-date">'+p.date+'</div>'+
+          '<div class="pkg-name" onclick="event.stopPropagation();startEditName(\''+p.id+'\',\''+p.name.replace(/'/g,"\\'")+'\')" title="点击编辑">📦 '+p.name+'</div>'+
+          '<div class="pkg-date" onclick="event.stopPropagation();startEditDate(\''+p.id+'\',\''+p.date+'\')" title="点击编辑">'+p.date+'</div>'+
         '</div>'+
         '<span class="pkg-summary">'+pkgTotal+'件 · '+pkgSkuCount+' SKU</span>'+
         '<div class="pkg-actions">'+
@@ -652,6 +656,32 @@ function renderTransitTab(){
 function togglePackage(id){
   var card=document.getElementById('pkg-card-'+id);
   card.classList.toggle('open');
+}
+
+// 包裹名称/日期编辑
+function startEditName(id, name){
+  var el=event.target;
+  el.outerHTML='<input class="pkg-name-edit" value="'+name.replace(/"/g,'&quot;')+'" id="edit-name-'+id+'" onkeydown="if(event.key===\'Enter\')savePkgEdit(\''+id+'\')" onblur="savePkgEdit(\''+id+'\')" onclick="event.stopPropagation()">';
+  var inp=document.getElementById('edit-name-'+id);
+  inp.focus();inp.select();
+}
+function startEditDate(id, date){
+  var el=event.target;
+  el.outerHTML='<input type="date" class="pkg-date-edit" value="'+date+'" id="edit-date-'+id+'" onchange="savePkgEdit(\''+id+'\')" onclick="event.stopPropagation()">';
+  document.getElementById('edit-date-'+id).focus();
+}
+function savePkgEdit(id){
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var pkg=data.find(function(p){return p.id===id});
+  if(!pkg) return;
+  var nameEl=document.getElementById('edit-name-'+id);
+  var dateEl=document.getElementById('edit-date-'+id);
+  if(nameEl) pkg.name=nameEl.value.trim()||pkg.name;
+  if(dateEl) pkg.date=dateEl.value||pkg.date;
+  _transitData=data;
+  renderTransitTab();
+  saveTransitToGitHub(data);
+  showToast('已更新');
 }
 
 function adjTransitInPkg(pkgId,sku,delta){
@@ -731,8 +761,9 @@ var _modalAdded=[];  // [{sku, qty}]
 function openTransitAdd(){
   _modalAdded=[];
   document.getElementById('modalAdded').innerHTML='';
-  // 填入今天日期
-  document.getElementById('modalDate').value=new Date().toISOString().slice(0,10);
+  // 填入今天日期（本地时区）
+  var d=new Date();
+  document.getElementById('modalDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   document.getElementById('modalNewPkg').value='';
   document.getElementById('modalPkgName').value='';
   document.getElementById('newPkgRow').style.display='';
