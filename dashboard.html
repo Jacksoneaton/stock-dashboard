@@ -272,6 +272,7 @@ footer a{color:var(--dim);text-decoration:none}
       <span style="font-size:12px;color:var(--muted);font-family:monospace">公式: 建议采购 = 日均销量 × (补货周期 + 安全天数)</span>
     </div>
     <div class="tiers" id="tierCards"></div>
+    <div class="search-box" style="margin-bottom:10px"><input type="text" id="replenSearch" placeholder="搜索 SKU / 商品名称 / 规格..." oninput="filterReplen()"></div>
     <div id="replenTable"></div>
     <div class="total-bar" id="replenTotal"></div>
   </div>
@@ -806,8 +807,10 @@ function confirmTransitAdd(){
 }
 
 // ====== 补货预测 Tab ======
+var _replenItems=[];
 function renderReplenTab(){
-  var items=[];
+  _replenItems=[];
+  var items=_replenItems;
   DATA.forEach(function(d){
     var rep=REPLENISH[d.sku]||{};
     if(rep.suggest&&rep.suggest>0){
@@ -824,11 +827,26 @@ function renderReplenTab(){
     '<div class="tier-card a"><div class="tier-label">A 级 · 爆款</div><div class="tier-count">'+a.length+'</div><div class="tier-rule">≥3件/天 → 备13天 · 预警4天</div></div>'+
     '<div class="tier-card b"><div class="tier-label">B 级 · 常规</div><div class="tier-count">'+b.length+'</div><div class="tier-rule">1~3件/天 → 备9天 · 预警3天</div></div>'+
     '<div class="tier-card c"><div class="tier-label">C 级 · 慢销</div><div class="tier-count">'+c.length+'</div><div class="tier-rule"><1件/天 → 备7天 · 预警2天</div></div>';
+  document.getElementById('replenSearch').value='';
+  renderReplenTable(items);
+}
+function filterReplen(){
+  var q=document.getElementById('replenSearch').value.toLowerCase();
+  var filtered=_replenItems.filter(function(i){
+    return !q||i.sku.toLowerCase().indexOf(q)>-1||i.title.toLowerCase().indexOf(q)>-1||i.spec.toLowerCase().indexOf(q)>-1;
+  });
+  renderReplenTable(filtered);
+}
+function renderReplenTable(items){
   if(items.length===0){
-    document.getElementById('replenTable').innerHTML='<div class="empty-state"><div class="icon">✅</div><p>所有 SKU 库存充足，无需补货</p></div>';
+    var q=document.getElementById('replenSearch').value.trim();
+    document.getElementById('replenTable').innerHTML='<div class="empty-state"><div class="icon">'+(q?'🔍':'✅')+'</div><p>'+(q?'无匹配结果':'所有 SKU 库存充足，无需补货')+'</p></div>';
     document.getElementById('replenTotal').innerHTML='';
     return;
   }
+  // 重新计算 ABC 分档
+  var a=0,b=0,c=0;
+  items.forEach(function(i){if(i.tier==='A')a++;else if(i.tier==='B')b++;else c++;});
   var rows=items.sort(function(x,y){return y.suggest-x.suggest}).map(function(i){
     var days=i.daily>0?Math.round(i.stock/i.daily*10)/10:0;
     var daysStr=days<1?'<span style="color:var(--red)">'+days+'天</span>':days<3?'<span style="color:var(--yellow)">'+days+'天</span>':days+'天';
