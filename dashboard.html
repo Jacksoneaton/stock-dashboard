@@ -140,6 +140,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .pkg-item-del{color:var(--muted);cursor:pointer;font-size:13px;transition:all .15s}
 .pkg-item-del:hover{color:var(--red)}
 
+.qty-input{width:48px;text-align:center;font-size:14px;font-weight:700;color:var(--cyan);background:#f5f6f8;border:1px solid var(--border);border-radius:5px;padding:3px 0;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;outline:none;-moz-appearance:textfield}
+.qty-input:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(8,145,178,.1)}
+.qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{opacity:1;height:24px}
+.qty-input-sm{width:38px;font-size:12px;padding:2px 0}
 .empty-state{text-align:center;padding:60px 20px;color:var(--dim)}
 .empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.3}
 .empty-state p{font-size:12px}
@@ -622,7 +626,7 @@ function renderTransitTab(){
         '<td style="text-align:center;font-weight:600;color:'+(info.stock===0?'var(--red)':'var(--green)')+'">'+info.stock+'</td>'+
         '<td style="text-align:center"><div class="pkg-item-qty">'+
           '<button class="qty-btn" onclick="adjTransitInPkg(\''+p.id+'\',\''+sku+'\',-1)">−</button>'+
-          '<span class="qty-num">'+p.items[sku]+'</span>'+
+          '<input type="number" value="'+p.items[sku]+'" min="0" class="qty-input qty-input-sm" onchange="setTransitQty(\''+p.id+'\',\''+sku+'\',this.value)" onclick="event.stopPropagation()">'+
           '<button class="qty-btn" onclick="adjTransitInPkg(\''+p.id+'\',\''+sku+'\',1)">+</button>'+
         '</div></td>'+
         '<td style="text-align:center"><span class="pkg-item-del" onclick="deleteTransitItem(\''+p.id+'\',\''+sku+'\')" title="从包裹移除">✕</span></td>'+
@@ -648,6 +652,21 @@ function adjTransitInPkg(pkgId,sku,delta){
   if(Object.keys(pkg.items).length===0){
     data=data.filter(function(p){return p.id!==pkgId});
   }
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+function setTransitQty(pkgId,sku,val){
+  var v=parseInt(val)||0;
+  if(v<0) v=0;
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var pkg=data.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  if(v===0){delete pkg.items[sku]}
+  else{pkg.items[sku]=v}
+  if(Object.keys(pkg.items).length===0) data=data.filter(function(p){return p.id!==pkgId});
   _transitData=data;
   renderTransitTab();
   refreshAll();
@@ -740,7 +759,7 @@ function renderModalAdded(){
       '<span class="sku">'+item.sku+'</span>'+
       '<span style="color:var(--muted);font-size:10px">'+item.spec+'</span>'+
       '<button class="qty-btn" onclick="_modalAdded['+idx+'].qty=Math.max(1,_modalAdded['+idx+'].qty-1);renderModalAdded()" style="width:20px;height:20px;font-size:10px">−</button>'+
-      '<span class="qty">'+item.qty+'</span>'+
+      '<input type="number" value="'+item.qty+'" min="1" class="qty-input qty-input-sm" onchange="var v=parseInt(this.value)||1;_modalAdded['+idx+'].qty=Math.max(1,v);renderModalAdded()" onclick="event.stopPropagation()">'+
       '<button class="qty-btn" onclick="_modalAdded['+idx+'].qty+=1;renderModalAdded()" style="width:20px;height:20px;font-size:10px">+</button>'+
       '<span class="remove" onclick="removeModalAdded('+idx+')">✕</span>'+
     '</div>';
