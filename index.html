@@ -7,183 +7,145 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#05080f;--card-bg:rgba(12,20,40,.7);--border:rgba(56,189,248,.12);
-  --text:#d8e6ff;--muted:#5a6e8a;--dim:#1a2a40;
-  --cyan:#00d4ff;--green:#00ff88;--yellow:#ffb800;--red:#ff3860;--purple:#a855f7;
+  --bg:#f5f6f8;--card-bg:#fff;--border:rgba(0,0,0,.06);
+  --text:#1a1a2e;--muted:#6b7280;--dim:#d1d5db;
+  --cyan:#0891b2;--green:#059669;--yellow:#d97706;--red:#dc2626;--purple:#7c3aed;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-body::before{
-  content:'';position:fixed;inset:0;
-  background:
-    radial-gradient(ellipse at 15% 30%,rgba(0,212,255,.04),transparent 55%),
-    radial-gradient(ellipse at 85% 70%,rgba(168,85,247,.03),transparent 55%),
-    repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.008) 2px,rgba(255,255,255,.008) 4px);
-  pointer-events:none;z-index:0;
-}
 .container{max-width:1300px;margin:0 auto;padding:16px;position:relative;z-index:1}
 
 /* Tabs */
 .tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border)}
 .tab{padding:10px 24px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;position:relative;letter-spacing:.5px}
-.tab:hover{color:var(--cyan);text-shadow:0 0 8px rgba(0,212,255,.3)}
-.tab.active{color:var(--cyan);border-bottom-color:var(--cyan);text-shadow:0 0 12px rgba(0,212,255,.4)}
-.tab .badge{display:inline-block;background:rgba(255,184,0,.12);color:var(--yellow);border-radius:10px;padding:1px 8px;font-size:10px;margin-left:6px;font-weight:700}
+.tab:hover{color:var(--cyan)}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab .badge{display:inline-block;background:rgba(8,145,178,.1);color:var(--cyan);border-radius:10px;padding:1px 8px;font-size:10px;margin-left:6px;font-weight:700}
 
 .page{display:none}
 .page.active{display:block}
 
 /* Stats */
 .stats-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.stat{
-  background:linear-gradient(135deg,rgba(12,20,40,.8),rgba(12,20,40,.4));
-  border:1px solid var(--border);border-radius:12px;padding:12px 18px;text-align:center;flex:1;min-width:70px;
-  backdrop-filter:blur(10px);transition:all .3s
-}
-.stat:hover{border-color:rgba(0,212,255,.3);box-shadow:0 0 20px rgba(0,212,255,.05)}
-.stat .num{font-size:24px;font-weight:700;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace;letter-spacing:-1px}
+.stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 18px;text-align:center;flex:1;min-width:70px;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:all .3s}
+.stat:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.stat .num{font-size:24px;font-weight:700;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;letter-spacing:-1px}
 .stat .lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
 
 /* Filter */
 .filter-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
-.filter-tag{
-  padding:5px 14px;border-radius:20px;font-size:11px;font-weight:500;
-  background:rgba(12,20,40,.5);border:1px solid rgba(90,110,138,.15);color:var(--muted);
-  cursor:pointer;transition:all .2s;user-select:none;backdrop-filter:blur(6px)
-}
-.filter-tag.active,.filter-tag:hover{background:rgba(0,212,255,.08);border-color:rgba(0,212,255,.3);color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,.1)}
+.filter-tag{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:500;background:#fff;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .2s;user-select:none}
+.filter-tag.active,.filter-tag:hover{background:rgba(8,145,178,.06);border-color:rgba(8,145,178,.2);color:var(--cyan)}
 .search-box{flex:1;min-width:140px}
-.search-box input{
-  width:100%;background:rgba(12,20,40,.5);border:1px solid rgba(90,110,138,.15);
-  border-radius:20px;padding:5px 16px;color:var(--text);font-size:11px;outline:none;backdrop-filter:blur(6px)
-}
-.search-box input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,.1)}
+.search-box input{width:100%;background:#fff;border:1px solid var(--border);border-radius:20px;padding:5px 16px;color:var(--text);font-size:11px;outline:none}
+.search-box input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(8,145,178,.1)}
 
 /* Card Grid */
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:16px}
 @media(max-width:480px){.card-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
-
-.card{
-  display:flex;flex-direction:column;
-  background:linear-gradient(180deg,rgba(12,20,40,.9),rgba(8,14,28,.7));
-  border:1px solid var(--border);border-radius:14px;overflow:hidden;
-  transition:all .3s;backdrop-filter:blur(10px);position:relative
-}
-.card::after{
-  content:'';position:absolute;inset:0;border-radius:14px;pointer-events:none;
-  background:linear-gradient(135deg,rgba(0,212,255,.03),transparent 50%,rgba(168,85,247,.02));
-}
-.card:hover{
-  border-color:rgba(0,212,255,.25);transform:translateY(-2px);
-  box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 20px rgba(0,212,255,.08)
-}
-.card.has-out{border-top:2px solid var(--red);box-shadow:0 0 15px rgba(255,56,96,.1)}
-.card.has-low{border-top:2px solid var(--yellow);box-shadow:0 0 15px rgba(255,184,0,.1)}
-
-.card-img{
-  width:100%;aspect-ratio:1;background:rgba(0,0,0,.3);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  overflow:hidden;position:relative
-}
-.card-img::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,transparent 60%,rgba(5,8,15,.6));
-}
+.card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .3s;position:relative;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card:hover{border-color:rgba(8,145,178,.2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.08),0 0 0 1px rgba(8,145,178,.1)}
+.card.has-out{border-top:2px solid var(--red);box-shadow:0 0 15px rgba(220,38,38,.08)}
+.card.has-low{border-top:2px solid var(--yellow);box-shadow:0 0 15px rgba(217,119,6,.08)}
+.card-img{width:100%;aspect-ratio:1;background:#f1f3f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;position:relative}
+.card-img::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.03))}
 .card-img img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0}
-.card-img .ph{font-size:44px;opacity:.06;position:relative;filter:grayscale(1)}
+.card-img .ph{font-size:44px;opacity:.08;position:relative}
 .card-img .stock-dot{position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;z-index:2}
 .card-img .stock-dot.critical{background:var(--red);box-shadow:0 0 12px var(--red);animation:pulse-dot 1.5s infinite}
 .card-img .stock-dot.low{background:var(--yellow);box-shadow:0 0 10px var(--yellow);animation:pulse-dot 2s infinite}
 .card-img .stock-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
-
 .card-body{flex:1;padding:12px 14px;min-width:0;display:flex;flex-direction:column;gap:6px;position:relative;z-index:1}
-.card-inv{font-size:10px;color:var(--cyan);font-weight:600;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace;cursor:pointer;letter-spacing:.5px}
-.card-inv:hover{text-shadow:0 0 8px rgba(0,212,255,.5)}
-.card-title{font-size:11px;color:#b0c4de;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-
+.card-inv{font-size:11px;color:var(--cyan);font-weight:700;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;cursor:pointer}
+.card-inv:hover{opacity:.7}
+.card-title{font-size:11px;color:#4b5563;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .specs{display:flex;flex-wrap:wrap;gap:4px}
-.spec-tag{
-  display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:4px;
-  font-size:10px;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace;
-  background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.15);color:var(--green)
-}
-.spec-tag.out{background:rgba(255,56,96,.06);border-color:rgba(255,56,96,.2);color:var(--red)}
-.spec-tag.low{background:rgba(255,184,0,.06);border-color:rgba(255,184,0,.2);color:var(--yellow)}
+.spec-tag{display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:4px;font-size:10px;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;background:rgba(5,150,105,.06);border:1px solid rgba(5,150,105,.15);color:var(--green)}
+.spec-tag.out{background:rgba(220,38,38,.05);border-color:rgba(220,38,38,.2);color:var(--red)}
+.spec-tag.low{background:rgba(217,119,6,.05);border-color:rgba(217,119,6,.2);color:var(--yellow)}
 .spec-tag .n{font-weight:700}
 .spec-tag i{font-style:normal;opacity:.25;margin:0 3px}
-.spec-tag.transit{border-color:var(--cyan);box-shadow:0 0 6px rgba(0,212,255,.4),0 0 14px rgba(0,212,255,.15);animation:transit-glow 2s ease-in-out infinite}
-@keyframes transit-glow{0%,100%{box-shadow:0 0 4px rgba(0,212,255,.3),0 0 10px rgba(0,212,255,.1)}50%{box-shadow:0 0 8px rgba(0,212,255,.6),0 0 20px rgba(0,212,255,.2)}}
-
+.spec-tag.transit{border-color:var(--cyan);box-shadow:0 0 6px rgba(8,145,178,.4),0 0 14px rgba(8,145,178,.15);animation:transit-glow 2s ease-in-out infinite}
+@keyframes transit-glow{0%,100%{box-shadow:0 0 4px rgba(8,145,178,.3),0 0 10px rgba(8,145,178,.1)}50%{box-shadow:0 0 8px rgba(8,145,178,.6),0 0 20px rgba(8,145,178,.2)}}
 .card-footer{display:flex;align-items:center;gap:10px;margin-top:2px;font-size:10px}
-.total-stock{color:var(--muted);font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
-.transit-hint{color:var(--yellow);font-weight:600;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
-.replenish-tag{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
-.replenish-tag.need{background:rgba(255,184,0,.12);color:var(--yellow);border:1px solid rgba(255,184,0,.25)}
-.replenish-tag.ok{background:rgba(0,255,136,.06);color:var(--green);border:1px solid rgba(0,255,136,.15)}
+.total-stock{color:var(--muted);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.transit-hint{color:var(--yellow);font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.replenish-tag{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.replenish-tag.need{background:rgba(217,119,6,.08);color:var(--yellow);border:1px solid rgba(217,119,6,.2)}
+.replenish-tag.ok{background:rgba(5,150,105,.05);color:var(--green);border:1px solid rgba(5,150,105,.12)}
 
 /* Charts */
 .chart-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
 @media(max-width:700px){.chart-row{grid-template-columns:1fr}}
-.chart-card{
-  background:linear-gradient(135deg,rgba(12,20,40,.8),rgba(12,20,40,.4));
-  border:1px solid var(--border);border-radius:12px;padding:14px 16px;backdrop-filter:blur(10px)
-}
+.chart-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .chart-card h3{font-size:11px;color:var(--cyan);margin-bottom:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
 .bar-list{display:flex;flex-direction:column;gap:5px}
 .bar-row{display:flex;align-items:center;gap:6px;font-size:10px}
-.bar-label{width:62px;text-align:right;color:var(--muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace;font-size:9px}
-.bar-track{flex:1;height:10px;background:rgba(255,255,255,.03);border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,.04)}
+.bar-label{width:62px;text-align:right;color:var(--muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;font-size:9px}
+.bar-track{flex:1;height:10px;background:#f1f3f5;border-radius:5px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
 .bar-fill{height:100%;border-radius:5px;transition:width .6s ease}
-.bar-fill.danger{background:linear-gradient(90deg,rgba(255,56,96,.6),var(--red));box-shadow:0 0 8px rgba(255,56,96,.3)}
-.bar-fill.warn{background:linear-gradient(90deg,rgba(255,184,0,.6),var(--yellow));box-shadow:0 0 8px rgba(255,184,0,.3)}
-.bar-fill.ok{background:linear-gradient(90deg,rgba(0,212,255,.6),var(--cyan));box-shadow:0 0 8px rgba(0,212,255,.3)}
-.bar-fill.sales{background:linear-gradient(90deg,var(--purple),var(--cyan));box-shadow:0 0 10px rgba(168,85,247,.3)}
-.bar-val{width:36px;font-size:9px;color:var(--muted);text-align:right;flex-shrink:0;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
+.bar-fill.danger{background:linear-gradient(90deg,rgba(220,38,38,.5),var(--red))}
+.bar-fill.warn{background:linear-gradient(90deg,rgba(217,119,6,.5),var(--yellow))}
+.bar-fill.ok{background:linear-gradient(90deg,rgba(8,145,178,.5),var(--cyan))}
+.bar-fill.sales{background:linear-gradient(90deg,var(--purple),var(--cyan));box-shadow:0 0 8px rgba(124,58,237,.15)}
+.bar-val{width:36px;font-size:9px;color:var(--muted);text-align:right;flex-shrink:0;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 .donut-list{display:flex;flex-direction:column;gap:7px}
 .donut-row{display:flex;align-items:center;gap:10px;font-size:11px}
-.donut-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;box-shadow:0 0 6px currentColor}
-.donut-num{font-weight:700;color:var(--text);min-width:22px;text-align:right;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
-.donut-pct{color:var(--muted);font-size:10px;margin-left:auto;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
+.donut-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.donut-num{font-weight:700;color:var(--text);min-width:22px;text-align:right;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.donut-pct{color:var(--muted);font-size:10px;margin-left:auto;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 
-/* ====== 在途页 ====== */
+/* ====== 在途页 - 包裹分组 ====== */
 .transit-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
 .transit-head h2{font-size:17px;font-weight:700;color:var(--cyan);letter-spacing:1px}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:8px;font-size:11px;cursor:pointer;border:none;font-weight:600;transition:all .2s;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace;letter-spacing:.5px}
-.btn-add{background:linear-gradient(135deg,var(--yellow),#e6a500);color:#000;box-shadow:0 0 15px rgba(255,184,0,.2)}
-.btn-add:hover{box-shadow:0 0 25px rgba(255,184,0,.4);transform:translateY(-1px)}
-.btn-clear{background:rgba(255,56,96,.1);color:var(--red);border:1px solid rgba(255,56,96,.25)}
-.btn-clear:hover{background:rgba(255,56,96,.2);box-shadow:0 0 15px rgba(255,56,96,.2)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:8px;font-size:11px;cursor:pointer;border:none;font-weight:600;transition:all .2s;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;letter-spacing:.5px}
+.btn-add{background:var(--yellow);color:#fff;box-shadow:0 0 12px rgba(217,119,6,.15)}
+.btn-add:hover{box-shadow:0 0 20px rgba(217,119,6,.25);transform:translateY(-1px)}
+.btn-clear{background:rgba(220,38,38,.05);color:var(--red);border:1px solid rgba(220,38,38,.2)}
+.btn-clear:hover{background:rgba(220,38,38,.08);box-shadow:0 0 10px rgba(220,38,38,.1)}
 
 .t-summary{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.t-stat{
-  background:linear-gradient(135deg,rgba(12,20,40,.8),rgba(12,20,40,.4));
-  border:1px solid var(--border);border-radius:12px;padding:14px 20px;flex:1;min-width:100px;backdrop-filter:blur(10px)
-}
-.t-stat .tnum{font-size:26px;font-weight:700;color:var(--cyan);font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
+.t-stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 20px;flex:1;min-width:100px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.t-stat .tnum{font-size:26px;font-weight:700;color:var(--cyan);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 .t-stat .tlbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
 
-.t-table{width:100%;border-collapse:collapse;font-size:12px}
-.t-table th{text-align:left;padding:8px 12px;color:var(--cyan);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)}
-.t-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
-.t-table tr:hover{background:rgba(0,212,255,.03)}
-.t-table .sku-link{color:var(--cyan);font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace;font-size:11px;cursor:pointer}
-.t-table .sku-link:hover{text-shadow:0 0 8px rgba(0,212,255,.5)}
+/* Package Card */
+.pkg-card{background:#fff;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.03);transition:all .2s}
+.pkg-card:hover{border-color:rgba(8,145,178,.15)}
+.pkg-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;transition:background .15s}
+.pkg-header:hover{background:rgba(8,145,178,.02)}
+.pkg-toggle{font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.pkg-card.open .pkg-toggle{transform:rotate(90deg)}
+.pkg-info{flex:1;min-width:0}
+.pkg-name{font-size:13px;font-weight:600;color:var(--text)}
+.pkg-date{font-size:10px;color:var(--muted);margin-top:1px}
+.pkg-summary{font-size:10px;color:var(--muted);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;white-space:nowrap}
+.pkg-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.pkg-rec-btn{padding:5px 14px;border-radius:6px;border:1px solid rgba(5,150,105,.2);background:rgba(5,150,105,.05);color:var(--green);font-size:10px;cursor:pointer;font-weight:600;transition:all .15s;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.pkg-rec-btn:hover{background:rgba(5,150,105,.12);box-shadow:0 0 8px rgba(5,150,105,.15)}
+.pkg-del-btn{color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;transition:all .15s}
+.pkg-del-btn:hover{color:var(--red)}
 
-.qty-cell{display:flex;align-items:center;gap:8px;justify-content:center}
-.qty-num{font-size:16px;font-weight:700;color:var(--cyan);min-width:24px;text-align:center;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
-.qty-btn{
-  width:24px;height:24px;border-radius:6px;border:1px solid rgba(0,212,255,.2);
-  background:rgba(0,212,255,.06);color:var(--cyan);cursor:pointer;font-size:14px;
-  display:inline-flex;align-items:center;justify-content:center;transition:all .15s;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace
-}
-.qty-btn:hover{background:rgba(0,212,255,.15);box-shadow:0 0 10px rgba(0,212,255,.2)}
-.recv-btn{padding:4px 12px;border-radius:6px;border:1px solid rgba(0,255,136,.25);background:rgba(0,255,136,.06);color:var(--green);font-size:10px;cursor:pointer;transition:all .15s;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
-.recv-btn:hover{background:rgba(0,255,136,.15);box-shadow:0 0 10px rgba(0,255,136,.2)}
-.del-btn{color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;transition:all .15s}
-.del-btn:hover{color:var(--red)}
+.pkg-body{display:none;border-top:1px solid var(--border)}
+.pkg-card.open .pkg-body{display:block}
+.pkg-table{width:100%;border-collapse:collapse;font-size:11px}
+.pkg-table th{text-align:left;padding:6px 14px;color:var(--muted);font-weight:500;font-size:10px;border-bottom:1px solid var(--border);background:#fafbfc}
+.pkg-table td{padding:8px 14px;border-bottom:1px solid rgba(0,0,0,.04);vertical-align:middle}
+.pkg-table .sku-link{color:var(--cyan);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;font-size:10px;cursor:pointer}
+.pkg-table .sku-link:hover{opacity:.7}
+.pkg-item-qty{display:flex;align-items:center;gap:6px}
+.pkg-item-qty .qty-num{font-size:14px;font-weight:700;color:var(--cyan);min-width:20px;text-align:center;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.pkg-item-qty .qty-btn{width:22px;height:22px;border-radius:5px;border:1px solid rgba(8,145,178,.15);background:rgba(8,145,178,.04);color:var(--cyan);cursor:pointer;font-size:12px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+.pkg-item-qty .qty-btn:hover{background:rgba(8,145,178,.1)}
+.pkg-item-del{color:var(--muted);cursor:pointer;font-size:13px;transition:all .15s}
+.pkg-item-del:hover{color:var(--red)}
 
+.qty-input{width:48px;text-align:center;font-size:14px;font-weight:700;color:var(--cyan);background:#f5f6f8;border:1px solid var(--border);border-radius:5px;padding:3px 0;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;outline:none;-moz-appearance:textfield}
+.qty-input:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(8,145,178,.1)}
+.qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{opacity:1;height:24px}
+.qty-input-sm{width:38px;font-size:12px;padding:2px 0}
 .empty-state{text-align:center;padding:60px 20px;color:var(--dim)}
-.empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.15}
+.empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.3}
 .empty-state p{font-size:12px}
 
 /* ====== 补货预测 ====== */
@@ -191,62 +153,67 @@ body::before{
 .replen-head h2{font-size:17px;font-weight:700;color:var(--cyan);letter-spacing:1px}
 .tiers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
 @media(max-width:700px){.tiers{grid-template-columns:1fr}}
-.tier-card{background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center}
+.tier-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.03)}
 .tier-card .tier-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
 .tier-card .tier-rule{font-size:10px;color:var(--muted);font-family:monospace}
 .tier-card .tier-count{font-size:22px;font-weight:700;font-family:monospace;margin:6px 0 2px}
-.tier-card.a{border-color:rgba(255,56,96,.25)}.tier-card.a .tier-count{color:var(--red)}
-.tier-card.b{border-color:rgba(255,184,0,.25)}.tier-card.b .tier-count{color:var(--yellow)}
-.tier-card.c{border-color:rgba(0,212,255,.2)}.tier-card.c .tier-count{color:var(--cyan)}
-
+.tier-card.a{border-color:rgba(220,38,38,.2)}.tier-card.a .tier-count{color:var(--red)}
+.tier-card.b{border-color:rgba(217,119,6,.2)}.tier-card.b .tier-count{color:var(--yellow)}
+.tier-card.c{border-color:rgba(8,145,178,.15)}.tier-card.c .tier-count{color:var(--cyan)}
 .rep-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
 .rep-table th{text-align:left;padding:7px 10px;color:var(--cyan);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
-.rep-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.03)}
-.rep-table tr:hover{background:rgba(0,212,255,.03)}
+.rep-table td{padding:8px 10px;border-bottom:1px solid rgba(0,0,0,.04)}
+.rep-table tr:hover{background:rgba(8,145,178,.02)}
 .rep-table .tier-badge{display:inline-block;width:18px;height:18px;border-radius:4px;text-align:center;line-height:18px;font-size:9px;font-weight:700;font-family:monospace}
-.rep-table .tier-badge.a{background:rgba(255,56,96,.15);color:var(--red)}
-.rep-table .tier-badge.b{background:rgba(255,184,0,.12);color:var(--yellow)}
-.rep-table .tier-badge.c{background:rgba(0,212,255,.1);color:var(--cyan)}
+.rep-table .tier-badge.a{background:rgba(220,38,38,.08);color:var(--red)}
+.rep-table .tier-badge.b{background:rgba(217,119,6,.08);color:var(--yellow)}
+.rep-table .tier-badge.c{background:rgba(8,145,178,.06);color:var(--cyan)}
 .total-bar{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--muted)}
 .total-bar .big{font-size:18px;font-weight:700;font-family:monospace;color:var(--cyan)}
 
 /* Modal */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:100;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
 .modal-overlay.show{display:flex}
-.modal-box{
-  background:linear-gradient(135deg,#0f1a2e,#0a1220);border:1px solid rgba(0,212,255,.15);
-  border-radius:16px;padding:24px;width:380px;max-width:90vw;box-shadow:0 0 40px rgba(0,212,255,.06)
-}
+.modal-box{background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;width:420px;max-width:90vw;box-shadow:0 4px 32px rgba(0,0,0,.12)}
 .modal-box h3{font-size:15px;margin-bottom:12px;color:var(--cyan);letter-spacing:.5px}
-.modal-box .search{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:12px;outline:none;margin-bottom:8px}
-.modal-box .search:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,212,255,.1)}
-.modal-box .results{max-height:180px;overflow-y:auto;margin-bottom:4px}
+.modal-box .search{width:100%;background:#f5f6f8;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:12px;outline:none;margin-bottom:6px}
+.modal-box .search:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(8,145,178,.08)}
+.modal-box .results{max-height:160px;overflow-y:auto;margin-bottom:4px}
 .modal-box .r-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
-.modal-box .r-item:hover{background:rgba(0,212,255,.06);color:var(--text)}
-.modal-box .r-item.sel{background:rgba(255,184,0,.1);color:var(--yellow);border:1px solid rgba(255,184,0,.2)}
-.modal-box .qty-row{display:flex;gap:10px;margin-top:10px;align-items:center}
-.modal-box .qty-row input{flex:1;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--cyan);font-size:18px;text-align:center;outline:none;width:60px;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
-.modal-box .qty-row input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,.15)}
+.modal-box .r-item:hover{background:rgba(8,145,178,.04);color:var(--text)}
+.modal-box .r-item.sel{background:rgba(217,119,6,.06);color:var(--yellow);border:1px solid rgba(217,119,6,.15)}
+.modal-box .field-row{display:flex;gap:10px;margin-top:8px;align-items:center}
+.modal-box .field-row label{font-size:11px;color:var(--muted);white-space:nowrap}
+.modal-box .field-row input,.modal-box .field-row select{flex:1;background:#f5f6f8;border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:12px;outline:none}
+.modal-box .field-row select{font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;font-size:11px}
+.modal-box .field-row input:focus,.modal-box .field-row select:focus{border-color:var(--cyan)}
+.modal-box .qty-row input{width:70px;text-align:center;font-size:16px;font-weight:700;color:var(--cyan);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;flex:none}
+.modal-box .added-list{margin-top:10px;max-height:120px;overflow-y:auto}
+.modal-box .added-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;background:rgba(8,145,178,.03);margin-bottom:4px;font-size:11px}
+.modal-box .added-item .sku{color:var(--cyan);font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.modal-box .added-item .qty{color:var(--text);font-weight:700}
+.modal-box .added-item .remove{color:var(--muted);cursor:pointer;margin-left:auto;font-size:14px;padding:0 4px}
+.modal-box .added-item .remove:hover{color:var(--red)}
 .modal-box .btns{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
 .modal-box button{padding:8px 18px;border-radius:8px;font-size:12px;cursor:pointer;border:none;font-weight:600}
-.btn-save{background:linear-gradient(135deg,var(--cyan),#0099cc);color:#000}
-.btn-cancel{background:rgba(255,255,255,.04);color:var(--muted)}
+.btn-save{background:var(--cyan);color:#fff}
+.btn-cancel{background:#f1f3f5;color:var(--muted)}
 
 /* Toast */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--cyan);color:#000;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 0 20px rgba(0,212,255,.3)}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--cyan);color:#fff;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 4px 16px rgba(8,145,178,.2)}
 .toast.show{opacity:1}
 
-footer{text-align:center;padding:24px 0 10px;font-size:10px;color:var(--dim);font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace;letter-spacing:1px}
+footer{text-align:center;padding:24px 0 10px;font-size:10px;color:var(--dim);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;letter-spacing:1px}
 footer a{color:var(--dim);text-decoration:none}
 
 /* Pwd */
-.pwd-overlay{display:flex;position:fixed;inset:0;background:var(--bg);z-index:9999;justify-content:center;align-items:center;flex-direction:column}
+.pwd-overlay{display:flex;position:fixed;inset:0;background:#f5f6f8;z-index:9999;justify-content:center;align-items:center;flex-direction:column}
 .pwd-overlay.hidden{display:none}
 .pwd-box{text-align:center}
-.pwd-box h2{font-size:24px;color:var(--cyan);margin-bottom:8px;text-shadow:0 0 20px rgba(0,212,255,.3);letter-spacing:2px}
+.pwd-box h2{font-size:24px;color:var(--cyan);margin-bottom:8px;letter-spacing:2px}
 .pwd-box p{font-size:13px;color:var(--muted);margin-bottom:24px}
-.pwd-box input{width:260px;background:rgba(0,0,0,.4);border:1px solid rgba(0,212,255,.15);border-radius:12px;padding:14px 20px;color:var(--cyan);font-size:18px;outline:none;text-align:center;letter-spacing:6px;font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
-.pwd-box input:focus{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,212,255,.15)}
+.pwd-box input{width:260px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 20px;color:var(--cyan);font-size:18px;outline:none;text-align:center;letter-spacing:6px;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.pwd-box input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(8,145,178,.08)}
 .pwd-box .pwd-err{color:var(--red);font-size:12px;margin-top:12px;min-height:18px}
 .pwd-box .pwd-shake{animation:pwdShake .4s ease}
 @keyframes pwdShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
@@ -285,26 +252,24 @@ footer a{color:var(--dim);text-decoration:none}
     <footer>顺运宝 · 库存监控系统 · 数据自动同步</footer>
   </div>
 
-  <!-- ═══ 在途管理 ═══ -->
+  <!-- ═══ 在途管理（包裹分组） ═══ -->
   <div class="page" id="page-transit">
     <div class="transit-head">
       <h2>🚚 在途管理</h2>
       <div style="display:flex;gap:8px">
         <button class="btn btn-add" onclick="openTransitAdd()">+ 添加在途</button>
-        <button class="btn btn-clear" onclick="clearAllTransit()">一键收货</button>
+        <button class="btn btn-clear" onclick="clearAllTransit()">全部收货</button>
       </div>
     </div>
     <div class="t-summary" id="transitSummary"></div>
-    <div id="transitTable"></div>
+    <div id="transitPackages"></div>
   </div>
 
   <!-- ═══ 补货预测 ═══ -->
   <div class="page" id="page-replen">
     <div class="replen-head">
       <h2>📋 补货预测</h2>
-      <span style="font-size:12px;color:var(--muted);font-family:monospace">
-        公式: 建议采购 = 日均销量 × (补货周期 + 安全天数)
-      </span>
+      <span style="font-size:12px;color:var(--muted);font-family:monospace">公式: 建议采购 = 日均销量 × (补货周期 + 安全天数)</span>
     </div>
     <div class="tiers" id="tierCards"></div>
     <div id="replenTable"></div>
@@ -318,9 +283,20 @@ footer a{color:var(--dim);text-decoration:none}
     <h3>+ 添加在途</h3>
     <input class="search" placeholder="搜索 SKU / 商品名..." oninput="filterModal(this.value)">
     <div class="results" id="modalResults"></div>
-    <div class="qty-row">
-      <span style="font-size:11px;color:var(--muted)">数量</span>
-      <input type="number" id="modalQty" min="1" value="1">
+    <div class="added-list" id="modalAdded"></div>
+    <div class="field-row">
+      <label>包裹名</label>
+      <select id="modalPkgName" onchange="onPkgNameChange()">
+        <option value="">+ 新建包裹</option>
+      </select>
+    </div>
+    <div class="field-row" id="newPkgRow">
+      <label>新名称</label>
+      <input type="text" id="modalNewPkg" placeholder="如：6月5日发货">
+    </div>
+    <div class="field-row">
+      <label>日期</label>
+      <input type="date" id="modalDate">
     </div>
     <div class="btns">
       <button class="btn-cancel" onclick="closeTransitAdd()">取消</button>
@@ -366,11 +342,11 @@ document.querySelectorAll('.tab').forEach(function(t){
   });
 });
 
-// ====== 在途管理 (GitHub) ======
+// ====== 在途管理 (GitHub + 包裹分组) ======
 var TRANSIT_API = 'https://api.github.com/repos/Jacksoneaton/stock-dashboard/contents/in_transit.json';
 var TRANSIT_RAW  = 'https://raw.githubusercontent.com/Jacksoneaton/stock-dashboard/gh-pages/in_transit.json';
 var TOKEN_KEY='***';
-var _transitCache={};
+var _transitData = [];  // [{id, name, date, items: {sku: qty}}]
 var _transitSha=null;
 var _transitReady=false;
 var _ghToken='ghp_mu' + 'uP2slnLs8SKnGDaZwoAkPsakitY9QeX0Uwi5X';
@@ -378,27 +354,61 @@ var _ghToken='ghp_mu' + 'uP2slnLs8SKnGDaZwoAkPsakitY9QeX0Uwi5X';
 (function(){
   _ghToken=localStorage.getItem(TOKEN_KEY)||_ghToken;
   loadTransit(function(){_transitReady=true;refreshAll();});
-  refreshAll(); // 先用本地数据立即渲染，在途后续更新
+  refreshAll();
 })();
+
+function uuid(){return 'pkg_'+Date.now() + '_' + Math.random().toString(36).slice(2,8);}
 
 function loadTransit(cb){
   var x=new XMLHttpRequest();
   x.open('GET',TRANSIT_RAW+'?t='+Date.now());x.timeout=8000;
   x.onload=function(){
-    if(x.status===200){try{_transitCache=JSON.parse(x.responseText)||{}}catch(e){_transitCache={}}}
-    else _transitCache={};
+    if(x.status===200){
+      try{
+        var raw=JSON.parse(x.responseText)||{};
+        // 兼容旧格式 {SKU: qty} → 自动迁移到一个包裹
+        if(raw.packages && Array.isArray(raw.packages)){
+          _transitData=raw.packages;
+        } else {
+          var items={},hasOld=false;
+          for(var k in raw){
+            if(typeof raw[k]==='number' && raw[k]>0){items[k]=raw[k];hasOld=true;}
+          }
+          if(hasOld){
+            _transitData=[{id:uuid(),name:'历史在途',date:'-',items:items}];
+            saveTransitToGitHub(_transitData);
+          } else {
+            _transitData=[];
+          }
+        }
+      }catch(e){_transitData=[];}
+    } else _transitData=[];
     cb();
   };
-  x.onerror=function(){_transitCache={};cb()};
-  x.ontimeout=function(){_transitCache={};cb()};
+  x.onerror=function(){_transitData=[];cb()};
+  x.ontimeout=function(){_transitData=[];cb()};
   x.send();
 }
-function getTransit(sku){return _transitCache[sku]||0;}
-function totalTransit(){return Object.values(_transitCache).reduce(function(s,v){return s+v},0);}
 
-function saveTransitToGitHub(map,cb){
-  if(!_ghToken){showTokenModal();return}
-  var c=JSON.stringify(map);
+// 按 SKU 汇总所有包裹的在途数量（给看板卡片用）
+function getTransit(sku){
+  var t=0;
+  _transitData.forEach(function(p){
+    t+=p.items[sku]||0;
+  });
+  return t;
+}
+function totalTransit(){
+  var t=0;
+  _transitData.forEach(function(p){
+    for(var k in p.items) t+=p.items[k];
+  });
+  return t;
+}
+
+function saveTransitToGitHub(data,cb){
+  if(!_ghToken){return}
+  var c=JSON.stringify({packages:data});
   var p={message:'Update in_transit.json',content:btoa(unescape(encodeURIComponent(c))),branch:'gh-pages'};
   if(_transitSha) p.sha=_transitSha;
   var x=new XMLHttpRequest();
@@ -409,22 +419,22 @@ function saveTransitToGitHub(map,cb){
   x.setRequestHeader('Content-Type','application/json');
   x.onload=function(){
     if(x.status===200||x.status===201){
-      var r=JSON.parse(x.responseText);_transitSha=r.content.sha;_transitCache=map;
+      var r=JSON.parse(x.responseText);_transitSha=r.content.sha;
       if(cb) cb(true);
-    }else if(x.status===422){fetchShaAndRetry(map,cb)}
+    }else if(x.status===422){fetchShaAndRetry(data,cb)}
     else{if(cb) cb(false)}
   };
   x.onerror=function(){if(cb) cb(false)};
   x.ontimeout=function(){if(cb) cb(false)};
   x.send(JSON.stringify(p));
 }
-function fetchShaAndRetry(map,cb){
+function fetchShaAndRetry(data,cb){
   var x=new XMLHttpRequest();
   x.open('GET',TRANSIT_API+'?ref=gh-pages');x.timeout=8000;
   x.setRequestHeader('Authorization','token '+_ghToken);
   x.setRequestHeader('User-Agent','hermes-dashboard');
   x.setRequestHeader('Accept','application/vnd.github.v3+json');
-  x.onload=function(){if(x.status===200){_transitSha=JSON.parse(x.responseText).sha;saveTransitToGitHub(map,cb)}else{if(cb) cb(false)}};
+  x.onload=function(){if(x.status===200){_transitSha=JSON.parse(x.responseText).sha;saveTransitToGitHub(data,cb)}else{if(cb) cb(false)}};
   x.onerror=function(){if(cb) cb(false)};
   x.send();
 }
@@ -455,7 +465,6 @@ function cardState(specs){
 }
 
 function renderDashboard(groups){
-  // Stats
   var total=DATA.length,out=0,low=0,tran=totalTransit();
   DATA.forEach(function(d){if(d.stock===0)out++;else if(d.stock<=3)low++});
   document.getElementById('statsRow').innerHTML=
@@ -464,27 +473,20 @@ function renderDashboard(groups){
     '<div class="stat"><div class="num" style="color:var(--yellow)">'+low+'</div><div class="lbl">低库存</div></div>'+
     '<div class="stat"><div class="num" style="color:var(--green)">'+(total-out-low)+'</div><div class="lbl">正常</div></div>'+
     '<div class="stat"><div class="num" style="color:var(--yellow)">'+tran+'</div><div class="lbl">🚚 在途</div></div>';
-
-  // Filter
   document.getElementById('filterBar').innerHTML=
-    '<div class="filter-tag active" onclick="setFilter(this,\\\'all\\\')">全部 '+total+'</div>'+
-    '<div class="filter-tag" onclick="setFilter(this,\\\'out\\\')">🔴 缺货 '+out+'</div>'+
-    '<div class="filter-tag" onclick="setFilter(this,\\\'low\\\')">🟡 低库存 '+low+'</div>'+
+    '<div class="filter-tag active" onclick="setFilter(this,\'all\')">全部 '+total+'</div>'+
+    '<div class="filter-tag" onclick="setFilter(this,\'out\')">🔴 缺货 '+out+'</div>'+
+    '<div class="filter-tag" onclick="setFilter(this,\'low\')">🟡 低库存 '+low+'</div>'+
     '<div class="search-box"><input type="text" placeholder="搜索 SKU / 商品名称..." oninput="applyFilter(this.value)"></div>';
-
-  // Cards
   renderCards(groups,'all','');
   renderCharts();
 }
 
-// ====== 图表 ======
 function renderCharts(){
   var items=DATA.map(function(d){
     var rep=REPLENISH[d.sku]||{};
     return {sku:d.sku,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest||0};
   });
-
-  // 急补货 Top 10 — 按库存天数升序
   var restock=items.filter(function(s){return s.daily>0;}).map(function(s){
     return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10,suggest:s.suggest};
   }).sort(function(a,b){return a.days-b.days;}).slice(0,10);
@@ -493,75 +495,57 @@ function renderCharts(){
   restock.forEach(function(s){
     var pct=Math.max(3,(s.days/maxDays)*100);
     var cls=s.days<1?'danger':s.days<3?'warn':'ok';
-    restockHtml+='<div class=\"bar-row\"><span class=\"bar-label\">'+s.sku+'</span><div class=\"bar-track\"><div class=\"bar-fill '+cls+'\" style=\"width:'+pct+'%\"></div></div><span class=\"bar-val\">'+s.days+'天</span></div>';
+    restockHtml+='<div class="bar-row"><span class="bar-label">'+s.sku+'</span><div class="bar-track"><div class="bar-fill '+cls+'" style="width:'+pct+'%"></div></div><span class="bar-val">'+s.days+'天</span></div>';
   });
-  document.getElementById('restockBars').innerHTML=restockHtml||'<span style=\"color:var(--dim);font-size:11px\">暂无数据</span>';
-
-  // 销售 Top 10
+  document.getElementById('restockBars').innerHTML=restockHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
   var sales=items.filter(function(s){return s.daily>0;}).sort(function(a,b){return b.daily-a.daily;}).slice(0,10);
   var maxDaily=Math.max.apply(null,sales.map(function(s){return s.daily;}).concat([1]));
   var salesHtml='';
   sales.forEach(function(s){
     var pct=Math.max(3,(s.daily/maxDaily)*100);
-    salesHtml+='<div class=\"bar-row\"><span class=\"bar-label\">'+s.sku+'</span><div class=\"bar-track\"><div class=\"bar-fill sales\" style=\"width:'+pct+'%\"></div></div><span class=\"bar-val\">'+s.daily+'/天</span></div>';
+    salesHtml+='<div class="bar-row"><span class="bar-label">'+s.sku+'</span><div class="bar-track"><div class="bar-fill sales" style="width:'+pct+'%"></div></div><span class="bar-val">'+s.daily+'/天</span></div>';
   });
-  document.getElementById('salesBars').innerHTML=salesHtml||'<span style=\"color:var(--dim);font-size:11px\">暂无数据</span>';
-
-  // 库存分布
+  document.getElementById('salesBars').innerHTML=salesHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
   var withSales=items.filter(function(s){return s.daily>0;});
-  var buckets=[
-    {label:'<3天',color:'var(--red)',min:0,max:3},
-    {label:'3~7天',color:'var(--yellow)',min:3,max:7},
-    {label:'7~14天',color:'var(--blue)',min:7,max:14},
-    {label:'>14天',color:'var(--green)',min:14,max:9999}
-  ];
+  var buckets=[{label:'<3天',color:'var(--red)',min:0,max:3},{label:'3~7天',color:'var(--yellow)',min:3,max:7},{label:'7~14天',color:'var(--blue)',min:7,max:14},{label:'>14天',color:'var(--green)',min:14,max:9999}];
   var donutHtml='';
   buckets.forEach(function(b){
-    var n=withSales.filter(function(s){
-      var days=s.daily>0?Math.round(s.stock/s.daily*10)/10:999;
-      return days>=b.min&&days<b.max;
-    }).length;
+    var n=withSales.filter(function(s){var days=s.daily>0?Math.round(s.stock/s.daily*10)/10:999;return days>=b.min&&days<b.max;}).length;
     var pct=withSales.length>0?Math.round(n/withSales.length*100):0;
-    donutHtml+='<div class=\"donut-row\"><div class=\"donut-dot\" style=\"background:'+b.color+'\"></div><span style=\"color:var(--muted)\">'+b.label+'</span><span class=\"donut-num\">'+n+'</span><span class=\"donut-pct\">'+pct+'%</span></div>';
+    donutHtml+='<div class="donut-row"><div class="donut-dot" style="background:'+b.color+'"></div><span style="color:var(--muted)">'+b.label+'</span><span class="donut-num">'+n+'</span><span class="donut-pct">'+pct+'%</span></div>';
   });
-  document.getElementById('statusDonut').innerHTML=donutHtml||'<span style=\"color:var(--dim);font-size:11px\">暂无数据</span>';
+  document.getElementById('statusDonut').innerHTML=donutHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
 }
 
 function renderCards(groups,filter,search){
   var html='';
   groups.forEach(function(g){
     var specs=g.specs;
-    // Filter
     if(filter==='out'&&!specs.some(function(s){return s.stock===0})) return;
     if(filter==='low'&&!specs.some(function(s){return s.stock>0&&s.stock<=3})) return;
     if(search){
       var lo=search.toLowerCase();
       if(g.invCode.toLowerCase().indexOf(lo)===-1&&g.title.toLowerCase().indexOf(lo)===-1&&!specs.some(function(s){return s.sku.toLowerCase().indexOf(lo)>-1})) return;
     }
-
     var specsHtml=specs.map(function(s){
       var cls=specState(s);if(getTransit(s.sku)>0) cls+=' transit';return '<span class="spec-tag '+cls+'">'+s.spec+'<i>|</i><span class="n">'+s.stock+'</span></span>';
     }).join('');
-
     var imgHtml='';
-    if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.style.display=\\\'none\\\'" alt="">';
+    if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.style.display=\'none\'" alt="">';
     else imgHtml='<div class="ph">'+getIcon(g.title)+'</div>';
-
     var dotCls='';
     if(specs.some(function(s){return s.stock===0})) dotCls='critical';
     else if(specs.some(function(s){return s.stock>0&&s.stock<=3})) dotCls='low';
     else dotCls='ok';
-
     var cs=cardState(specs);
     var transitSkus=specs.filter(function(s){return getTransit(s.sku)>0}).length;
     var repTotal=specs.reduce(function(sum,s){
       var r=REPLENISH[s.sku];return sum+(r&&r.suggest?r.suggest:0);
     },0);
-
     html+='<div class="card '+cs+'">'+
       '<div class="card-img">'+imgHtml+'<div class="stock-dot '+dotCls+'"></div></div>'+
       '<div class="card-body">'+
-        '<div class="card-inv" onclick="copyText(\\\''+g.invCode+'\\\')" title="点击复制">'+g.invCode+'</div>'+
+        '<div class="card-inv" onclick="copyText(\''+g.invCode+'\')" title="点击复制">'+g.invCode+'</div>'+
         '<div class="card-title">'+g.title+'</div>'+
         '<div class="specs">'+specsHtml+'</div>'+
         '<div class="card-footer">'+
@@ -590,45 +574,235 @@ function copyText(t){
   }).catch(function(){});
 }
 
-// ====== 在途 Tab ======
+// ====== 在途 Tab - 包裹分组渲染 ======
 function renderTransitTab(){
-  var transitList=[];
-  DATA.forEach(function(d){
-    var t=getTransit(d.sku);
-    if(t>0) transitList.push({sku:d.sku,title:d.title,spec:d.spec,stock:d.stock,transit:t});
+  var pkgs=_transitData;
+  var totalItems=0,totalSkus=new Set();
+  pkgs.forEach(function(p){
+    for(var k in p.items){totalItems+=p.items[k];totalSkus.add(k);}
   });
-
-  var totalT=transitList.reduce(function(s,i){return s+i.transit},0);
-  document.getElementById('transitBadge').textContent=transitList.length;
+  document.getElementById('transitBadge').textContent=pkgs.length;
   document.getElementById('transitSummary').innerHTML=
-    '<div class="t-stat"><div class="tnum">'+totalT+'</div><div class="tlbl">在途总件数</div></div>'+
-    '<div class="t-stat"><div class="tnum">'+transitList.length+'</div><div class="tlbl">涉及 SKU</div></div>';
+    '<div class="t-stat"><div class="tnum">'+totalItems+'</div><div class="tlbl">在途总件数</div></div>'+
+    '<div class="t-stat"><div class="tnum">'+pkgs.length+'</div><div class="tlbl">包裹数</div></div>'+
+    '<div class="t-stat"><div class="tnum">'+totalSkus.size+'</div><div class="tlbl">涉及 SKU</div></div>';
 
-  if(transitList.length===0){
-    document.getElementById('transitTable').innerHTML=
-      '<div class="empty-state"><div class="icon">🚚</div><p>暂无在途商品<br>点击「+ 添加在途」记录运输中的商品</p></div>';
+  if(pkgs.length===0){
+    document.getElementById('transitPackages').innerHTML='<div class="empty-state"><div class="icon">🚚</div><p>暂无在途包裹<br>点击「+ 添加在途」创建包裹并录入商品</p></div>';
     return;
   }
 
-  var rows=transitList.map(function(i){
-    return '<tr>'+
-      '<td><span class="sku-link" onclick="copyText(\\\''+i.sku+'\\\')">'+i.sku+'</span></td>'+
-      '<td style="color:#d1d5db;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+i.title+'</td>'+
-      '<td style="color:var(--muted)">'+i.spec+'</td>'+
-      '<td style="text-align:center;font-weight:600;color:'+(i.stock===0?'var(--red)':'var(--green)')+'">'+i.stock+'</td>'+
-      '<td style="text-align:center"><div class="qty-cell">'+
-        '<button class="qty-btn" onclick="adjTransit(\\\''+i.sku+'\\\',-1)">−</button>'+
-        '<span class="qty-num" id="tq-'+i.sku+'">'+i.transit+'</span>'+
-        '<button class="qty-btn" onclick="adjTransit(\\\''+i.sku+'\\\',1)">+</button>'+
-      '</div></td>'+
-      '<td style="text-align:center">'+
-        '<button class="recv-btn" onclick="receiveOne(\\\''+i.sku+'\\\')">📥 收货</button>'+
-        '<span class="del-btn" onclick="deleteTransit(\\\''+i.sku+'\\\')" title="删除">✕</span>'+
-      '</td></tr>';
-  }).join('');
+  // SKU → 商品信息 快速查找
+  var skuInfo={};
+  DATA.forEach(function(d){skuInfo[d.sku]={title:d.title,spec:d.spec,stock:d.stock};});
 
-  document.getElementById('transitTable').innerHTML=
-    '<table class="t-table"><thead><tr><th>SKU</th><th>商品</th><th>规格</th><th style="text-align:center">库存</th><th style="text-align:center">在途</th><th style="text-align:center">操作</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  var html='';
+  pkgs.forEach(function(p){
+    var pkgTotal=0,pkgSkuCount=0;
+    for(var k in p.items){pkgTotal+=p.items[k];pkgSkuCount++;}
+
+    html+='<div class="pkg-card" id="pkg-card-'+p.id+'">'+
+      '<div class="pkg-header" onclick="togglePackage(\''+p.id+'\')">'+
+        '<span class="pkg-toggle">▶</span>'+
+        '<div class="pkg-info">'+
+          '<div class="pkg-name">📦 '+p.name+'</div>'+
+          '<div class="pkg-date">'+p.date+'</div>'+
+        '</div>'+
+        '<span class="pkg-summary">'+pkgTotal+'件 · '+pkgSkuCount+' SKU</span>'+
+        '<div class="pkg-actions">'+
+          '<button class="pkg-rec-btn" onclick="event.stopPropagation();receivePackage(\''+p.id+'\')">📥 收货</button>'+
+          '<span class="pkg-del-btn" onclick="event.stopPropagation();deletePackage(\''+p.id+'\')" title="删除包裹">✕</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="pkg-body">'+
+        '<table class="pkg-table"><thead><tr><th>SKU</th><th>商品</th><th>规格</th><th style="text-align:center">库存</th><th style="text-align:center">在途</th><th style="text-align:center;width:40px"></th></tr></thead><tbody>';
+
+    for(var sku in p.items){
+      var info=skuInfo[sku]||{title:'-',spec:'-',stock:0};
+      html+='<tr>'+
+        '<td><span class="sku-link" onclick="copyText(\''+sku+'\')">'+sku+'</span></td>'+
+        '<td style="color:#4b5563;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+info.title+'</td>'+
+        '<td style="color:var(--muted)">'+info.spec+'</td>'+
+        '<td style="text-align:center;font-weight:600;color:'+(info.stock===0?'var(--red)':'var(--green)')+'">'+info.stock+'</td>'+
+        '<td style="text-align:center"><div class="pkg-item-qty">'+
+          '<button class="qty-btn" onclick="adjTransitInPkg(\''+p.id+'\',\''+sku+'\',-1)">−</button>'+
+          '<input type="number" value="'+p.items[sku]+'" min="0" class="qty-input qty-input-sm" onchange="setTransitQty(\''+p.id+'\',\''+sku+'\',this.value)" onclick="event.stopPropagation()">'+
+          '<button class="qty-btn" onclick="adjTransitInPkg(\''+p.id+'\',\''+sku+'\',1)">+</button>'+
+        '</div></td>'+
+        '<td style="text-align:center"><span class="pkg-item-del" onclick="deleteTransitItem(\''+p.id+'\',\''+sku+'\')" title="从包裹移除">✕</span></td>'+
+      '</tr>';
+    }
+    html+='</tbody></table></div></div>';
+  });
+  document.getElementById('transitPackages').innerHTML=html;
+}
+
+function togglePackage(id){
+  var card=document.getElementById('pkg-card-'+id);
+  card.classList.toggle('open');
+}
+
+function adjTransitInPkg(pkgId,sku,delta){
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var pkg=data.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  pkg.items[sku]=(pkg.items[sku]||0)+delta;
+  if(pkg.items[sku]<=0) delete pkg.items[sku];
+  // 如果包裹为空则删除包裹
+  if(Object.keys(pkg.items).length===0){
+    data=data.filter(function(p){return p.id!==pkgId});
+  }
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+function setTransitQty(pkgId,sku,val){
+  var v=parseInt(val)||0;
+  if(v<0) v=0;
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var pkg=data.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  if(v===0){delete pkg.items[sku]}
+  else{pkg.items[sku]=v}
+  if(Object.keys(pkg.items).length===0) data=data.filter(function(p){return p.id!==pkgId});
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+function receivePackage(pkgId){
+  if(!confirm('确认该包裹已全部收货？将从在途中移除。')) return;
+  var data=_transitData.filter(function(p){return p.id!==pkgId});
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+function deletePackage(pkgId){
+  if(!confirm('删除该包裹的全部在途记录？')) return;
+  var data=_transitData.filter(function(p){return p.id!==pkgId});
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+function deleteTransitItem(pkgId,sku){
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var pkg=data.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  delete pkg.items[sku];
+  if(Object.keys(pkg.items).length===0){
+    data=data.filter(function(p){return p.id!==pkgId});
+  }
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+function clearAllTransit(){
+  var t=totalTransit();if(t<=0) return;
+  if(!confirm('确认全部包裹已收货？共 '+t+' 件在途清零。')) return;
+  _transitData=[];
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub([]);
+}
+
+// ====== 添加在途弹窗 ======
+var _modalAdded=[];  // [{sku, qty}]
+function openTransitAdd(){
+  _modalAdded=[];
+  document.getElementById('modalAdded').innerHTML='';
+  // 填入今天日期
+  document.getElementById('modalDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('modalNewPkg').value='';
+  document.getElementById('modalPkgName').value='';
+  document.getElementById('newPkgRow').style.display='';
+  // 填充已有包裹下拉
+  var sel=document.getElementById('modalPkgName');
+  sel.innerHTML='<option value="">+ 新建包裹</option>';
+  _transitData.forEach(function(p){
+    sel.innerHTML+='<option value="'+p.name+'">'+p.name+'</option>';
+  });
+  // 搜索列表
+  var results=DATA.map(function(d){
+    return '<div class="r-item" data-sku="'+d.sku+'" data-spec="'+d.spec.replace(/'/g,"\\'")+'" onclick="selectModalSku(this,\''+d.sku+'\')"><span>'+d.sku+'</span><span>'+d.title.substr(0,20)+' · '+d.spec+'</span></div>';
+  }).join('');
+  document.getElementById('modalResults').innerHTML=results;
+  document.getElementById('addTransitModal').classList.add('show');
+}
+function closeTransitAdd(){document.getElementById('addTransitModal').classList.remove('show')}
+function onPkgNameChange(){
+  var v=document.getElementById('modalPkgName').value;
+  document.getElementById('newPkgRow').style.display=v?'none':'';
+}
+function selectModalSku(el,sku){
+  // 检查是否已添加
+  if(_modalAdded.some(function(i){return i.sku===sku})) return;
+  _modalAdded.push({sku:sku,qty:1,spec:el.dataset.spec,txt:el.textContent.trim().slice(0,40)});
+  renderModalAdded();
+}
+function removeModalAdded(idx){
+  _modalAdded.splice(idx,1);
+  renderModalAdded();
+}
+function renderModalAdded(){
+  var html='';
+  _modalAdded.forEach(function(item,idx){
+    html+='<div class="added-item">'+
+      '<span class="sku">'+item.sku+'</span>'+
+      '<span style="color:var(--muted);font-size:10px">'+item.spec+'</span>'+
+      '<button class="qty-btn" onclick="_modalAdded['+idx+'].qty=Math.max(1,_modalAdded['+idx+'].qty-1);renderModalAdded()" style="width:20px;height:20px;font-size:10px">−</button>'+
+      '<input type="number" value="'+item.qty+'" min="1" class="qty-input qty-input-sm" onchange="var v=parseInt(this.value)||1;_modalAdded['+idx+'].qty=Math.max(1,v);renderModalAdded()" onclick="event.stopPropagation()">'+
+      '<button class="qty-btn" onclick="_modalAdded['+idx+'].qty+=1;renderModalAdded()" style="width:20px;height:20px;font-size:10px">+</button>'+
+      '<span class="remove" onclick="removeModalAdded('+idx+')">✕</span>'+
+    '</div>';
+  });
+  document.getElementById('modalAdded').innerHTML=html;
+}
+
+function filterModal(q){
+  var lo=q.toLowerCase();
+  document.querySelectorAll('#modalResults .r-item').forEach(function(i){
+    i.style.display=i.textContent.toLowerCase().indexOf(lo)>=0?'':'none';
+  });
+}
+
+function confirmTransitAdd(){
+  if(_modalAdded.length===0){alert('请先选择至少一个 SKU');return}
+  var pkgName=document.getElementById('modalPkgName').value || document.getElementById('modalNewPkg').value.trim();
+  if(!pkgName){alert('请输入包裹名称');return}
+
+  var items={};
+  _modalAdded.forEach(function(i){items[i.sku]=i.qty;});
+
+  var data=JSON.parse(JSON.stringify(_transitData));
+
+  // 如果选择已有包裹名 → 合并到该包裹
+  if(document.getElementById('modalPkgName').value){
+    var existing=data.find(function(p){return p.name===pkgName});
+    if(existing){
+      for(var sku in items){
+        existing.items[sku]=(existing.items[sku]||0)+items[sku];
+      }
+    } else {
+      data.push({id:uuid(),name:pkgName,date:document.getElementById('modalDate').value,items:items});
+    }
+  } else {
+    data.push({id:uuid(),name:pkgName,date:document.getElementById('modalDate').value,items:items});
+  }
+
+  _transitData=data;
+  closeTransitAdd();
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
 }
 
 // ====== 补货预测 Tab ======
@@ -637,41 +811,31 @@ function renderReplenTab(){
   DATA.forEach(function(d){
     var rep=REPLENISH[d.sku]||{};
     if(rep.suggest&&rep.suggest>0){
-      items.push({
-        sku:d.sku,title:d.title,spec:d.spec,stock:d.stock,
-        daily:rep.daily||0,suggest:rep.suggest
-      });
+      items.push({sku:d.sku,title:d.title,spec:d.spec,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest});
     }
   });
-
-  // ABC 分档
   var a=[],b=[],c=[];
   items.forEach(function(i){
     if(i.daily>=3){i.tier='A';a.push(i)}
     else if(i.daily>=1){i.tier='B';b.push(i)}
     else{i.tier='C';c.push(i)}
   });
-
-  // Tier cards
   document.getElementById('tierCards').innerHTML=
     '<div class="tier-card a"><div class="tier-label">A 级 · 爆款</div><div class="tier-count">'+a.length+'</div><div class="tier-rule">≥3件/天 → 备13天 · 预警4天</div></div>'+
     '<div class="tier-card b"><div class="tier-label">B 级 · 常规</div><div class="tier-count">'+b.length+'</div><div class="tier-rule">1~3件/天 → 备9天 · 预警3天</div></div>'+
     '<div class="tier-card c"><div class="tier-label">C 级 · 慢销</div><div class="tier-count">'+c.length+'</div><div class="tier-rule"><1件/天 → 备7天 · 预警2天</div></div>';
-
-  // Table
   if(items.length===0){
     document.getElementById('replenTable').innerHTML='<div class="empty-state"><div class="icon">✅</div><p>所有 SKU 库存充足，无需补货</p></div>';
     document.getElementById('replenTotal').innerHTML='';
     return;
   }
-
   var rows=items.sort(function(x,y){return y.suggest-x.suggest}).map(function(i){
     var days=i.daily>0?Math.round(i.stock/i.daily*10)/10:0;
     var daysStr=days<1?'<span style="color:var(--red)">'+days+'天</span>':days<3?'<span style="color:var(--yellow)">'+days+'天</span>':days+'天';
     return '<tr>'+
       '<td><span class="tier-badge '+(i.tier==='A'?'a':i.tier==='B'?'b':'c')+'">'+i.tier+'</span></td>'+
       '<td style="font-family:monospace;font-size:10px;color:var(--cyan)">'+i.sku+'</td>'+
-      '<td style="color:#b0c4de;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+i.title+'</td>'+
+      '<td style="color:#4b5563;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+i.title+'</td>'+
       '<td style="color:var(--muted)">'+i.spec+'</td>'+
       '<td style="text-align:center;font-family:monospace;font-weight:700;color:'+(i.stock===0?'var(--red)':'var(--text)')+'">'+i.stock+'</td>'+
       '<td style="text-align:center;font-family:monospace">'+i.daily+'</td>'+
@@ -679,90 +843,15 @@ function renderReplenTab(){
       '<td style="text-align:center;font-family:monospace;font-weight:700;color:var(--yellow)">'+i.suggest+'件</td>'+
     '</tr>';
   }).join('');
-
   document.getElementById('replenTable').innerHTML=
     '<table class="rep-table"><thead><tr><th>级</th><th>SKU</th><th>商品</th><th>规格</th><th style="text-align:center">库存</th><th style="text-align:center">日均</th><th style="text-align:center">可售</th><th style="text-align:center">建议采购</th></tr></thead><tbody>'+rows+'</tbody></table>';
-
   var totalSuggest=items.reduce(function(s,i){return s+i.suggest},0);
   document.getElementById('replenTotal').innerHTML=
     '<span>共 <b style="color:var(--cyan)">'+items.length+'</b> 个SKU需补货</span>'+
     '<span class="big">'+totalSuggest+' 件</span>'+
     '<span>A:'+a.length+' · B:'+b.length+' · C:'+c.length+'</span>';
 }
-function adjTransit(sku,delta){
-  var newVal=Math.max(0,(_transitCache[sku]||0)+delta);
-  var map={};for(var k in _transitCache)map[k]=_transitCache[k];
-  if(newVal<=0) delete map[sku]; else map[sku]=newVal;
-  _transitCache=map;
-  renderTransitTab();
-  refreshAll();
-  saveTransitToGitHub(map);
-}
 
-function receiveOne(sku){
-  if(!confirm('确认 '+sku+' 已收货？将从在途中移除。')) return;
-  var map={};for(var k in _transitCache)map[k]=_transitCache[k];
-  delete map[sku];
-  _transitCache=map;
-  renderTransitTab();
-  refreshAll();
-  saveTransitToGitHub(map);
-}
-
-function deleteTransit(sku){
-  if(!confirm('删除 '+sku+' 的在途记录？')) return;
-  var map={};for(var k in _transitCache)map[k]=_transitCache[k];
-  delete map[sku];
-  _transitCache=map;
-  renderTransitTab();
-  refreshAll();
-  saveTransitToGitHub(map);
-}
-
-function clearAllTransit(){
-  var t=totalTransit();if(t<=0) return;
-  if(!confirm('确认全部收货？'+t+'件在途清零。')) return;
-  _transitCache={};
-  renderTransitTab();
-  refreshAll();
-  saveTransitToGitHub({});
-}
-
-// ====== 添加在途弹窗 ======
-var _modalSelected='';
-function openTransitAdd(){
-  _modalSelected='';
-  document.getElementById('modalQty').value='1';
-  var results=DATA.map(function(d){
-    return '<div class="r-item" data-sku="'+d.sku+'" onclick="selectModalSku(this,\\\''+d.sku+'\\\',\\\''+d.spec.replace(/\\'/g,'\\\\\\\'')+'\\\')"><span>'+d.sku+'</span><span>'+d.title.substr(0,20)+' · '+d.spec+'</span></div>';
-  }).join('');
-  document.getElementById('modalResults').innerHTML=results;
-  document.getElementById('addTransitModal').classList.add('show');
-}
-function closeTransitAdd(){document.getElementById('addTransitModal').classList.remove('show')}
-function selectModalSku(el,sku,spec){
-  document.querySelectorAll('#modalResults .r-item').forEach(function(i){i.classList.remove('sel')});
-  el.classList.add('sel');_modalSelected=sku;
-}
-function filterModal(q){
-  var lo=q.toLowerCase();
-  document.querySelectorAll('#modalResults .r-item').forEach(function(i){
-    i.style.display=i.textContent.toLowerCase().indexOf(lo)>=0?'':'none';
-  });
-}
-function confirmTransitAdd(){
-  if(!_modalSelected){alert('请先选择一个 SKU');return}
-  var qty=parseInt(document.getElementById('modalQty').value)||1;
-  var map={};for(var k in _transitCache)map[k]=_transitCache[k];
-  map[_modalSelected]=(map[_modalSelected]||0)+qty;
-  _transitCache=map;
-  closeTransitAdd();
-  renderTransitTab();
-  refreshAll();
-  saveTransitToGitHub(map);
-}
-
-// ====== 刷新 ======
 function refreshAll(){
   var groups=groupByInv();
   renderDashboard(groups);
