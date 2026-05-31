@@ -361,15 +361,22 @@ var _ghToken='ghp_mu' + 'uP2slnLs8SKnGDaZwoAkPsakitY9QeX0Uwi5X';
 function uuid(){return 'pkg_'+Date.now() + '_' + Math.random().toString(36).slice(2,8);}
 
 function loadTransit(cb){
+  // 先从 localStorage 恢复（保证刷新不丢）
+  try{
+    var local=localStorage.getItem('hermes_transit');
+    if(local){_transitData=JSON.parse(local);}
+  }catch(e){}
+  
+  // 再异步从 GitHub 拉最新
   var x=new XMLHttpRequest();
   x.open('GET',TRANSIT_RAW+'?t='+Date.now());x.timeout=8000;
   x.onload=function(){
     if(x.status===200){
       try{
         var raw=JSON.parse(x.responseText)||{};
-        // 兼容旧格式 {SKU: qty} → 自动迁移到一个包裹
         if(raw.packages && Array.isArray(raw.packages)){
           _transitData=raw.packages;
+          localStorage.setItem('hermes_transit',JSON.stringify(_transitData));
         } else {
           var items={},hasOld=false;
           for(var k in raw){
@@ -378,16 +385,14 @@ function loadTransit(cb){
           if(hasOld){
             _transitData=[{id:uuid(),name:'历史在途',date:'-',items:items}];
             saveTransitToGitHub(_transitData);
-          } else {
-            _transitData=[];
           }
         }
-      }catch(e){_transitData=[];}
-    } else _transitData=[];
+      }catch(e){}
+    }
     cb();
   };
-  x.onerror=function(){_transitData=[];cb()};
-  x.ontimeout=function(){_transitData=[];cb()};
+  x.onerror=function(){cb()};
+  x.ontimeout=function(){cb()};
   x.send();
 }
 
@@ -408,7 +413,10 @@ function totalTransit(){
 }
 
 function saveTransitToGitHub(data,cb){
-  if(!_ghToken){return}
+  // 先存localStorage，保证刷新不丢
+  try{localStorage.setItem('hermes_transit',JSON.stringify(data));}catch(e){}
+  
+  if(!_ghToken){showToast('⚠️ 未配置Token，数据仅保存在本地');if(cb)cb(false);return}
   var c=JSON.stringify({packages:data});
   var p={message:'Update in_transit.json',content:btoa(unescape(encodeURIComponent(c))),branch:'gh-pages'};
   if(_transitSha) p.sha=_transitSha;
@@ -423,10 +431,10 @@ function saveTransitToGitHub(data,cb){
       var r=JSON.parse(x.responseText);_transitSha=r.content.sha;
       if(cb) cb(true);
     }else if(x.status===422){fetchShaAndRetry(data,cb)}
-    else{if(cb) cb(false)}
+    else{showToast('⚠️ 同步失败，数据已存本地');if(cb)cb(false)}
   };
-  x.onerror=function(){if(cb) cb(false)};
-  x.ontimeout=function(){if(cb) cb(false)};
+  x.onerror=function(){showToast('⚠️ 网络异常，数据已存本地');if(cb)cb(false)};
+  x.ontimeout=function(){showToast('⚠️ 同步超时，数据已存本地');if(cb)cb(false)};
   x.send(JSON.stringify(p));
 }
 function fetchShaAndRetry(data,cb){
@@ -571,8 +579,11 @@ function getIcon(title){
 
 function copyText(t){
   navigator.clipboard.writeText(t).then(function(){
-    var el=document.getElementById('toast');el.textContent='已复制: '+t;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},1500);
+    showToast('已复制: '+t);
   }).catch(function(){});
+}
+function showToast(msg){
+  var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},2000);
 }
 
 // ====== 在途 Tab - 包裹分组渲染 ======
