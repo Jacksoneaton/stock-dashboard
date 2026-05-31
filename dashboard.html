@@ -385,13 +385,14 @@ var _ghToken='ghp_muuP2slnS728DaZw' + 'oAkPsakitY9QeX0Uwi5X';
 function uuid(){return 'pkg_'+Date.now() + '_' + Math.random().toString(36).slice(2,8);}
 
 function loadTransit(cb){
-  // 先从 localStorage 恢复（保证刷新不丢）
+  // localStorage 是主数据源，GitHub 是备份
   try{
     var local=localStorage.getItem('hermes_transit');
     if(local){_transitData=JSON.parse(local);}
   }catch(e){}
+  var localCopy=_transitData.slice();  // 备份一下，后续比较用
   
-  // 再异步从 GitHub 拉最新
+  // 异步从 GitHub 拉取（仅做参考，不覆盖更多数据的本地版本）
   var x=new XMLHttpRequest();
   x.open('GET',TRANSIT_RAW+'?t='+Date.now());x.timeout=8000;
   x.onload=function(){
@@ -399,20 +400,20 @@ function loadTransit(cb){
       try{
         var raw=JSON.parse(x.responseText)||{};
         if(raw.packages && Array.isArray(raw.packages)){
-          _transitData=raw.packages;
-          localStorage.setItem('hermes_transit',JSON.stringify(_transitData));
-          setSyncStatus('synced','已同步 · GitHub');
-        } else {
-          var items={},hasOld=false;
-          for(var k in raw){
-            if(typeof raw[k]==='number' && raw[k]>0){items[k]=raw[k];hasOld=true;}
-          }
-          if(hasOld){
-            _transitData=[{id:uuid(),name:'历史在途',date:'-',items:items}];
-            saveTransitToGitHub(_transitData);
+          var remote=raw.packages;
+          var localCount=localCopy.reduce(function(s,p){for(var k in p.items)s+=p.items[k];return s},0);
+          var remoteCount=remote.reduce(function(s,p){for(var k in p.items)s+=p.items[k];return s},0);
+          // 只有 GitHub 数据更多时才更新本地（说明其他设备有新增）
+          if(remoteCount>localCount||localCopy.length===0){
+            _transitData=remote;
+            localStorage.setItem('hermes_transit',JSON.stringify(remote));
+            setSyncStatus('synced','已同步 · GitHub');
+            refreshAll();
+          }else{
+            setSyncStatus('synced','已同步 · 本地优先');
           }
         }
-      }catch(e){setSyncStatus('error','数据解析失败')}
+      }catch(e){setSyncStatus('local','离线模式 · 本地数据')}
     }else{setSyncStatus('local','离线模式 · 本地数据')}
     cb();
   };
