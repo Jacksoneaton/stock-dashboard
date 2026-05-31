@@ -111,6 +111,8 @@ body::before{
 .spec-tag.low{background:rgba(255,184,0,.06);border-color:rgba(255,184,0,.2);color:var(--yellow)}
 .spec-tag .n{font-weight:700}
 .spec-tag i{font-style:normal;opacity:.25;margin:0 3px}
+.spec-tag.transit{border-color:var(--cyan);box-shadow:0 0 6px rgba(0,212,255,.4),0 0 14px rgba(0,212,255,.15);animation:transit-glow 2s ease-in-out infinite}
+@keyframes transit-glow{0%,100%{box-shadow:0 0 4px rgba(0,212,255,.3),0 0 10px rgba(0,212,255,.1)}50%{box-shadow:0 0 8px rgba(0,212,255,.6),0 0 20px rgba(0,212,255,.2)}}
 
 .card-footer{display:flex;align-items:center;gap:10px;margin-top:2px;font-size:10px}
 .total-stock{color:var(--muted);font-family:'SF Mono','Cascadia Code','Consolas','Courier New',monospace}
@@ -538,7 +540,7 @@ function renderCards(groups,filter,search){
     }
 
     var specsHtml=specs.map(function(s){
-      var cls=specState(s);return '<span class="spec-tag '+cls+'">'+s.spec+'<i>|</i><span class="n">'+s.stock+'</span></span>';
+      var cls=specState(s);if(getTransit(s.sku)>0) cls+=' transit';return '<span class="spec-tag '+cls+'">'+s.spec+'<i>|</i><span class="n">'+s.stock+'</span></span>';
     }).join('');
 
     var imgHtml='';
