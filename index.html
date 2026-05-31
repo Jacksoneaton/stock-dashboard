@@ -139,6 +139,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .pkg-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
 .pkg-rec-btn{padding:5px 14px;border-radius:6px;border:1px solid rgba(5,150,105,.2);background:rgba(5,150,105,.05);color:var(--green);font-size:10px;cursor:pointer;font-weight:600;transition:all .15s;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 .pkg-rec-btn:hover{background:rgba(5,150,105,.12);box-shadow:0 0 8px rgba(5,150,105,.15)}
+.pkg-copy-btn{padding:5px 12px;border-radius:6px;border:1px solid rgba(124,58,237,.2);background:rgba(124,58,237,.05);color:var(--purple);font-size:10px;cursor:pointer;font-weight:600;transition:all .15s;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.pkg-copy-btn:hover{background:rgba(124,58,237,.12);box-shadow:0 0 8px rgba(124,58,237,.15)}
 .pkg-del-btn{color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;transition:all .15s}
 .pkg-del-btn:hover{color:var(--red)}
 
@@ -665,7 +667,9 @@ function renderTransitTab(){
         '<span class="pkg-summary">'+pkgTotal+'件 · '+pkgSkuCount+' SKU</span>'+
         '<div class="pkg-actions">'+
           '<button class="pkg-rec-btn" onclick="event.stopPropagation();receivePackage(\''+p.id+'\')">📥 收货</button>'+
+          '<button class="pkg-copy-btn" onclick="event.stopPropagation();copyPackageInfo(\''+p.id+'\')">📋 复制</button>'+
           '<span class="pkg-del-btn" onclick="event.stopPropagation();deletePackage(\''+p.id+'\')" title="删除包裹">✕</span>'+
+        '</div>'+
         '</div>'+
       '</div>'+
       '<div class="pkg-body">'+
@@ -769,6 +773,21 @@ function deletePackage(pkgId){
   renderTransitTab();
   refreshAll();
   saveTransitToGitHub(data);
+}
+
+function copyPackageInfo(pkgId){
+  var pkg=_transitData.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  var skuInfo={};
+  DATA.forEach(function(d){skuInfo[d.sku]={title:d.title,spec:d.spec};});
+  var lines=['📦 '+pkg.name,'日期: '+pkg.date,''];
+  for(var sku in pkg.items){
+    var info=skuInfo[sku]||{title:'?',spec:'?'};
+    lines.push(sku+'  '+info.title+'('+info.spec+')  ×'+pkg.items[sku]);
+  }
+  var text=lines.join('\n');
+  if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){showToast('已复制包裹信息')});}
+  else{showToast('复制失败，请手动复制')}
 }
 
 function deleteTransitItem(pkgId,sku){
