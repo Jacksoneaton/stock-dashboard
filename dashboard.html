@@ -159,10 +159,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .qty-ctrl .qc-btn:hover{background:rgba(8,145,178,.08);border-color:var(--cyan)}
 .qty-ctrl .qc-btn:active{transform:scale(.92)}
 .qty-ctrl .qc-num{
-  width:46px;text-align:center;font-size:14px;font-weight:700;color:var(--cyan);
-  background:#f5f6f8;border:1px solid var(--border);border-radius:6px;padding:4px 0;
+  width:46px;height:26px;text-align:center;font-size:14px;font-weight:700;color:var(--cyan);
+  background:#f5f6f8;border:1px solid var(--border);border-radius:6px;padding:0;
   font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;outline:none;
-  -moz-appearance:textfield
+  -moz-appearance:textfield;box-sizing:border-box;vertical-align:middle
 }
 .qty-ctrl .qc-num:focus{border-color:var(--cyan)}
 .qty-ctrl .qc-num::-webkit-outer-spin-button,.qty-ctrl .qc-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
@@ -832,7 +832,7 @@ function renderModalAdded(){
       '<span style="color:var(--muted);font-size:10px">'+item.spec+'</span>'+
       '<div class="qty-ctrl">'+
         '<button class="qc-btn" onclick="_modalAdded['+idx+'].qty=Math.max(1,_modalAdded['+idx+'].qty-1);renderModalAdded()">−</button>'+
-        '<input type="number" value="'+item.qty+'" min="1" class="qc-num" style="width:38px;font-size:13px" onchange="var v=parseInt(this.value)||1;_modalAdded['+idx+'].qty=Math.max(1,v);renderModalAdded()" onclick="event.stopPropagation()">'+
+        '<input type="number" value="'+item.qty+'" min="1" class="qc-num" style="width:38px;height:26px;font-size:13px;box-sizing:border-box" onchange="var v=parseInt(this.value)||1;_modalAdded['+idx+'].qty=Math.max(1,v);renderModalAdded()" onclick="event.stopPropagation()">'+
         '<button class="qc-btn" onclick="_modalAdded['+idx+'].qty+=1;renderModalAdded()">+</button>'+
       '</div>'+
       '<span class="remove" onclick="removeModalAdded('+idx+')">✕</span>'+
