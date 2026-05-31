@@ -184,6 +184,30 @@ body::before{
 .empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.15}
 .empty-state p{font-size:12px}
 
+/* ====== 补货预测 ====== */
+.replen-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.replen-head h2{font-size:17px;font-weight:700;color:var(--cyan);letter-spacing:1px}
+.tiers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:700px){.tiers{grid-template-columns:1fr}}
+.tier-card{background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center}
+.tier-card .tier-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.tier-card .tier-rule{font-size:10px;color:var(--muted);font-family:monospace}
+.tier-card .tier-count{font-size:22px;font-weight:700;font-family:monospace;margin:6px 0 2px}
+.tier-card.a{border-color:rgba(255,56,96,.25)}.tier-card.a .tier-count{color:var(--red)}
+.tier-card.b{border-color:rgba(255,184,0,.25)}.tier-card.b .tier-count{color:var(--yellow)}
+.tier-card.c{border-color:rgba(0,212,255,.2)}.tier-card.c .tier-count{color:var(--cyan)}
+
+.rep-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
+.rep-table th{text-align:left;padding:7px 10px;color:var(--cyan);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.rep-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.03)}
+.rep-table tr:hover{background:rgba(0,212,255,.03)}
+.rep-table .tier-badge{display:inline-block;width:18px;height:18px;border-radius:4px;text-align:center;line-height:18px;font-size:9px;font-weight:700;font-family:monospace}
+.rep-table .tier-badge.a{background:rgba(255,56,96,.15);color:var(--red)}
+.rep-table .tier-badge.b{background:rgba(255,184,0,.12);color:var(--yellow)}
+.rep-table .tier-badge.c{background:rgba(0,212,255,.1);color:var(--cyan)}
+.total-bar{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--muted)}
+.total-bar .big{font-size:18px;font-weight:700;font-family:monospace;color:var(--cyan)}
+
 /* Modal */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
 .modal-overlay.show{display:flex}
@@ -242,6 +266,7 @@ footer a{color:var(--dim);text-decoration:none}
   <!-- Tabs -->
   <div class="tabs" id="tabs">
     <div class="tab active" data-page="dash">📦 库存看板</div>
+    <div class="tab" data-page="replen">📋 补货预测</div>
     <div class="tab" data-page="transit">🚚 在途管理<span class="badge" id="transitBadge">0</span></div>
   </div>
 
@@ -269,6 +294,19 @@ footer a{color:var(--dim);text-decoration:none}
     </div>
     <div class="t-summary" id="transitSummary"></div>
     <div id="transitTable"></div>
+  </div>
+
+  <!-- ═══ 补货预测 ═══ -->
+  <div class="page" id="page-replen">
+    <div class="replen-head">
+      <h2>📋 补货预测</h2>
+      <span style="font-size:12px;color:var(--muted);font-family:monospace">
+        公式: 建议采购 = 日均销量 × (补货周期 + 安全天数)
+      </span>
+    </div>
+    <div class="tiers" id="tierCards"></div>
+    <div id="replenTable"></div>
+    <div class="total-bar" id="replenTotal"></div>
   </div>
 </div>
 
@@ -322,13 +360,14 @@ document.querySelectorAll('.tab').forEach(function(t){
     document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
     document.getElementById('page-'+t.dataset.page).classList.add('active');
     if(t.dataset.page==='transit') renderTransitTab();
+    if(t.dataset.page==='replen') renderReplenTab();
   });
 });
 
 // ====== 在途管理 (GitHub) ======
 var TRANSIT_API = 'https://api.github.com/repos/Jacksoneaton/stock-dashboard/contents/in_transit.json';
 var TRANSIT_RAW  = 'https://raw.githubusercontent.com/Jacksoneaton/stock-dashboard/gh-pages/in_transit.json';
-var TOKEN_KEY='hermes_gh_token';
+var TOKEN_KEY='***';
 var _transitCache={};
 var _transitSha=null;
 var _transitReady=false;
@@ -590,6 +629,64 @@ function renderTransitTab(){
     '<table class="t-table"><thead><tr><th>SKU</th><th>商品</th><th>规格</th><th style="text-align:center">库存</th><th style="text-align:center">在途</th><th style="text-align:center">操作</th></tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
+// ====== 补货预测 Tab ======
+function renderReplenTab(){
+  var items=[];
+  DATA.forEach(function(d){
+    var rep=REPLENISH[d.sku]||{};
+    if(rep.suggest&&rep.suggest>0){
+      items.push({
+        sku:d.sku,title:d.title,spec:d.spec,stock:d.stock,
+        daily:rep.daily||0,suggest:rep.suggest
+      });
+    }
+  });
+
+  // ABC 分档
+  var a=[],b=[],c=[];
+  items.forEach(function(i){
+    if(i.daily>=3){i.tier='A';a.push(i)}
+    else if(i.daily>=1){i.tier='B';b.push(i)}
+    else{i.tier='C';c.push(i)}
+  });
+
+  // Tier cards
+  document.getElementById('tierCards').innerHTML=
+    '<div class="tier-card a"><div class="tier-label">A 级 · 爆款</div><div class="tier-count">'+a.length+'</div><div class="tier-rule">≥3件/天 → 备13天 · 预警4天</div></div>'+
+    '<div class="tier-card b"><div class="tier-label">B 级 · 常规</div><div class="tier-count">'+b.length+'</div><div class="tier-rule">1~3件/天 → 备9天 · 预警3天</div></div>'+
+    '<div class="tier-card c"><div class="tier-label">C 级 · 慢销</div><div class="tier-count">'+c.length+'</div><div class="tier-rule"><1件/天 → 备7天 · 预警2天</div></div>';
+
+  // Table
+  if(items.length===0){
+    document.getElementById('replenTable').innerHTML='<div class="empty-state"><div class="icon">✅</div><p>所有 SKU 库存充足，无需补货</p></div>';
+    document.getElementById('replenTotal').innerHTML='';
+    return;
+  }
+
+  var rows=items.sort(function(x,y){return y.suggest-x.suggest}).map(function(i){
+    var days=i.daily>0?Math.round(i.stock/i.daily*10)/10:0;
+    var daysStr=days<1?'<span style="color:var(--red)">'+days+'天</span>':days<3?'<span style="color:var(--yellow)">'+days+'天</span>':days+'天';
+    return '<tr>'+
+      '<td><span class="tier-badge '+(i.tier==='A'?'a':i.tier==='B'?'b':'c')+'">'+i.tier+'</span></td>'+
+      '<td style="font-family:monospace;font-size:10px;color:var(--cyan)">'+i.sku+'</td>'+
+      '<td style="color:#b0c4de;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+i.title+'</td>'+
+      '<td style="color:var(--muted)">'+i.spec+'</td>'+
+      '<td style="text-align:center;font-family:monospace;font-weight:700;color:'+(i.stock===0?'var(--red)':'var(--text)')+'">'+i.stock+'</td>'+
+      '<td style="text-align:center;font-family:monospace">'+i.daily+'</td>'+
+      '<td style="text-align:center;font-family:monospace">'+daysStr+'</td>'+
+      '<td style="text-align:center;font-family:monospace;font-weight:700;color:var(--yellow)">'+i.suggest+'件</td>'+
+    '</tr>';
+  }).join('');
+
+  document.getElementById('replenTable').innerHTML=
+    '<table class="rep-table"><thead><tr><th>级</th><th>SKU</th><th>商品</th><th>规格</th><th style="text-align:center">库存</th><th style="text-align:center">日均</th><th style="text-align:center">可售</th><th style="text-align:center">建议采购</th></tr></thead><tbody>'+rows+'</tbody></table>';
+
+  var totalSuggest=items.reduce(function(s,i){return s+i.suggest},0);
+  document.getElementById('replenTotal').innerHTML=
+    '<span>共 <b style="color:var(--cyan)">'+items.length+'</b> 个SKU需补货</span>'+
+    '<span class="big">'+totalSuggest+' 件</span>'+
+    '<span>A:'+a.length+' · B:'+b.length+' · C:'+c.length+'</span>';
+}
 function adjTransit(sku,delta){
   var newVal=Math.max(0,(_transitCache[sku]||0)+delta);
   var map={};for(var k in _transitCache)map[k]=_transitCache[k];
