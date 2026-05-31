@@ -409,8 +409,14 @@ function loadTransit(cb){
             localStorage.setItem('hermes_transit',JSON.stringify(remote));
             setSyncStatus('synced','已同步 · GitHub');
             refreshAll();
+          }else if(localCount>remoteCount){
+            // 本地有未上传的数据 → 自动推送到 GitHub
+            _transitData=localCopy;
+            saveTransitToGitHub(localCopy);
+            setSyncStatus('synced','恢复同步 · 已上传');
+            refreshAll();
           }else{
-            setSyncStatus('synced','已同步 · 本地优先');
+            setSyncStatus('synced','已同步 · 一致');
           }
         }
       }catch(e){setSyncStatus('local','离线模式 · 本地数据')}
