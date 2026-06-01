@@ -151,6 +151,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .pkg-table td{padding:8px 14px;border-bottom:1px solid rgba(0,0,0,.04);vertical-align:middle}
 .pkg-table .sku-link{color:var(--cyan);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;font-size:10px;cursor:pointer}
 .pkg-table .sku-link:hover{opacity:.7}
+/* Transit item thumbnail */
+.transit-thumb{width:44px;height:44px;border-radius:6px;overflow:hidden;background:#f3f4f6;flex-shrink:0;position:relative}
+.transit-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.transit-thumb-fallback{font-size:12px;color:#4b5563;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Quantity control */
 .qty-ctrl{display:inline-flex;align-items:center;gap:6px}
 .qty-ctrl .qc-btn{
@@ -631,6 +635,13 @@ function setSyncStatus(cls,msg){
 }
 
 // ====== 在途 Tab - 包裹分组渲染 ======
+function productCell(sku, info, invImg){
+  var img = invImg[info.invCode] || '';
+  if(img){
+    return '<div class="transit-thumb"><img src="'+img+'" alt="'+info.title+'" title="'+info.title+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'"><span class="transit-thumb-fallback" style="display:none">'+info.title+'</span></div>';
+  }
+  return '<span class="transit-thumb-fallback">'+info.title+'</span>';
+}
 function renderTransitTab(){
   var pkgs=_transitData;
   var totalItems=0,totalSkus=new Set();
@@ -650,7 +661,11 @@ function renderTransitTab(){
 
   // SKU → 商品信息 快速查找
   var skuInfo={};
-  DATA.forEach(function(d){skuInfo[d.sku]={title:d.title,spec:d.spec,stock:d.stock};});
+  var invImg={};
+  DATA.forEach(function(d){
+    skuInfo[d.sku]={title:d.title,spec:d.spec,stock:d.stock,invCode:d.invCode};
+    if(d.img) invImg[d.invCode]=d.img;
+  });
 
   var html='';
   pkgs.forEach(function(p){
@@ -678,7 +693,7 @@ function renderTransitTab(){
       var info=skuInfo[sku]||{title:'-',spec:'-',stock:0};
       html+='<tr>'+
         '<td><span class="sku-link" onclick="copyText(\''+sku+'\')">'+sku+'</span></td>'+
-        '<td style="color:#4b5563;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+info.title+'</td>'+
+        '<td>'+productCell(sku,info,invImg)+'</td>'+
         '<td style="color:var(--muted)">'+info.spec+'</td>'+
         '<td style="text-align:center;font-weight:600;color:'+(info.stock===0?'var(--red)':'var(--green)')+'">'+info.stock+'</td>'+
         '<td style="text-align:center"><div class="qty-ctrl">'+
