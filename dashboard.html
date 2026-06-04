@@ -723,7 +723,11 @@ function productCell(sku, info, invImg){
   return '<span class="transit-thumb-fallback">'+info.title+'</span>';
 }
 function renderTransitTab(){
-  var pkgs=_transitData;
+  var pkgs=_transitData.slice().sort(function(a,b){
+    if(a.date<b.date) return -1;
+    if(a.date>b.date) return 1;
+    return 0;
+  });
   var totalItems=0,totalSkus=new Set();
   pkgs.forEach(function(p){
     for(var k in p.items){totalItems+=p.items[k];totalSkus.add(k);}
@@ -1087,13 +1091,20 @@ function openTransitAdd(){
   document.getElementById('modalDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   document.getElementById('modalNewPkg').value='';
   document.getElementById('modalPkgName').value='';
-  document.getElementById('newPkgRow').style.display='';
   // 填充已有包裹下拉
   var sel=document.getElementById('modalPkgName');
   sel.innerHTML='<option value="">+ 新建包裹</option>';
   _transitData.forEach(function(p){
     sel.innerHTML+='<option value="'+p.name+'">'+p.name+'</option>';
   });
+  // 默认上次选择的包裹
+  var lastPkg=localStorage.getItem('hermes_last_pkg')||'';
+  if(lastPkg&&_transitData.some(function(p){return p.name===lastPkg})){
+    sel.value=lastPkg;
+    document.getElementById('newPkgRow').style.display='none';
+  } else {
+    document.getElementById('newPkgRow').style.display='';
+  }
   // 搜索列表
   var results=DATA.map(function(d){
     return '<div class="r-item" data-sku="'+d.sku+'" data-spec="'+d.spec.replace(/'/g,"\\'")+'" onclick="selectModalSku(this,\''+d.sku+'\')"><span>'+d.sku+'</span><span>'+d.title.substr(0,20)+' · '+d.spec+'</span></div>';
@@ -1144,6 +1155,9 @@ function confirmTransitAdd(){
   if(_modalAdded.length===0){alert('请先选择至少一个 SKU');return}
   var pkgName=document.getElementById('modalPkgName').value || document.getElementById('modalNewPkg').value.trim();
   if(!pkgName){alert('请输入包裹名称');return}
+
+  // 记住本次选择的包裹名
+  localStorage.setItem('hermes_last_pkg',pkgName);
 
   var items={};
   _modalAdded.forEach(function(i){items[i.sku]=i.qty;});
