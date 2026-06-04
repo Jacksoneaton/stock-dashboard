@@ -143,6 +143,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .pkg-copy-btn:hover{background:rgba(124,58,237,.12);box-shadow:0 0 8px rgba(124,58,237,.15)}
 .pkg-del-btn{color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;transition:all .15s}
 .pkg-del-btn:hover{color:var(--red)}
+.pkg-move-btn{color:var(--muted);cursor:pointer;font-size:12px;padding:2px 4px;transition:all .15s;display:inline-block}
+.pkg-move-btn:hover{color:var(--yellow)}
+
+/* Move item modal */
+.move-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:110;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+.move-modal.show{display:flex}
+.move-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;width:370px;max-width:90vw;box-shadow:0 4px 32px rgba(0,0,0,.12)}
+.move-box h3{font-size:14px;margin-bottom:6px;color:var(--yellow);letter-spacing:.5px}
+.move-box .move-info{font-size:11px;color:var(--muted);margin-bottom:12px;padding:6px 10px;background:rgba(217,119,6,.04);border-radius:6px;font-family:monospace}
+.move-box .move-info b{color:var(--text)}
+.move-box .field-row{display:flex;gap:10px;margin-top:8px;align-items:center}
+.move-box .field-row label{font-size:11px;color:var(--muted);white-space:nowrap}
+.move-box .field-row input,.move-box .field-row select{flex:1;background:#f5f6f8;border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:12px;outline:none;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.move-box .field-row input:focus,.move-box .field-row select:focus{border-color:var(--yellow)}
+.move-box .btns{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+.move-box button{padding:8px 18px;border-radius:8px;font-size:12px;cursor:pointer;border:none;font-weight:600}
+.move-btn-save{background:var(--yellow);color:#fff}
+.move-btn-cancel{background:#f1f3f5;color:var(--muted)}
 
 .pkg-body{display:none;border-top:1px solid var(--border)}
 .pkg-card.open .pkg-body{display:block}
@@ -349,6 +367,32 @@ footer a{color:var(--dim);text-decoration:none}
     <div class="btns">
       <button class="btn-cancel" onclick="closeTransitAdd()">取消</button>
       <button class="btn-save" onclick="confirmTransitAdd()">添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- 迁移在途弹窗 -->
+<div class="move-modal" id="moveItemModal">
+  <div class="move-box">
+    <h3>↗ 迁移包裹明细</h3>
+    <div class="move-info" id="moveItemInfo"></div>
+    <div class="field-row">
+      <label>迁移到</label>
+      <select id="moveTargetPkg" onchange="onMoveTargetChange()">
+        <option value="">选择包裹</option>
+      </select>
+    </div>
+    <div class="field-row" id="moveNewPkgRow" style="display:none">
+      <label>新包裹名</label>
+      <input type="text" id="moveNewPkgName" placeholder="如：6月5日发货">
+    </div>
+    <div class="field-row" id="moveNewDateRow" style="display:none">
+      <label>日期</label>
+      <input type="date" id="moveNewPkgDate">
+    </div>
+    <div class="btns">
+      <button class="move-btn-cancel" onclick="closeMoveItem()">取消</button>
+      <button class="move-btn-save" onclick="confirmMoveItem()">迁移</button>
     </div>
   </div>
 </div>
@@ -718,7 +762,7 @@ function renderTransitTab(){
           '<input type="number" value="'+p.items[sku]+'" min="0" class="qc-num" onchange="setTransitQty(\''+p.id+'\',\''+sku+'\',this.value)" onclick="event.stopPropagation()">'+
           '<button class="qc-btn" onclick="adjTransitInPkg(\''+p.id+'\',\''+sku+'\',1)">+</button>'+
         '</div></td>'+
-        '<td style="text-align:center"><span class="pkg-item-del" onclick="deleteTransitItem(\''+p.id+'\',\''+sku+'\')" title="从包裹移除">✕</span></td>'+
+        '<td style="text-align:center;white-space:nowrap"><span class="pkg-move-btn" onclick="openMoveItem(\''+p.id+'\',\''+sku+'\')" title="迁移到其他包裹">↗</span><span class="pkg-item-del" onclick="deleteTransitItem(\''+p.id+'\',\''+sku+'\')" title="从包裹移除">✕</span></td>'+
       '</tr>';
     }
     html+='</tbody></table></div></div>';
@@ -833,6 +877,80 @@ function deleteTransitItem(pkgId,sku){
   renderTransitTab();
   refreshAll();
   saveTransitToGitHub(data);
+}
+
+// ====== 迁移包裹明细 ======
+var _moveSrcPkg=null,_moveSrcSku=null;
+function openMoveItem(pkgId,sku){
+  _moveSrcPkg=pkgId;
+  _moveSrcSku=sku;
+  var pkg=_transitData.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  var qty=pkg.items[sku]||0;
+  var skuInfo={};
+  DATA.forEach(function(d){skuInfo[d.sku]={title:d.title,spec:d.spec};});
+  var info=skuInfo[sku]||{title:'?',spec:'?'};
+  document.getElementById('moveItemInfo').innerHTML=
+    '从 <b>'+pkg.name+'</b> 迁移 <b>'+sku+'</b> ×<b>'+qty+'件</b><br>'+
+    '<span style="font-size:10px">'+info.title+' · '+info.spec+'</span>';
+  var sel=document.getElementById('moveTargetPkg');
+  sel.innerHTML='<option value="">选择包裹</option>';
+  _transitData.forEach(function(p){
+    if(p.id!==pkgId){
+      sel.innerHTML+='<option value="'+p.id+'">'+p.name+' ('+p.date+')</option>';
+    }
+  });
+  sel.innerHTML+='<option value="__NEW__">+ 新建包裹</option>';
+  sel.value='';
+  document.getElementById('moveNewPkgRow').style.display='none';
+  document.getElementById('moveNewDateRow').style.display='none';
+  var d=new Date();
+  document.getElementById('moveNewPkgDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  document.getElementById('moveItemModal').classList.add('show');
+}
+function onMoveTargetChange(){
+  var v=document.getElementById('moveTargetPkg').value;
+  var showNew=v==='__NEW__';
+  document.getElementById('moveNewPkgRow').style.display=showNew?'flex':'none';
+  document.getElementById('moveNewDateRow').style.display=showNew?'flex':'none';
+}
+function closeMoveItem(){
+  document.getElementById('moveItemModal').classList.remove('show');
+  _moveSrcPkg=null;_moveSrcSku=null;
+}
+function confirmMoveItem(){
+  var targetId=document.getElementById('moveTargetPkg').value;
+  if(!targetId){alert('请选择目标包裹');return}
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var srcPkg=data.find(function(p){return p.id===_moveSrcPkg});
+  if(!srcPkg){closeMoveItem();return}
+  var qty=srcPkg.items[_moveSrcSku]||0;
+  var isNew=targetId==='__NEW__';
+  var newName='';
+  if(isNew){
+    newName=document.getElementById('moveNewPkgName').value.trim();
+    if(!newName){alert('请输入新包裹名称');return}
+  }
+  delete srcPkg.items[_moveSrcSku];
+  if(Object.keys(srcPkg.items).length===0){
+    data=data.filter(function(p){return p.id!==_moveSrcPkg});
+  }
+  if(isNew){
+    var newDate=document.getElementById('moveNewPkgDate').value;
+    data.push({id:uuid(),name:newName,date:newDate,items:{}});
+    data[data.length-1].items[_moveSrcSku]=qty;
+  } else {
+    var tgtPkg=data.find(function(p){return p.id===targetId});
+    if(tgtPkg){
+      tgtPkg.items[_moveSrcSku]=(tgtPkg.items[_moveSrcSku]||0)+qty;
+    }
+  }
+  _transitData=data;
+  closeMoveItem();
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+  showToast('已迁移 '+_moveSrcSku);
 }
 
 function clearAllTransit(){
