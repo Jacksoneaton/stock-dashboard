@@ -7,60 +7,54 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f6f8;color:#1a1a2e;display:flex;justify-content:center;min-height:100vh}
-.container{width:100%;max-width:960px;padding:24px 20px 40px}
+.container{width:100%;max-width:800px;padding:20px 16px 40px}
 
-/* header */
-.hd{text-align:center;padding:24px 0 16px}
-.hd h1{font-size:22px;font-weight:700;letter-spacing:1px}
-.hd .sub{font-size:11px;color:#6b7280;margin:6px 0 12px}
-.hd a{display:inline-block;font-size:11px;color:#6b7280;text-decoration:none;padding:4px 14px;border:1px solid #e5e7eb;border-radius:20px;transition:all .2s}
+.hd{text-align:center;padding:20px 0 12px}
+.hd h1{font-size:20px;font-weight:700;letter-spacing:1px}
+.hd .sub{font-size:11px;color:#6b7280;margin:4px 0 10px}
+.hd a{display:inline-block;font-size:10px;color:#6b7280;text-decoration:none;padding:3px 12px;border:1px solid #e5e7eb;border-radius:16px}
 .hd a:hover{color:#0891b2;border-color:#0891b2}
 
-/* stats row */
-.stats{display:flex;justify-content:center;gap:14px;margin-bottom:28px;flex-wrap:wrap}
-.stat{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 24px;text-align:center;min-width:120px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.stat .n{font-size:26px;font-weight:700;font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace;color:#0891b2}
-.stat .l{font-size:10px;color:#6b7280;margin-top:4px;letter-spacing:.5px}
+.stats{display:flex;justify-content:center;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+.st{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 20px;text-align:center;min-width:100px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.st .n{font-size:22px;font-weight:700;font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace;color:#0891b2}
+.st .l{font-size:9px;color:#9ca3af;margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
 
-/* section */
-.sec{margin-bottom:32px}
-.sec h2{font-size:15px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e5e7eb;display:flex;align-items:center;gap:6px}
+.sec{margin-bottom:28px}
+.sec h2{font-size:14px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:5px}
 
-/* table */
-.tb{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-table{width:100%;border-collapse:collapse}
-th{font-size:10px;font-weight:500;color:#9ca3af;text-align:left;padding:10px 16px;background:#f9fafb;border-bottom:1px solid #e5e7eb;text-transform:uppercase;letter-spacing:.5px}
-th.n{text-align:right}
-td{font-size:12px;padding:10px 16px;border-bottom:1px solid #f3f4f6}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:#f9fafb}
-tr.qtw td{background:#f8fafc}
-td.r{width:40px;text-align:center;font-weight:600;font-size:13px}
-td.sku{font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace;font-size:11px;font-weight:600;color:#0891b2;white-space:nowrap}
-td.nm{color:#4b5563;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-td.n{font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace;font-size:13px;font-weight:600;text-align:right;white-space:nowrap}
-td.n.rev{color:#059669}
+/* leaderboard */
+.lb{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.lb-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f3f4f6}
+.lb-row:last-child{border-bottom:none}
+.lb-row:hover{background:#f9fafb}
+.lb-rank{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#6b7280;flex-shrink:0;border-radius:8px;background:#f3f4f6}
+.lb-rank.top3{background:#fef3c7;color:#92400e;font-size:14px;width:36px;height:36px;border-radius:10px;box-shadow:0 2px 6px rgba(251,191,36,.2)}
+.lb-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.lb-sku{font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace;font-size:11px;font-weight:600;color:#1a1a2e}
+.lb-bar-wrap{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden}
+.lb-bar{height:100%;border-radius:3px;transition:width 1s ease;min-width:4px;opacity:.85}
+.lb-val{font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace;font-size:13px;font-weight:700;white-space:nowrap;flex-shrink:0;text-align:right;min-width:80px}
+.lb-val.rev{color:#059669}
 
-/* chart */
-.ch{display:flex;justify-content:center;align-items:flex-end;gap:16px;height:260px;padding:16px 0 0;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.bar{display:flex;flex-direction:column;align-items:center;gap:6px;height:100%}
-.bar-top{font-size:12px;font-weight:700;font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace;color:#0891b2;white-space:nowrap}
-.bar-top span{font-size:9px;font-weight:400;color:#6b7280}
-.bar-fill{width:36px;background:linear-gradient(180deg,#0891b2,#67e8f9);border-radius:4px 4px 0 0;min-height:4px;transition:height .5s ease}
-.bar-mid{font-size:9px;color:#059669;opacity:.8;white-space:nowrap}
-.bar-lbl{font-size:10px;color:#6b7280;font-weight:500}
+/* monthly chart */
+.mc{display:flex;justify-content:center;align-items:flex-end;gap:14px;padding:20px 16px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);min-height:220px}
+.mc-bar{display:flex;flex-direction:column;align-items:center;gap:6px;height:100%}
+.mc-qty{font-size:12px;font-weight:700;font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace;color:#0891b2;white-space:nowrap}
+.mc-qty i{font-size:9px;font-style:normal;font-weight:400;color:#6b7280}
+.mc-fill{width:40px;background:linear-gradient(180deg,#7c3aed,#a78bfa);border-radius:4px 4px 0 0;min-height:4px;transition:height .6s ease}
+.mc-rev{font-size:9px;color:#059669;white-space:nowrap}
+.mc-lbl{font-size:10px;color:#6b7280;font-weight:500}
 
-/* footer */
-.ft{text-align:center;padding:20px 0;color:#d1d5db;font-size:10px}
-
-@media(max-width:600px){
-  .container{padding:12px 10px 24px}
-  td.nm{max-width:100px}
-  th,td{padding:8px 10px;font-size:10px}
-  .ch{gap:10px;height:220px}
-  .bar-fill{width:28px}
-  .stat{min-width:90px;padding:10px 14px}
-  .stat .n{font-size:20px}
+@media(max-width:480px){
+  .container{padding:12px 8px 24px}
+  .lb-row{gap:8px;padding:8px 12px}
+  .lb-val{font-size:11px;min-width:60px}
+  .lb-sku{font-size:10px}
+  .mc{gap:10px}
+  .mc-fill{width:32px}
+  .st{min-width:80px;padding:10px 14px}
+  .st .n{font-size:18px}
 }
 </style>
 </head>
@@ -68,98 +62,351 @@ td.n.rev{color:#059669}
 <div class="container">
 <div class="hd">
   <h1>📊 销量排行榜</h1>
-  <div class="sub">Wearing Notes · 近3个月 · 2026-06-06 07:27 更新</div>
+  <div class="sub">Wearing Notes · 近3个月 · 2026-06-06 07:30</div>
   <a href="dashboard.html">← 返回库存看板</a>
 </div>
 
 <div class="stats">
-  <div class="stat"><div class="n">1250</div><div class="l">总销量（件）</div></div>
-  <div class="stat"><div class="n">NT$ 348,463</div><div class="l">总销售额</div></div>
-  <div class="stat"><div class="n">492</div><div class="l">SKU 数</div></div>
+  <div class="st"><div class="n">1250</div><div class="l">总销量</div></div>
+  <div class="st"><div class="n" style="color:#7c3aed">NT$ 348,463</div><div class="l">总销售额</div></div>
+  <div class="st"><div class="n">492</div><div class="l">SKU</div></div>
 </div>
 
 <div class="sec">
-  <h2>🏆 销量排行 Top 30</h2>
-  <div class="tb"><table>
-    <thead><tr><th>#</th><th>SKU</th><th>商品</th><th class="n">销量</th><th class="n">销售额</th></tr></thead>
-    <tbody><tr class="qtw"><td class="r">🥇</td><td class="sku">QTW00267-03</td><td class="nm">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖</td><td class="n">40</td><td class="n rev">NT$ 6,762</td></tr>
-<tr class="qtw"><td class="r">🥈</td><td class="sku">QTW00261-01</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">27</td><td class="n rev">NT$ 14,428</td></tr>
-<tr class="qtw"><td class="r">🥉</td><td class="sku">QTW00269-01</td><td class="nm">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動</td><td class="n">21</td><td class="n rev">NT$ 6,769</td></tr>
-<tr class="qtw"><td class="r">4</td><td class="sku">QTW00261-03</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">19</td><td class="n rev">NT$ 11,381</td></tr>
-<tr class="qtw"><td class="r">5</td><td class="sku">QTW00261-04</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">19</td><td class="n rev">NT$ 11,381</td></tr>
-<tr><td class="r">6</td><td class="sku">白色=m</td><td class="nm">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t </td><td class="n">19</td><td class="n rev">NT$ 3,232</td></tr>
-<tr class="qtw"><td class="r">7</td><td class="sku">QTW00267-05</td><td class="nm">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖</td><td class="n">17</td><td class="n rev">NT$ 2,873</td></tr>
-<tr class="qtw"><td class="r">8</td><td class="sku">QTW00267-02</td><td class="nm">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖</td><td class="n">16</td><td class="n rev">NT$ 2,735</td></tr>
-<tr><td class="r">9</td><td class="sku">黑色=l</td><td class="nm">韓版🌟完美版型💯辣妹裝 波點撞色拼接設計 一字領 短版上衣 露肩上衣 韓系上衣 修身上衣 短袖T恤 </td><td class="n">16</td><td class="n rev">NT$ 2,527</td></tr>
-<tr><td class="r">10</td><td class="sku">黑色=L 建議50.0-57.5kg</td><td class="nm">🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣 辣妹上衣 短版上衣</td><td class="n">15</td><td class="n rev">NT$ 2,565</td></tr>
-<tr><td class="r">11</td><td class="sku">灰色=l</td><td class="nm">🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 短版上衣 露肩上衣 </td><td class="n">14</td><td class="n rev">NT$ 2,605</td></tr>
-<tr class="qtw"><td class="r">12</td><td class="sku">QTW00269-05</td><td class="nm">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動</td><td class="n">14</td><td class="n rev">NT$ 3,986</td></tr>
-<tr class="qtw"><td class="r">13</td><td class="sku">QTW00267-04</td><td class="nm">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖</td><td class="n">14</td><td class="n rev">NT$ 2,367</td></tr>
-<tr><td class="r">14</td><td class="sku">黑色=m</td><td class="nm">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t </td><td class="n">14</td><td class="n rev">NT$ 2,831</td></tr>
-<tr class="qtw"><td class="r">15</td><td class="sku">QTW00267-01</td><td class="nm">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖</td><td class="n">13</td><td class="n rev">NT$ 2,197</td></tr>
-<tr><td class="r">16</td><td class="sku">灰色=xl</td><td class="nm">🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 短版上衣 露肩上衣 </td><td class="n">12</td><td class="n rev">NT$ 2,241</td></tr>
-<tr class="qtw"><td class="r">17</td><td class="sku">QTW00264-02</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">11</td><td class="n rev">NT$ 3,500</td></tr>
-<tr><td class="r">18</td><td class="sku">灰色=m</td><td class="nm">🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 短版上衣 露肩上衣 </td><td class="n">11</td><td class="n rev">NT$ 2,085</td></tr>
-<tr class="qtw"><td class="r">19</td><td class="sku">QTW00259-01</td><td class="nm">現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 </td><td class="n">11</td><td class="n rev">NT$ 6,589</td></tr>
-<tr class="qtw"><td class="r">20</td><td class="sku">QTW00268-04</td><td class="nm">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白</td><td class="n">10</td><td class="n rev">NT$ 3,980</td></tr>
-<tr><td class="r">21</td><td class="sku">黑色=xl</td><td class="nm">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t </td><td class="n">10</td><td class="n rev">NT$ 1,998</td></tr>
-<tr><td class="r">22</td><td class="sku">黑色=s</td><td class="nm">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t </td><td class="n">10</td><td class="n rev">NT$ 1,900</td></tr>
-<tr class="qtw"><td class="r">23</td><td class="sku">QTW00261-02</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">10</td><td class="n rev">NT$ 5,990</td></tr>
-<tr><td class="r">24</td><td class="sku">淺綠色=XL 57.5-65.0斤</td><td class="nm">🔥台灣發貨🇰🇷韓版🌟實拍 背心 吊帶 辣妹裝 吊帶背心 寬肩帶 修身顯瘦 短版上衣 平口上衣 無袖背</td><td class="n">9</td><td class="n rev">NT$ 1,113</td></tr>
-<tr class="qtw"><td class="r">25</td><td class="sku">QTW00261-05</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">9</td><td class="n rev">NT$ 5,391</td></tr>
-<tr><td class="r">26</td><td class="sku">米白色=xl</td><td class="nm">🔥台灣發貨🔥實拍🌟 法式甜美 波點吊帶連衣裙 荷葉邊修身短裙 收腰不規則裙子 百搭洋裝 吊帶裙 連身</td><td class="n">9</td><td class="n rev">NT$ 1,783</td></tr>
-<tr class="qtw"><td class="r">27</td><td class="sku">QTW00268-03</td><td class="nm">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白</td><td class="n">9</td><td class="n rev">NT$ 3,934</td></tr>
-<tr><td class="r">28</td><td class="sku">花灰色（拼接黑色）=m</td><td class="nm">韓版🌟完美版型💯純欲 蕾絲花邊蝴蝶結 短袖T恤 短版上衣 假兩件上衣 韓系上衣 螺紋 短袖 T恤 舒</td><td class="n">9</td><td class="n rev">NT$ 1,179</td></tr>
-<tr><td class="r">29</td><td class="sku">腰頭黑色格子褲-黑色=l</td><td class="nm">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動</td><td class="n">9</td><td class="n rev">NT$ 2,673</td></tr>
-<tr><td class="r">30</td><td class="sku">花灰色（拼接黑色）=l</td><td class="nm">韓版🌟完美版型💯純欲 蕾絲花邊蝴蝶結 短袖T恤 短版上衣 假兩件上衣 韓系上衣 螺紋 短袖 T恤 舒</td><td class="n">8</td><td class="n rev">NT$ 1,096</td></tr></tbody>
-  </table></div>
+  <h2>🏆 销量排行 Top 20</h2>
+  <div class="lb"><div class="lb-row">
+  <div class="lb-rank top3">🥇</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00267-03</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:100.0%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">40 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank top3">🥈</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00261-01</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:67.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">27 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank top3">🥉</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00269-01</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:52.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">21 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">4</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00261-03</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:47.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">19 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">5</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00261-04</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:47.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">19 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">6</div>
+  <div class="lb-info">
+    <div class="lb-sku">白色=m</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:47.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">19 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">7</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00267-05</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:42.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">17 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">8</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00267-02</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:40.0%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">16 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">9</div>
+  <div class="lb-info">
+    <div class="lb-sku">黑色=l</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:40.0%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">16 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">10</div>
+  <div class="lb-info">
+    <div class="lb-sku">黑色=L 建議50.0-57.5kg</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:37.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">15 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">11</div>
+  <div class="lb-info">
+    <div class="lb-sku">灰色=l</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:35.0%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">14 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">12</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00269-05</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:35.0%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">14 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">13</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00267-04</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:35.0%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">14 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">14</div>
+  <div class="lb-info">
+    <div class="lb-sku">黑色=m</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:35.0%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">14 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">15</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00267-01</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:32.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">13 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">16</div>
+  <div class="lb-info">
+    <div class="lb-sku">灰色=xl</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:30.0%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">12 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">17</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00264-02</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:27.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">11 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">18</div>
+  <div class="lb-info">
+    <div class="lb-sku">灰色=m</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:27.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">11 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">19</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00259-01</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:27.5%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">11 件</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">20</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00268-04</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:25.0%;background:#7c3aed"></div></div>
+  </div>
+  <div class="lb-val">10 件</div>
+</div></div>
 </div>
 
 <div class="sec">
-  <h2>💰 销售额排行 Top 30</h2>
-  <div class="tb"><table>
-    <thead><tr><th>#</th><th>SKU</th><th>商品</th><th class="n">销量</th><th class="n">销售额</th></tr></thead>
-    <tbody><tr class="qtw"><td class="r">🥇</td><td class="sku">QTW00261-01</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">27</td><td class="n rev">NT$ 14,428</td></tr>
-<tr class="qtw"><td class="r">🥈</td><td class="sku">QTW00261-03</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">19</td><td class="n rev">NT$ 11,381</td></tr>
-<tr class="qtw"><td class="r">🥉</td><td class="sku">QTW00261-04</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">19</td><td class="n rev">NT$ 11,381</td></tr>
-<tr class="qtw"><td class="r">4</td><td class="sku">QTW00269-01</td><td class="nm">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動</td><td class="n">21</td><td class="n rev">NT$ 6,769</td></tr>
-<tr class="qtw"><td class="r">5</td><td class="sku">QTW00267-03</td><td class="nm">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖</td><td class="n">40</td><td class="n rev">NT$ 6,762</td></tr>
-<tr class="qtw"><td class="r">6</td><td class="sku">QTW00259-01</td><td class="nm">現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 </td><td class="n">11</td><td class="n rev">NT$ 6,589</td></tr>
-<tr class="qtw"><td class="r">7</td><td class="sku">QTW00261-02</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">10</td><td class="n rev">NT$ 5,990</td></tr>
-<tr class="qtw"><td class="r">8</td><td class="sku">QTW00261-05</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">9</td><td class="n rev">NT$ 5,391</td></tr>
-<tr class="qtw"><td class="r">9</td><td class="sku">QTW00258-01</td><td class="nm">現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 </td><td class="n">8</td><td class="n rev">NT$ 4,792</td></tr>
-<tr class="qtw"><td class="r">10</td><td class="sku">QTW00261-06</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">7</td><td class="n rev">NT$ 4,193</td></tr>
-<tr class="qtw"><td class="r">11</td><td class="sku">QTW00264-01</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">8</td><td class="n rev">NT$ 4,000</td></tr>
-<tr class="qtw"><td class="r">12</td><td class="sku">QTW00269-05</td><td class="nm">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動</td><td class="n">14</td><td class="n rev">NT$ 3,986</td></tr>
-<tr class="qtw"><td class="r">13</td><td class="sku">QTW00268-04</td><td class="nm">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白</td><td class="n">10</td><td class="n rev">NT$ 3,980</td></tr>
-<tr class="qtw"><td class="r">14</td><td class="sku">QTW00268-03</td><td class="nm">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白</td><td class="n">9</td><td class="n rev">NT$ 3,934</td></tr>
-<tr class="qtw"><td class="r">15</td><td class="sku">QTW00264-02</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">11</td><td class="n rev">NT$ 3,500</td></tr>
-<tr class="qtw"><td class="r">16</td><td class="sku">QTW00264-05</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">7</td><td class="n rev">NT$ 3,500</td></tr>
-<tr><td class="r">17</td><td class="sku">白色=m</td><td class="nm">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t </td><td class="n">19</td><td class="n rev">NT$ 3,232</td></tr>
-<tr class="qtw"><td class="r">18</td><td class="sku">QTW00268-02</td><td class="nm">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白</td><td class="n">7</td><td class="n rev">NT$ 3,005</td></tr>
-<tr class="qtw"><td class="r">19</td><td class="sku">QTW00264-03</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">6</td><td class="n rev">NT$ 3,000</td></tr>
-<tr class="qtw"><td class="r">20</td><td class="sku">QTW00267-05</td><td class="nm">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖</td><td class="n">17</td><td class="n rev">NT$ 2,873</td></tr>
-<tr><td class="r">21</td><td class="sku">黑色=m</td><td class="nm">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t </td><td class="n">14</td><td class="n rev">NT$ 2,831</td></tr>
-<tr class="qtw"><td class="r">22</td><td class="sku">QTW00265-03</td><td class="nm">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 </td><td class="n">6</td><td class="n rev">NT$ 2,754</td></tr>
-<tr class="qtw"><td class="r">23</td><td class="sku">QTW00267-02</td><td class="nm">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖</td><td class="n">16</td><td class="n rev">NT$ 2,735</td></tr>
-<tr><td class="r">24</td><td class="sku">腰頭黑色格子褲-黑色=l</td><td class="nm">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動</td><td class="n">9</td><td class="n rev">NT$ 2,673</td></tr>
-<tr><td class="r">25</td><td class="sku">灰色=l</td><td class="nm">🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 短版上衣 露肩上衣 </td><td class="n">14</td><td class="n rev">NT$ 2,605</td></tr>
-<tr><td class="r">26</td><td class="sku">黑色=L 建議50.0-57.5kg</td><td class="nm">🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣 辣妹上衣 短版上衣</td><td class="n">15</td><td class="n rev">NT$ 2,565</td></tr>
-<tr><td class="r">27</td><td class="sku">黑色=l</td><td class="nm">韓版🌟完美版型💯辣妹裝 波點撞色拼接設計 一字領 短版上衣 露肩上衣 韓系上衣 修身上衣 短袖T恤 </td><td class="n">16</td><td class="n rev">NT$ 2,527</td></tr>
-<tr class="qtw"><td class="r">28</td><td class="sku">QTW00263-05</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">5</td><td class="n rev">NT$ 2,500</td></tr>
-<tr class="qtw"><td class="r">29</td><td class="sku">QTW00263-06</td><td class="nm">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休</td><td class="n">5</td><td class="n rev">NT$ 2,500</td></tr>
-<tr class="qtw"><td class="r">30</td><td class="sku">QTW00260-01</td><td class="nm">現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 </td><td class="n">4</td><td class="n rev">NT$ 2,396</td></tr></tbody>
-  </table></div>
+  <h2>💰 销售额排行 Top 20</h2>
+  <div class="lb"><div class="lb-row">
+  <div class="lb-rank top3">🥇</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00261-01</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:100.0%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 14,428</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank top3">🥈</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00261-03</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:78.9%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 11,381</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank top3">🥉</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00261-04</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:78.9%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 11,381</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">4</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00269-01</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:46.9%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 6,769</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">5</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00267-03</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:46.9%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 6,762</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">6</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00259-01</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:45.7%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 6,589</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">7</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00261-02</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:41.5%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 5,990</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">8</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00261-05</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:37.4%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 5,391</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">9</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00258-01</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:33.2%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 4,792</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">10</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00261-06</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:29.1%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 4,193</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">11</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00264-01</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:27.7%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 4,000</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">12</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00269-05</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:27.6%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 3,986</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">13</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00268-04</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:27.6%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 3,980</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">14</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00268-03</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:27.3%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 3,934</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">15</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00264-02</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:24.3%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 3,500</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">16</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00264-05</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:24.3%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 3,500</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">17</div>
+  <div class="lb-info">
+    <div class="lb-sku">白色=m</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:22.4%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 3,232</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">18</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00268-02</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:20.8%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 3,005</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">19</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00264-03</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:20.8%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 3,000</div>
+</div>
+<div class="lb-row">
+  <div class="lb-rank">20</div>
+  <div class="lb-info">
+    <div class="lb-sku">QTW00267-05</div>
+    <div class="lb-bar-wrap"><div class="lb-bar" style="width:19.9%;background:#0891b2"></div></div>
+  </div>
+  <div class="lb-val">NT$ 2,873</div>
+</div></div>
 </div>
 
 <div class="sec">
   <h2>📈 月度销量趋势</h2>
-  <div class="ch"><div class="bar"><div class="bar-top">177<span>件</span></div><div class="bar-fill" style="height:32px"></div><div class="bar-mid">NT$50k</div><div class="bar-lbl">04月</div></div>
-<div class="bar"><div class="bar-top">876<span>件</span></div><div class="bar-fill" style="height:160px"></div><div class="bar-mid">NT$246k</div><div class="bar-lbl">05月</div></div>
-<div class="bar"><div class="bar-top">197<span>件</span></div><div class="bar-fill" style="height:35px"></div><div class="bar-mid">NT$53k</div><div class="bar-lbl">06月</div></div></div>
+  <div class="mc"><div class="mc-bar"><div class="mc-qty">177<i>件</i></div><div class="mc-fill" style="height:28px"></div><div class="mc-rev">NT$50k</div><div class="mc-lbl">04月</div></div>
+<div class="mc-bar"><div class="mc-qty">876<i>件</i></div><div class="mc-fill" style="height:140px"></div><div class="mc-rev">NT$246k</div><div class="mc-lbl">05月</div></div>
+<div class="mc-bar"><div class="mc-qty">197<i>件</i></div><div class="mc-fill" style="height:31px"></div><div class="mc-rev">NT$53k</div><div class="mc-lbl">06月</div></div></div>
 </div>
 
-<div class="ft">货憨憨 API · 自动更新</div>
 </div>
 </body>
 </html>
