@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>📊 销量排行榜 · Wearing Notes</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#05080f;--card-bg:rgba(12,20,40,.9);--border:rgba(0,212,255,.1);
+  --text:#e2e8f0;--muted:#64748b;--dim:#334155;
+  --cyan:#00d4ff;--green:#00ff88;--yellow:#ffb800;--red:#ff3860;--purple:#a855f7;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.008) 2px,rgba(255,255,255,.008) 4px);
+}
+.container{max-width:1100px;margin:0 auto;padding:20px 16px;position:relative;z-index:1}
+
+/* Header */
+.header{text-align:center;padding:30px 0 20px}
+.header h1{font-size:28px;font-weight:700;letter-spacing:2px;color:var(--cyan);text-shadow:0 0 40px rgba(0,212,255,.2)}
+.header .sub{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:1px}
+.header .nav{margin-top:16px}
+.header .nav a{color:var(--muted);text-decoration:none;font-size:11px;padding:6px 16px;border:1px solid var(--border);border-radius:20px;transition:all .2s}
+.header .nav a:hover{color:var(--cyan);border-color:var(--cyan)}
+
+/* Stats */
+.stats{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+.stat{flex:1;min-width:100px;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center;backdrop-filter:blur(10px)}
+.stat .num{font-size:26px;font-weight:700;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--cyan);text-shadow:0 0 20px rgba(0,212,255,.15)}
+.stat .lbl{font-size:10px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+
+/* Section */
+.section{margin-bottom:32px}
+.section h2{font-size:16px;font-weight:600;color:var(--cyan);margin-bottom:14px;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.section h2::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Table */
+.table-wrap{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;backdrop-filter:blur(10px)}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;font-weight:500;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:1px;background:rgba(0,212,255,.03)}
+th.num{text-align:right}
+td{font-size:12px;padding:9px 14px;border-bottom:1px solid rgba(0,212,255,.04)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,212,255,.03)}
+tr.qtw td{background:rgba(0,212,255,.02)}
+.rank{width:40px;text-align:center}
+.rank-num{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:rgba(255,255,255,.05);font-size:11px;font-weight:600;color:var(--muted);text-align:center}
+.sku-code{font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:11px;font-weight:600;color:var(--cyan);white-space:nowrap}
+.sku-name{color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.num{font-family:'SF Mono','Cascadia Code','Consolas',monospace;font-size:13px;font-weight:600;text-align:right;white-space:nowrap}
+.num.rev{color:var(--green)}
+
+/* Chart */
+.chart{display:flex;gap:12px;align-items:flex-end;height:200px;padding:20px 16px 10px;overflow-x:auto}
+.bar-item{flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%}
+.bar-val{font-size:12px;font-weight:700;font-family:'SF Mono','Cascadia Code','Consolas',monospace;color:var(--cyan);white-space:nowrap}
+.bar-val span{font-size:10px;font-weight:400;color:var(--muted)}
+.bar-fill{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.bar-inner{width:70%;max-width:32px;background:linear-gradient(180deg,var(--cyan),rgba(0,212,255,.4));border-radius:4px 4px 0 0;min-height:4px;box-shadow:0 0 12px rgba(0,212,255,.2);transition:height .6s ease}
+.bar-label{font-size:10px;color:var(--muted);font-weight:500}
+.bar-rev{font-size:9px;color:var(--green);opacity:.7;white-space:nowrap}
+
+/* Footer */
+.footer{text-align:center;padding:20px;color:var(--dim);font-size:10px;letter-spacing:1px}
+
+@media(max-width:600px){
+  .sku-name{max-width:100px}
+  th,td{padding:8px 10px;font-size:10px}
+  .num{font-size:11px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>📊 销量排行榜</h1>
+  <div class="sub">Wearing Notes · 货憨憨订单数据 · 近3个月</div>
+  <div class="nav">
+    <a href="dashboard.html">← 返回库存看板</a>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">1250</div><div class="lbl">总销量（件）</div></div>
+  <div class="stat"><div class="num">NT$ 348,463</div><div class="lbl">总销售额</div></div>
+  <div class="stat"><div class="num">492</div><div class="lbl">商品 SKU 数</div></div>
+</div>
+
+<div class="section">
+  <h2>🏆 销量排行 Top 30</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>SKU</th><th>商品</th><th class="num">销量</th><th class="num">销售额</th></tr></thead>
+      <tbody><tr class="qtw">
+            <td class="rank">🥇</td>
+            <td class="sku-code">QTW00267-03</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版</td>
+            <td class="num">40</td>
+            <td class="num rev">NT$ 6,762</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank">🥈</td>
+            <td class="sku-code">QTW00261-01</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">27</td>
+            <td class="num rev">NT$ 14,428</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank">🥉</td>
+            <td class="sku-code">QTW00269-01</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲</td>
+            <td class="num">21</td>
+            <td class="num rev">NT$ 6,769</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">4</span></td>
+            <td class="sku-code">QTW00261-03</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">19</td>
+            <td class="num rev">NT$ 11,381</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">5</span></td>
+            <td class="sku-code">QTW00261-04</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">19</td>
+            <td class="num rev">NT$ 11,381</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">6</span></td>
+            <td class="sku-code">白色=m</td>
+            <td class="sku-name">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上</td>
+            <td class="num">19</td>
+            <td class="num rev">NT$ 3,232</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">7</span></td>
+            <td class="sku-code">QTW00267-05</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版</td>
+            <td class="num">17</td>
+            <td class="num rev">NT$ 2,873</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">8</span></td>
+            <td class="sku-code">QTW00267-02</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版</td>
+            <td class="num">16</td>
+            <td class="num rev">NT$ 2,735</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">9</span></td>
+            <td class="sku-code">黑色=l</td>
+            <td class="sku-name">韓版🌟完美版型💯辣妹裝 波點撞色拼接設計 一字領 短版上衣 露肩上衣 韓系上衣 </td>
+            <td class="num">16</td>
+            <td class="num rev">NT$ 2,527</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">10</span></td>
+            <td class="sku-code">黑色=L 建議50.0-57.5kg</td>
+            <td class="sku-name">🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣</td>
+            <td class="num">15</td>
+            <td class="num rev">NT$ 2,565</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">11</span></td>
+            <td class="sku-code">灰色=l</td>
+            <td class="sku-name">🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 </td>
+            <td class="num">14</td>
+            <td class="num rev">NT$ 2,605</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">12</span></td>
+            <td class="sku-code">QTW00269-05</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲</td>
+            <td class="num">14</td>
+            <td class="num rev">NT$ 3,986</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">13</span></td>
+            <td class="sku-code">QTW00267-04</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版</td>
+            <td class="num">14</td>
+            <td class="num rev">NT$ 2,367</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">14</span></td>
+            <td class="sku-code">黑色=m</td>
+            <td class="sku-name">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上</td>
+            <td class="num">14</td>
+            <td class="num rev">NT$ 2,831</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">15</span></td>
+            <td class="sku-code">QTW00267-01</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版</td>
+            <td class="num">13</td>
+            <td class="num rev">NT$ 2,197</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">16</span></td>
+            <td class="sku-code">灰色=xl</td>
+            <td class="sku-name">🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 </td>
+            <td class="num">12</td>
+            <td class="num rev">NT$ 2,241</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">17</span></td>
+            <td class="sku-code">QTW00264-02</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">11</td>
+            <td class="num rev">NT$ 3,500</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">18</span></td>
+            <td class="sku-code">灰色=m</td>
+            <td class="sku-name">🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 </td>
+            <td class="num">11</td>
+            <td class="num rev">NT$ 2,085</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">19</span></td>
+            <td class="sku-code">QTW00259-01</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎</td>
+            <td class="num">11</td>
+            <td class="num rev">NT$ 6,589</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">20</span></td>
+            <td class="sku-code">QTW00268-04</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛</td>
+            <td class="num">10</td>
+            <td class="num rev">NT$ 3,980</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">21</span></td>
+            <td class="sku-code">黑色=xl</td>
+            <td class="sku-name">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上</td>
+            <td class="num">10</td>
+            <td class="num rev">NT$ 1,998</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">22</span></td>
+            <td class="sku-code">黑色=s</td>
+            <td class="sku-name">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上</td>
+            <td class="num">10</td>
+            <td class="num rev">NT$ 1,900</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">23</span></td>
+            <td class="sku-code">QTW00261-02</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">10</td>
+            <td class="num rev">NT$ 5,990</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">24</span></td>
+            <td class="sku-code">淺綠色=XL 57.5-65.0斤</td>
+            <td class="sku-name">🔥台灣發貨🇰🇷韓版🌟實拍 背心 吊帶 辣妹裝 吊帶背心 寬肩帶 修身顯瘦 短版上</td>
+            <td class="num">9</td>
+            <td class="num rev">NT$ 1,113</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">25</span></td>
+            <td class="sku-code">QTW00261-05</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">9</td>
+            <td class="num rev">NT$ 5,391</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">26</span></td>
+            <td class="sku-code">米白色=xl</td>
+            <td class="sku-name">🔥台灣發貨🔥實拍🌟 法式甜美 波點吊帶連衣裙 荷葉邊修身短裙 收腰不規則裙子 百</td>
+            <td class="num">9</td>
+            <td class="num rev">NT$ 1,783</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">27</span></td>
+            <td class="sku-code">QTW00268-03</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛</td>
+            <td class="num">9</td>
+            <td class="num rev">NT$ 3,934</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">28</span></td>
+            <td class="sku-code">花灰色（拼接黑色）=m</td>
+            <td class="sku-name">韓版🌟完美版型💯純欲 蕾絲花邊蝴蝶結 短袖T恤 短版上衣 假兩件上衣 韓系上衣 </td>
+            <td class="num">9</td>
+            <td class="num rev">NT$ 1,179</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">29</span></td>
+            <td class="sku-code">腰頭黑色格子褲-黑色=l</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲</td>
+            <td class="num">9</td>
+            <td class="num rev">NT$ 2,673</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">30</span></td>
+            <td class="sku-code">花灰色（拼接黑色）=l</td>
+            <td class="sku-name">韓版🌟完美版型💯純欲 蕾絲花邊蝴蝶結 短袖T恤 短版上衣 假兩件上衣 韓系上衣 </td>
+            <td class="num">8</td>
+            <td class="num rev">NT$ 1,096</td>
+        </tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h2>💰 销售额排行 Top 30</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>SKU</th><th>商品</th><th class="num">销量</th><th class="num">销售额</th></tr></thead>
+      <tbody><tr class="qtw">
+            <td class="rank">🥇</td>
+            <td class="sku-code">QTW00261-01</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">27</td>
+            <td class="num rev">NT$ 14,428</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank">🥈</td>
+            <td class="sku-code">QTW00261-03</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">19</td>
+            <td class="num rev">NT$ 11,381</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank">🥉</td>
+            <td class="sku-code">QTW00261-04</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">19</td>
+            <td class="num rev">NT$ 11,381</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">4</span></td>
+            <td class="sku-code">QTW00269-01</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲</td>
+            <td class="num">21</td>
+            <td class="num rev">NT$ 6,769</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">5</span></td>
+            <td class="sku-code">QTW00267-03</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版</td>
+            <td class="num">40</td>
+            <td class="num rev">NT$ 6,762</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">6</span></td>
+            <td class="sku-code">QTW00259-01</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎</td>
+            <td class="num">11</td>
+            <td class="num rev">NT$ 6,589</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">7</span></td>
+            <td class="sku-code">QTW00261-02</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">10</td>
+            <td class="num rev">NT$ 5,990</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">8</span></td>
+            <td class="sku-code">QTW00261-05</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">9</td>
+            <td class="num rev">NT$ 5,391</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">9</span></td>
+            <td class="sku-code">QTW00258-01</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎</td>
+            <td class="num">8</td>
+            <td class="num rev">NT$ 4,792</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">10</span></td>
+            <td class="sku-code">QTW00261-06</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">7</td>
+            <td class="num rev">NT$ 4,193</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">11</span></td>
+            <td class="sku-code">QTW00264-01</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">8</td>
+            <td class="num rev">NT$ 4,000</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">12</span></td>
+            <td class="sku-code">QTW00269-05</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲</td>
+            <td class="num">14</td>
+            <td class="num rev">NT$ 3,986</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">13</span></td>
+            <td class="sku-code">QTW00268-04</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛</td>
+            <td class="num">10</td>
+            <td class="num rev">NT$ 3,980</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">14</span></td>
+            <td class="sku-code">QTW00268-03</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛</td>
+            <td class="num">9</td>
+            <td class="num rev">NT$ 3,934</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">15</span></td>
+            <td class="sku-code">QTW00264-02</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">11</td>
+            <td class="num rev">NT$ 3,500</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">16</span></td>
+            <td class="sku-code">QTW00264-05</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">7</td>
+            <td class="num rev">NT$ 3,500</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">17</span></td>
+            <td class="sku-code">白色=m</td>
+            <td class="sku-name">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上</td>
+            <td class="num">19</td>
+            <td class="num rev">NT$ 3,232</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">18</span></td>
+            <td class="sku-code">QTW00268-02</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛</td>
+            <td class="num">7</td>
+            <td class="num rev">NT$ 3,005</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">19</span></td>
+            <td class="sku-code">QTW00264-03</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">6</td>
+            <td class="num rev">NT$ 3,000</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">20</span></td>
+            <td class="sku-code">QTW00267-05</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版</td>
+            <td class="num">17</td>
+            <td class="num rev">NT$ 2,873</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">21</span></td>
+            <td class="sku-code">黑色=m</td>
+            <td class="sku-name">實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上</td>
+            <td class="num">14</td>
+            <td class="num rev">NT$ 2,831</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">22</span></td>
+            <td class="sku-code">QTW00265-03</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒</td>
+            <td class="num">6</td>
+            <td class="num rev">NT$ 2,754</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">23</span></td>
+            <td class="sku-code">QTW00267-02</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版</td>
+            <td class="num">16</td>
+            <td class="num rev">NT$ 2,735</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">24</span></td>
+            <td class="sku-code">腰頭黑色格子褲-黑色=l</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲</td>
+            <td class="num">9</td>
+            <td class="num rev">NT$ 2,673</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">25</span></td>
+            <td class="sku-code">灰色=l</td>
+            <td class="sku-name">🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 </td>
+            <td class="num">14</td>
+            <td class="num rev">NT$ 2,605</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">26</span></td>
+            <td class="sku-code">黑色=L 建議50.0-57.5kg</td>
+            <td class="sku-name">🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣</td>
+            <td class="num">15</td>
+            <td class="num rev">NT$ 2,565</td>
+        </tr>
+<tr class="">
+            <td class="rank"><span class="rank-num">27</span></td>
+            <td class="sku-code">黑色=l</td>
+            <td class="sku-name">韓版🌟完美版型💯辣妹裝 波點撞色拼接設計 一字領 短版上衣 露肩上衣 韓系上衣 </td>
+            <td class="num">16</td>
+            <td class="num rev">NT$ 2,527</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">28</span></td>
+            <td class="sku-code">QTW00263-05</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">5</td>
+            <td class="num rev">NT$ 2,500</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">29</span></td>
+            <td class="sku-code">QTW00263-06</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀</td>
+            <td class="num">5</td>
+            <td class="num rev">NT$ 2,500</td>
+        </tr>
+<tr class="qtw">
+            <td class="rank"><span class="rank-num">30</span></td>
+            <td class="sku-code">QTW00260-01</td>
+            <td class="sku-name">現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎</td>
+            <td class="num">4</td>
+            <td class="num rev">NT$ 2,396</td>
+        </tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h2>📈 月度销量趋势</h2>
+  <div class="table-wrap">
+    <div class="chart"><div class="bar-item">
+            <div class="bar-val">177<span>件</span></div>
+            <div class="bar-fill"><div class="bar-inner" style="height:20%"></div></div>
+            <div class="bar-label">04月</div>
+            <div class="bar-rev">NT$49,687</div>
+        </div>
+<div class="bar-item">
+            <div class="bar-val">876<span>件</span></div>
+            <div class="bar-fill"><div class="bar-inner" style="height:100%"></div></div>
+            <div class="bar-label">05月</div>
+            <div class="bar-rev">NT$245,585</div>
+        </div>
+<div class="bar-item">
+            <div class="bar-val">197<span>件</span></div>
+            <div class="bar-fill"><div class="bar-inner" style="height:22%"></div></div>
+            <div class="bar-label">06月</div>
+            <div class="bar-rev">NT$53,191</div>
+        </div></div>
+  </div>
+</div>
+
+<div class="footer">更新于 2026-06-06 07:18 · 数据源：货憨憨 API</div>
+
+</div>
+</body>
+</html>
