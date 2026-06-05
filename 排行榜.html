@@ -6,295 +6,252 @@
 <title>📊 销量排行榜 · Wearing Notes</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f6f8;color:#1a1a2e;display:flex;justify-content:center;min-height:100vh}
-.c{width:100%;max-width:760px;padding:20px 14px 40px}
-.hd{text-align:center;padding:16px 0 8px}
-.hd h1{font-size:20px;font-weight:700;letter-spacing:1px}
-.hd .sub{font-size:10px;color:#6b7280;margin:3px 0 8px}
-.hd a{display:inline-block;font-size:10px;color:#6b7280;text-decoration:none;padding:3px 12px;border:1px solid #e5e7eb;border-radius:16px;transition:all .2s}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#F6F7F9;color:#1a1a2e;display:flex;justify-content:center;min-height:100vh}
+.main{width:100%;max-width:960px;padding:20px 12px 40px}
+
+.hd{text-align:center;padding:12px 0 4px}
+.hd h1{font-size:18px;font-weight:700}
+.hd .sub{font-size:10px;color:#6b7280;margin:2px 0 8px}
+.hd a{display:inline-block;font-size:9px;color:#6b7280;text-decoration:none;padding:3px 12px;border:1px solid #e5e7eb;border-radius:14px}
 .hd a:hover{color:#0891b2;border-color:#0891b2}
 
-.stats{display:flex;justify-content:center;gap:10px;margin-bottom:22px;flex-wrap:wrap}
-.st{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 20px;text-align:center;min-width:90px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-.st .n{font-size:22px;font-weight:700;font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace;color:#0891b2}
-.st .l{font-size:9px;color:#9ca3af;margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+/* KPI */
+.kpi{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.kpi-card{border-radius:12px;padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.04);display:flex;flex-direction:column;justify-content:center}
+.kpi-card.rev{flex:2;background:linear-gradient(135deg,#1e3a5f,#1a365d);color:#fff;min-width:200px}
+.kpi-card.qty{flex:1;background:#fff;border:1px solid #e5e7eb;min-width:120px}
+.kpi-card.sku{flex:1;background:#f0f9ff;border:1px solid #bae6fd;min-width:120px}
+.kpi-card .kpi-val{font-size:32px;font-weight:700;font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace}
+.kpi-card .kpi-curr{font-size:14px;font-weight:400;margin-left:4px;opacity:.8}
+.kpi-card.rev .kpi-val{color:#67e8f9}
+.kpi-card.qty .kpi-val{color:#7c3aed}
+.kpi-card.sku .kpi-val{color:#0891b2}
+.kpi-card .kpi-lbl{font-size:10px;margin-top:4px;text-transform:uppercase;letter-spacing:1px;opacity:.7}
+.kpi-card.rev .kpi-lbl{color:#94a3b8}
+.kpi-card.qty .kpi-lbl{color:#6b7280}
+.kpi-card.sku .kpi-lbl{color:#6b7280}
 
-.ch{margin-bottom:22px;text-align:center}
-.ch svg{display:block;margin:0 auto}
+/* 2-col layout */
+.two-col{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.col-left{flex:1;min-width:380px}
+.col-right{width:300px;display:flex;flex-direction:column;gap:14px}
+.ch{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow:hidden}
+.ch svg{display:block}
 
-.ft{text-align:center;padding:16px;color:#d1d5db;font-size:10px}
+.ft{text-align:center;padding:16px;color:#d1d5db;font-size:9px}
 
-@media(max-width:480px){
-  .c{padding:12px 6px 24px}
-  .st{min-width:70px;padding:10px 12px}
-  .st .n{font-size:18px}
+@media(max-width:700px){
+  .two-col{flex-direction:column}
+  .col-right{width:100%;flex-direction:row;flex-wrap:wrap}
+  .col-right .ch{flex:1;min-width:140px}
+  .kpi-card.rev{flex:1 1 100%}
+  .kpi-card .kpi-val{font-size:24px}
 }
 </style>
 </head>
 <body>
-<div class="c">
+<div class="main">
 <div class="hd">
   <h1>📊 销量排行榜</h1>
-  <div class="sub">Wearing Notes · 近3个月 · 2026-06-06 07:41</div>
+  <div class="sub">Wearing Notes · 近3个月 · 2026-06-06 07:49</div>
   <a href="dashboard.html">← 返回库存看板</a>
 </div>
 
-<div class="stats">
-  <div class="st"><div class="n">1250</div><div class="l">总销量</div></div>
-  <div class="st"><div class="n" style="color:#7c3aed">NT$ 348,463</div><div class="l">总销售额</div></div>
-  <div class="st"><div class="n">492</div><div class="l">SKU</div></div>
+<div class="kpi">
+  <div class="kpi-card rev">
+    <div class="kpi-lbl">总销售额</div>
+    <div><span class="kpi-val">NT$ 348,463</span><span class="kpi-curr">TWD</span></div>
+  </div>
+  <div class="kpi-card qty">
+    <div class="kpi-lbl">总销量</div>
+    <div><span class="kpi-val">1250</span><span class="kpi-curr">件</span></div>
+  </div>
+  <div class="kpi-card sku">
+    <div class="kpi-lbl">SKU 数量</div>
+    <div><span class="kpi-val">492</span><span class="kpi-curr">个</span></div>
+  </div>
 </div>
 
-<div class="ch"><svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif">
-  <rect x="10" y="12" width="700" height="416" rx="8" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
-  <text x="20" y="34" font-size="12" font-weight="600" fill="#374151">🏆 销量排行 Top 15</text>
-  <line x1="140" y1="58.0" x2="600" y2="58.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="58.0" r="10" fill="#fbbf24" opacity="0.9"/>
-  <text x="32" y="62.0" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">1</text>
-  <text x="134" y="62.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00267-03</text>
-  <rect x="140" y="48" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="48" width="460" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="460" dur="0.8s" fill="freeze"/></rect>
-  <text x="606" y="62.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">40件</text>
-  <line x1="140" y1="86.0" x2="600" y2="86.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="86.0" r="10" fill="#fbbf24" opacity="0.9"/>
-  <text x="32" y="90.0" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">2</text>
-  <text x="134" y="90.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00261-01</text>
-  <rect x="140" y="76" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="76" width="310" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="310" dur="0.8s" fill="freeze"/></rect>
-  <text x="456" y="90.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">27件</text>
-  <line x1="140" y1="114.0" x2="600" y2="114.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="114.0" r="10" fill="#fbbf24" opacity="0.9"/>
-  <text x="32" y="118.0" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">3</text>
-  <text x="134" y="118.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00269-01</text>
-  <rect x="140" y="104" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="104" width="241" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="241" dur="0.8s" fill="freeze"/></rect>
-  <text x="387" y="118.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">21件</text>
-  <line x1="140" y1="142.0" x2="600" y2="142.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="142.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="146.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">4</text>
-  <text x="134" y="146.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00261-03</text>
-  <rect x="140" y="132" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="132" width="218" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="218" dur="0.8s" fill="freeze"/></rect>
-  <text x="364" y="146.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">19件</text>
-  <line x1="140" y1="170.0" x2="600" y2="170.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="170.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="174.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">5</text>
-  <text x="134" y="174.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00261-04</text>
-  <rect x="140" y="160" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="160" width="218" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="218" dur="0.8s" fill="freeze"/></rect>
-  <text x="364" y="174.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">19件</text>
-  <line x1="140" y1="198.0" x2="600" y2="198.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="198.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="202.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">6</text>
-  <text x="134" y="202.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">白色=m</text>
-  <rect x="140" y="188" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="188" width="218" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="218" dur="0.8s" fill="freeze"/></rect>
-  <text x="364" y="202.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">19件</text>
-  <line x1="140" y1="226.0" x2="600" y2="226.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="226.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="230.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">7</text>
-  <text x="134" y="230.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00267-05</text>
-  <rect x="140" y="216" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="216" width="195" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="195" dur="0.8s" fill="freeze"/></rect>
-  <text x="341" y="230.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">17件</text>
-  <line x1="140" y1="254.0" x2="600" y2="254.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="254.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="258.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">8</text>
-  <text x="134" y="258.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00267-02</text>
-  <rect x="140" y="244" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="244" width="184" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="184" dur="0.8s" fill="freeze"/></rect>
-  <text x="330" y="258.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">16件</text>
-  <line x1="140" y1="282.0" x2="600" y2="282.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="282.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="286.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">9</text>
-  <text x="134" y="286.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">黑色=l</text>
-  <rect x="140" y="272" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="272" width="184" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="184" dur="0.8s" fill="freeze"/></rect>
-  <text x="330" y="286.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">16件</text>
-  <line x1="140" y1="310.0" x2="600" y2="310.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="310.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="314.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">10</text>
-  <text x="134" y="314.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">黑色=L 建議50.0-57.5kg</text>
-  <rect x="140" y="300" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="300" width="172" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="172" dur="0.8s" fill="freeze"/></rect>
-  <text x="318" y="314.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">15件</text>
-  <line x1="140" y1="338.0" x2="600" y2="338.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="338.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="342.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">11</text>
-  <text x="134" y="342.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">灰色=l</text>
-  <rect x="140" y="328" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="328" width="161" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="161" dur="0.8s" fill="freeze"/></rect>
-  <text x="307" y="342.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">14件</text>
-  <line x1="140" y1="366.0" x2="600" y2="366.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="366.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="370.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">12</text>
-  <text x="134" y="370.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00269-05</text>
-  <rect x="140" y="356" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="356" width="161" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="161" dur="0.8s" fill="freeze"/></rect>
-  <text x="307" y="370.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">14件</text>
-  <line x1="140" y1="394.0" x2="600" y2="394.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="394.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="398.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">13</text>
-  <text x="134" y="398.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00267-04</text>
-  <rect x="140" y="384" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="384" width="161" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="161" dur="0.8s" fill="freeze"/></rect>
-  <text x="307" y="398.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">14件</text>
-  <line x1="140" y1="422.0" x2="600" y2="422.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="422.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="426.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">14</text>
-  <text x="134" y="426.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">黑色=m</text>
-  <rect x="140" y="412" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="412" width="161" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="161" dur="0.8s" fill="freeze"/></rect>
-  <text x="307" y="426.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">14件</text>
-  <line x1="140" y1="450.0" x2="600" y2="450.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="450.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="454.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">15</text>
-  <text x="134" y="454.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00267-01</text>
-  <rect x="140" y="440" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="440" width="149" height="20" rx="4" fill="#7c3aed" opacity="0.85"><animate attributeName="width" from="0" to="149" dur="0.8s" fill="freeze"/></rect>
-  <text x="295" y="454.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">13件</text>
+<div class="two-col">
+  <div class="col-left">
+    <div class="ch"><svg viewBox="0 0 680 668" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif">
+<rect x="10" y="6" width="660" height="656" rx="10" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="144" y1="42.0" x2="570" y2="42.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="46.0" text-anchor="middle" font-size="14">🥇</text>
+<text x="138" y="36" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00267-03</text>
+<text x="138" y="48" text-anchor="end" font-size="9" fill="#6b7280">粉色 | M</text>
+<rect x="144" y="30" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="30" width="426" height="24" rx="5" fill="#FFD700" opacity="0.9"><animate attributeName="width" from="0" to="426" dur="0.7s" fill="freeze"/></rect>
+<text x="578" y="46.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">40件</text>
+<line x1="144" y1="74.0" x2="570" y2="74.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="78.0" text-anchor="middle" font-size="14">🥈</text>
+<text x="138" y="68" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00261-01</text>
+<text x="138" y="80" text-anchor="end" font-size="9" fill="#6b7280">卡其色,2XL</text>
+<rect x="144" y="62" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="62" width="287" height="24" rx="5" fill="#C9C9C9" opacity="0.9"><animate attributeName="width" from="0" to="287" dur="0.7s" fill="freeze"/></rect>
+<text x="439" y="78.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">27件</text>
+<line x1="144" y1="106.0" x2="570" y2="106.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="110.0" text-anchor="middle" font-size="14">🥉</text>
+<text x="138" y="100" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00269-01</text>
+<text x="138" y="112" text-anchor="end" font-size="9" fill="#6b7280">黑色 | L</text>
+<rect x="144" y="94" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="94" width="223" height="24" rx="5" fill="#CD853F" opacity="0.9"><animate attributeName="width" from="0" to="223" dur="0.7s" fill="freeze"/></rect>
+<text x="375" y="110.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">21件</text>
+<line x1="144" y1="138.0" x2="570" y2="138.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="142.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">4</tspan></text>
+<text x="138" y="132" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00261-03</text>
+<text x="138" y="144" text-anchor="end" font-size="9" fill="#6b7280">卡其色 | L</text>
+<rect x="144" y="126" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="126" width="202" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="202" dur="0.7s" fill="freeze"/></rect>
+<text x="354" y="142.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">19件</text>
+<line x1="144" y1="170.0" x2="570" y2="170.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="174.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">5</tspan></text>
+<text x="138" y="164" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00261-04</text>
+<text x="138" y="176" text-anchor="end" font-size="9" fill="#6b7280">卡其色 | M</text>
+<rect x="144" y="158" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="158" width="202" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="202" dur="0.7s" fill="freeze"/></rect>
+<text x="354" y="174.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">19件</text>
+<line x1="144" y1="202.0" x2="570" y2="202.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="206.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">6</tspan></text>
+<text x="138" y="196" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">白色</text>
+<text x="138" y="208" text-anchor="end" font-size="9" fill="#6b7280">白色 | M</text>
+<rect x="144" y="190" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="190" width="202" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="202" dur="0.7s" fill="freeze"/></rect>
+<text x="354" y="206.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">19件</text>
+<line x1="144" y1="234.0" x2="570" y2="234.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="238.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">7</tspan></text>
+<text x="138" y="228" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00267-05</text>
+<text x="138" y="240" text-anchor="end" font-size="9" fill="#6b7280">白色 | M</text>
+<rect x="144" y="222" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="222" width="181" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="181" dur="0.7s" fill="freeze"/></rect>
+<text x="333" y="238.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">17件</text>
+<line x1="144" y1="266.0" x2="570" y2="266.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="270.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">8</tspan></text>
+<text x="138" y="260" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00267-02</text>
+<text x="138" y="272" text-anchor="end" font-size="9" fill="#6b7280">粉色 | L</text>
+<rect x="144" y="254" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="254" width="170" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="170" dur="0.7s" fill="freeze"/></rect>
+<text x="322" y="270.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">16件</text>
+<line x1="144" y1="298.0" x2="570" y2="298.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="302.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">9</tspan></text>
+<text x="138" y="292" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">黑色</text>
+<text x="138" y="304" text-anchor="end" font-size="9" fill="#6b7280">黑色 | L</text>
+<rect x="144" y="286" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="286" width="170" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="170" dur="0.7s" fill="freeze"/></rect>
+<text x="322" y="302.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">16件</text>
+<line x1="144" y1="330.0" x2="570" y2="330.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="334.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">10</tspan></text>
+<text x="138" y="324" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">黑色</text>
+<text x="138" y="336" text-anchor="end" font-size="9" fill="#6b7280">黑色 | L</text>
+<rect x="144" y="318" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="318" width="159" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="159" dur="0.7s" fill="freeze"/></rect>
+<text x="311" y="334.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">15件</text>
+<line x1="144" y1="362.0" x2="570" y2="362.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="366.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">11</tspan></text>
+<text x="138" y="356" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">灰色</text>
+<text x="138" y="368" text-anchor="end" font-size="9" fill="#6b7280">灰色 | L</text>
+<rect x="144" y="350" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="350" width="149" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="149" dur="0.7s" fill="freeze"/></rect>
+<text x="301" y="366.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">14件</text>
+<line x1="144" y1="394.0" x2="570" y2="394.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="398.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">12</tspan></text>
+<text x="138" y="388" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00269-05</text>
+<text x="138" y="400" text-anchor="end" font-size="9" fill="#6b7280">黑色,2XL</text>
+<rect x="144" y="382" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="382" width="149" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="149" dur="0.7s" fill="freeze"/></rect>
+<text x="301" y="398.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">14件</text>
+<line x1="144" y1="426.0" x2="570" y2="426.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="430.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">13</tspan></text>
+<text x="138" y="420" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00267-04</text>
+<text x="138" y="432" text-anchor="end" font-size="9" fill="#6b7280">粉色 | S</text>
+<rect x="144" y="414" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="414" width="149" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="149" dur="0.7s" fill="freeze"/></rect>
+<text x="301" y="430.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">14件</text>
+<line x1="144" y1="458.0" x2="570" y2="458.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="462.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">14</tspan></text>
+<text x="138" y="452" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">黑色</text>
+<text x="138" y="464" text-anchor="end" font-size="9" fill="#6b7280">黑色 | M</text>
+<rect x="144" y="446" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="446" width="149" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="149" dur="0.7s" fill="freeze"/></rect>
+<text x="301" y="462.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">14件</text>
+<line x1="144" y1="490.0" x2="570" y2="490.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="494.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">15</tspan></text>
+<text x="138" y="484" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00267-01</text>
+<text x="138" y="496" text-anchor="end" font-size="9" fill="#6b7280">粉色 | XL</text>
+<rect x="144" y="478" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="478" width="138" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="138" dur="0.7s" fill="freeze"/></rect>
+<text x="290" y="494.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">13件</text>
+<line x1="144" y1="522.0" x2="570" y2="522.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="526.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">16</tspan></text>
+<text x="138" y="516" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">灰色</text>
+<text x="138" y="528" text-anchor="end" font-size="9" fill="#6b7280">灰色 | XL</text>
+<rect x="144" y="510" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="510" width="127" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="127" dur="0.7s" fill="freeze"/></rect>
+<text x="279" y="526.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">12件</text>
+<line x1="144" y1="554.0" x2="570" y2="554.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="558.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">17</tspan></text>
+<text x="138" y="548" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00264-02</text>
+<text x="138" y="560" text-anchor="end" font-size="9" fill="#6b7280">軍綠色,2XL</text>
+<rect x="144" y="542" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="542" width="117" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="117" dur="0.7s" fill="freeze"/></rect>
+<text x="269" y="558.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">11件</text>
+<line x1="144" y1="586.0" x2="570" y2="586.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="590.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">18</tspan></text>
+<text x="138" y="580" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">灰色</text>
+<text x="138" y="592" text-anchor="end" font-size="9" fill="#6b7280">灰色 | M</text>
+<rect x="144" y="574" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="574" width="117" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="117" dur="0.7s" fill="freeze"/></rect>
+<text x="269" y="590.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">11件</text>
+<line x1="144" y1="618.0" x2="570" y2="618.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="622.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">19</tspan></text>
+<text x="138" y="612" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00259-01</text>
+<text x="138" y="624" text-anchor="end" font-size="9" fill="#6b7280">卡其色 | L</text>
+<rect x="144" y="606" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="606" width="117" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="117" dur="0.7s" fill="freeze"/></rect>
+<text x="269" y="622.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">11件</text>
+<line x1="144" y1="650.0" x2="570" y2="650.0" stroke="#f3f4f6" stroke-width="1"/>
+<text x="30" y="654.0" text-anchor="middle" font-size="14"><tspan font-size="10" fill="#9ca3af">20</tspan></text>
+<text x="138" y="644" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#1a1a2e">QTW00268-04</text>
+<text x="138" y="656" text-anchor="end" font-size="9" fill="#6b7280">白色 | XL</text>
+<rect x="144" y="638" width="426" height="24" rx="5" fill="#f3f4f6"/>
+<rect x="144" y="638" width="106" height="24" rx="5" fill="#C4B5FD" opacity="0.9"><animate attributeName="width" from="0" to="106" dur="0.7s" fill="freeze"/></rect>
+<text x="258" y="654.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">10件</text>
 </svg></div>
-<div class="ch"><svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif">
-  <rect x="10" y="12" width="700" height="416" rx="8" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
-  <text x="20" y="34" font-size="12" font-weight="600" fill="#374151">💰 销售额排行 Top 15</text>
-  <line x1="140" y1="58.0" x2="600" y2="58.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="58.0" r="10" fill="#fbbf24" opacity="0.9"/>
-  <text x="32" y="62.0" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">1</text>
-  <text x="134" y="62.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00261-01</text>
-  <rect x="140" y="48" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="48" width="460" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="460" dur="0.8s" fill="freeze"/></rect>
-  <text x="606" y="62.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 14,428</text>
-  <line x1="140" y1="86.0" x2="600" y2="86.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="86.0" r="10" fill="#fbbf24" opacity="0.9"/>
-  <text x="32" y="90.0" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">2</text>
-  <text x="134" y="90.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00261-03</text>
-  <rect x="140" y="76" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="76" width="362" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="362" dur="0.8s" fill="freeze"/></rect>
-  <text x="508" y="90.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 11,381</text>
-  <line x1="140" y1="114.0" x2="600" y2="114.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="114.0" r="10" fill="#fbbf24" opacity="0.9"/>
-  <text x="32" y="118.0" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">3</text>
-  <text x="134" y="118.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00261-04</text>
-  <rect x="140" y="104" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="104" width="362" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="362" dur="0.8s" fill="freeze"/></rect>
-  <text x="508" y="118.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 11,381</text>
-  <line x1="140" y1="142.0" x2="600" y2="142.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="142.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="146.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">4</text>
-  <text x="134" y="146.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00269-01</text>
-  <rect x="140" y="132" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="132" width="215" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="215" dur="0.8s" fill="freeze"/></rect>
-  <text x="361" y="146.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 6,769</text>
-  <line x1="140" y1="170.0" x2="600" y2="170.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="170.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="174.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">5</text>
-  <text x="134" y="174.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00267-03</text>
-  <rect x="140" y="160" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="160" width="215" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="215" dur="0.8s" fill="freeze"/></rect>
-  <text x="361" y="174.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 6,762</text>
-  <line x1="140" y1="198.0" x2="600" y2="198.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="198.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="202.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">6</text>
-  <text x="134" y="202.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00259-01</text>
-  <rect x="140" y="188" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="188" width="210" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="210" dur="0.8s" fill="freeze"/></rect>
-  <text x="356" y="202.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 6,589</text>
-  <line x1="140" y1="226.0" x2="600" y2="226.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="226.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="230.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">7</text>
-  <text x="134" y="230.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00261-02</text>
-  <rect x="140" y="216" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="216" width="190" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="190" dur="0.8s" fill="freeze"/></rect>
-  <text x="336" y="230.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 5,990</text>
-  <line x1="140" y1="254.0" x2="600" y2="254.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="254.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="258.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">8</text>
-  <text x="134" y="258.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00261-05</text>
-  <rect x="140" y="244" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="244" width="171" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="171" dur="0.8s" fill="freeze"/></rect>
-  <text x="317" y="258.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 5,391</text>
-  <line x1="140" y1="282.0" x2="600" y2="282.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="282.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="286.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">9</text>
-  <text x="134" y="286.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00258-01</text>
-  <rect x="140" y="272" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="272" width="152" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="152" dur="0.8s" fill="freeze"/></rect>
-  <text x="298" y="286.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 4,792</text>
-  <line x1="140" y1="310.0" x2="600" y2="310.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="310.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="314.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">10</text>
-  <text x="134" y="314.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00261-06</text>
-  <rect x="140" y="300" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="300" width="133" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="133" dur="0.8s" fill="freeze"/></rect>
-  <text x="279" y="314.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 4,193</text>
-  <line x1="140" y1="338.0" x2="600" y2="338.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="338.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="342.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">11</text>
-  <text x="134" y="342.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00264-01</text>
-  <rect x="140" y="328" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="328" width="127" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="127" dur="0.8s" fill="freeze"/></rect>
-  <text x="273" y="342.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 4,000</text>
-  <line x1="140" y1="366.0" x2="600" y2="366.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="366.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="370.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">12</text>
-  <text x="134" y="370.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00269-05</text>
-  <rect x="140" y="356" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="356" width="127" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="127" dur="0.8s" fill="freeze"/></rect>
-  <text x="273" y="370.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 3,986</text>
-  <line x1="140" y1="394.0" x2="600" y2="394.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="394.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="398.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">13</text>
-  <text x="134" y="398.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00268-04</text>
-  <rect x="140" y="384" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="384" width="126" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="126" dur="0.8s" fill="freeze"/></rect>
-  <text x="272" y="398.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 3,980</text>
-  <line x1="140" y1="422.0" x2="600" y2="422.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="422.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="426.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">14</text>
-  <text x="134" y="426.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00268-03</text>
-  <rect x="140" y="412" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="412" width="125" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="125" dur="0.8s" fill="freeze"/></rect>
-  <text x="271" y="426.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 3,934</text>
-  <line x1="140" y1="450.0" x2="600" y2="450.0" stroke="#f3f4f6" stroke-width="1"/>
-  <circle cx="32" cy="450.0" r="10" fill="#e5e7eb" opacity="0.4"/>
-  <text x="32" y="454.0" text-anchor="middle" font-size="10" font-weight="600" fill="#9ca3af">15</text>
-  <text x="134" y="454.0" text-anchor="end" font-size="10" font-family="JetBrains Mono,Consolas,monospace" font-weight="600" fill="#374151">QTW00264-02</text>
-  <rect x="140" y="440" width="460" height="20" rx="4" fill="#f3f4f6"/>
-  <rect x="140" y="440" width="111" height="20" rx="4" fill="#0891b2" opacity="0.85"><animate attributeName="width" from="0" to="111" dur="0.8s" fill="freeze"/></rect>
-  <text x="257" y="454.0" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#374151">NT$ 3,500</text>
+  </div>
+  <div class="col-right">
+    <div class="ch"><svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:280px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif">
+<rect x="4" y="4" width="272" height="232" rx="10" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+<text x="140.0" y="18" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">🎨 色系占比</text>
+<path d="M 140.0 45.0 A 70 70 0 0 1 200.1 79.2 L 170.1 97.1 A 35 35 0 0 0 140.0 80.0 Z" fill="#1a1a2e" stroke="#fff" stroke-width="1.5"/>
+<text x="183.47391275150036" y="42.48843936975972" text-anchor="middle" font-size="9" fill="#374151" font-weight="500">黑色 16%</text>
+<path d="M 200.1 79.2 A 70 70 0 0 1 202.4 146.7 L 171.2 130.9 A 35 35 0 0 0 170.1 97.1 Z" fill="#f3f4f6" stroke="#fff" stroke-width="1.5"/>
+<text x="227.95037149970764" y="116.04497833114304" text-anchor="middle" font-size="9" fill="#374151" font-weight="500">白色 16%</text>
+<path d="M 202.4 146.7 A 70 70 0 0 1 182.1 170.9 L 161.1 142.9 A 35 35 0 0 0 171.2 130.9 Z" fill="#9ca3af" stroke="#fff" stroke-width="1.5"/>
+<text x="207.44437524109836" y="175.52659770707874" text-anchor="middle" font-size="9" fill="#374151" font-weight="500">灰色 7%</text>
+<path d="M 182.1 170.9 A 70 70 0 1 1 140.0 45.0 L 140.0 80.0 A 35 35 0 1 0 161.1 142.9 Z" fill="#d1d5db" stroke="#fff" stroke-width="1.5"/>
+<text x="56.54912158783307" y="146.92760090372482" text-anchor="middle" font-size="9" fill="#374151" font-weight="500">其他 60%</text>
 </svg></div>
-<div class="ch"><svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif">
-  <rect x="50" y="20" width="650" height="190" rx="8" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
-  <text x="60" y="38" font-size="12" font-weight="600" fill="#374151">📈 月度销量趋势</text>
-  <defs>
-    <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#7c3aed"/>
-      <stop offset="100%" stop-color="#a78bfa"/>
-    </linearGradient>
-  </defs>
-  <line x1="60" y1="163" x2="690" y2="163" stroke="#f3f4f6" stroke-width="1"/>
-  <text x="56" y="167" text-anchor="end" font-size="9" fill="#9ca3af">219</text>
-  <line x1="60" y1="125" x2="690" y2="125" stroke="#f3f4f6" stroke-width="1"/>
-  <text x="56" y="129" text-anchor="end" font-size="9" fill="#9ca3af">438</text>
-  <line x1="60" y1="88" x2="690" y2="88" stroke="#f3f4f6" stroke-width="1"/>
-  <text x="56" y="92" text-anchor="end" font-size="9" fill="#9ca3af">657</text>
-  <line x1="60" y1="50" x2="690" y2="50" stroke="#f3f4f6" stroke-width="1"/>
-  <text x="56" y="54" text-anchor="end" font-size="9" fill="#9ca3af">876</text>
-  <rect x="151.0" y="170" width="48.0" height="30" rx="3" fill="url(#barGrad)" opacity="0.9"><animate attributeName="height" from="0" to="30" dur="0.6s" fill="freeze"/><animate attributeName="y" from="200" to="170" dur="0.6s" fill="freeze"/></rect>
-  <text x="175.0" y="166" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#7c3aed">177</text>
-  <text x="175.0" y="216" text-anchor="middle" font-size="9" fill="#059669">NT$50k</text>
-  <text x="175.0" y="230" text-anchor="middle" font-size="10" fill="#6b7280" font-weight="500">04月</text>
-  <rect x="361.0" y="50" width="48.0" height="150" rx="3" fill="url(#barGrad)" opacity="0.9"><animate attributeName="height" from="0" to="150" dur="0.6s" fill="freeze"/><animate attributeName="y" from="200" to="50" dur="0.6s" fill="freeze"/></rect>
-  <text x="385.0" y="46" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#7c3aed">876</text>
-  <text x="385.0" y="216" text-anchor="middle" font-size="9" fill="#059669">NT$246k</text>
-  <text x="385.0" y="230" text-anchor="middle" font-size="10" fill="#6b7280" font-weight="500">05月</text>
-  <rect x="571.0" y="167" width="48.0" height="33" rx="3" fill="url(#barGrad)" opacity="0.9"><animate attributeName="height" from="0" to="33" dur="0.6s" fill="freeze"/><animate attributeName="y" from="200" to="167" dur="0.6s" fill="freeze"/></rect>
-  <text x="595.0" y="163" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#7c3aed">197</text>
-  <text x="595.0" y="216" text-anchor="middle" font-size="9" fill="#059669">NT$53k</text>
-  <text x="595.0" y="230" text-anchor="middle" font-size="10" fill="#6b7280" font-weight="500">06月</text>
+    <div class="ch"><svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:280px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif">
+<rect x="4" y="4" width="272" height="212" rx="10" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+<text x="140.0" y="18" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">📏 尺码销量汇总</text>
+<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0891b2"/><stop offset="100%" stop-color="#67e8f9"/></linearGradient></defs>
+<rect x="52" y="119" width="30" height="63" rx="3" fill="url(#sg)"><animate attributeName="height" from="0" to="63" dur="0.5s" fill="freeze"/></rect>
+<text x="67.0" y="116" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#0891b2">141</text>
+<text x="67.0" y="198" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">S</text>
+<rect x="107" y="46" width="30" height="136" rx="3" fill="url(#sg)"><animate attributeName="height" from="0" to="136" dur="0.5s" fill="freeze"/></rect>
+<text x="122.0" y="43" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#0891b2">301</text>
+<text x="122.0" y="198" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">M</text>
+<rect x="162" y="32" width="30" height="150" rx="3" fill="url(#sg)"><animate attributeName="height" from="0" to="150" dur="0.5s" fill="freeze"/></rect>
+<text x="177.0" y="29" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#0891b2">331</text>
+<text x="177.0" y="198" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">L</text>
+<rect x="217" y="72" width="30" height="110" rx="3" fill="url(#sg)"><animate attributeName="height" from="0" to="110" dur="0.5s" fill="freeze"/></rect>
+<text x="232.0" y="69" text-anchor="middle" font-size="11" font-weight="700" font-family="JetBrains Mono,Consolas,monospace" fill="#0891b2">244</text>
+<text x="232.0" y="198" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">XL</text>
 </svg></div>
+  </div>
+</div>
 
-<div class="ft">货憨憨 API · 自动更新</div>
+<div class="ft">货憨憨 API · 自动更新 · 月度趋势图预留</div>
 </div>
 </body>
 </html>
