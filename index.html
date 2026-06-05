@@ -349,7 +349,10 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="page" id="page-replen">
     <div class="replen-head">
       <h2>📋 补货预测</h2>
-      <span style="font-size:12px;color:var(--muted);font-family:monospace">公式: 建议采购 = 日均销量 × (补货周期 + 安全天数)</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-add" onclick="generateTransitFromReplen()">📦 一键生成在途包裹</button>
+        <span style="font-size:12px;color:var(--muted);font-family:monospace">公式: 建议采购 = 日均销量 × (补货周期 + 安全天数)</span>
+      </div>
     </div>
     <div class="tiers" id="tierCards"></div>
     <div class="search-box" style="margin-bottom:10px"><input type="text" id="replenSearch" placeholder="搜索 SKU / 商品名称 / 规格..." oninput="filterReplen()"></div>
@@ -1275,6 +1278,28 @@ function refreshAll(){
   renderCards(groups,'all','');
   currentFilter='all';currentSearch='';
   document.querySelectorAll('#filterBar .filter-tag').forEach(function(t,i){t.classList.toggle('active',i===0)});
+}
+
+// ====== 一键生成在途包裹 ======
+function generateTransitFromReplen(){
+  var items=[];
+  _replenItems.forEach(function(i){
+    if(i.suggest>0) items.push({sku:i.sku,qty:i.suggest});
+  });
+  if(items.length===0){showToast('没有需要补货的 SKU');return}
+  if(!confirm('将为 '+items.length+' 个SKU创建在途包裹，确认？')) return;
+  var d=new Date();
+  var today=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  var pkgId=uuid();
+  var pkgItems={};
+  items.forEach(function(it){pkgItems[it.sku]=it.qty;});
+  var pkg={id:pkgId,name:today+' 补货',date:today,items:pkgItems};
+  var data=JSON.parse(JSON.stringify(_transitData));
+  data.push(pkg);
+  _transitData=data;
+  saveTransitToGitHub(data);
+  renderTransitTab();
+  showToast('已生成在途包裹: '+items.length+'个SKU · '+items.reduce(function(s,x){return s+x.qty},0)+'件');
 }
 </script>
 </body>
