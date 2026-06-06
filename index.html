@@ -1324,7 +1324,7 @@ function renderCards(groups,filter,search){
       var cls=specState(s);if(getTransit(s.sku)>0) cls+=' transit';return '<span class="spec-tag '+cls+'">'+s.spec+'<i>|</i><span class="n">'+s.stock+'</span></span>';
     }).join('');
     var imgHtml='';
-    if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.style.display=\'none\'" alt="">';
+    if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.remove()" alt="">';
     else imgHtml='<div class="ph">'+getIcon(g.title)+'</div>';
     var dotCls='';
     if(specs.some(function(s){return s.stock===0})) dotCls='critical';
@@ -1395,7 +1395,7 @@ function setSyncStatus(cls,msg){
 function productCell(sku, info, invImg){
   var img = invImg[info.invCode] || '';
   if(img){
-    return '<div class="transit-thumb"><img src="'+img+'" alt="'+info.title+'" title="'+info.title+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'"><span class="transit-thumb-fallback" style="display:none">'+info.title+'</span></div>';
+    return '<div class="transit-thumb"><img src="'+img+'" alt="'+info.title+'" title="'+info.title+'" onerror="this.remove()"><span class="transit-thumb-fallback" style="display:none">'+info.title+'</span></div>';
   }
   return '<span class="transit-thumb-fallback">'+info.title+'</span>';
 }
@@ -1960,7 +1960,7 @@ function renderSuggested(){
     SUGGESTED.new.forEach(function(p){
       var vlist=p.variants.slice(0,4).map(function(v){return v.modelName.split(',')[0]+'×'+v.qty;}).join(' ');
       html+='<div class="np-card">'+
-        (p.itemPic?'<img class="np-img" src="'+p.itemPic+'" onerror="this.style.display=\\'none\\'" loading="lazy">':'')+
+        (p.itemPic?'<img class="np-img" src="'+p.itemPic+'" onerror="this.remove()" loading="lazy">':'')+
         '<div class="np-info">'+
           '<div class="np-name" title="'+p.itemName+'">'+p.itemName+'</div>'+
           '<div class="np-stats"><span class="sug-qty">销量 '+p.total_qty+'</span> · 建议 <b style="color:var(--cyan)">'+p.suggest+'件</b></div>'+
