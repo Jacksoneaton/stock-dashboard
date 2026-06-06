@@ -356,7 +356,7 @@ footer a{color:var(--dim);text-decoration:none}
     <p>请输入访问密码</p>
     <input type="password" id="pwdInput" placeholder="······" autofocus>
     <div class="pwd-err" id="pwdErr"></div>
-    <button class="pwd-btn" onclick="var b=this;b.textContent='验证中...';setTimeout(function(){checkPwd();if(b.textContent==='验证中...')b.textContent='确认';},50)">确认</button>
+    <button class="pwd-btn" onclick="checkPwd()">确认</button>
   </div>
 </div>
 
@@ -1062,23 +1062,16 @@ var PWD_KEY = 'hermes_pwd_ok';
   if(localStorage.getItem(PWD_KEY)==='1') document.getElementById('pwdOverlay').classList.add('hidden');
 })();
 function checkPwd(){
-  var input = document.getElementById('pwdInput');
-  var btn = document.querySelector('.pwd-btn');
-  var err = document.getElementById('pwdErr');
-  var pwd = input.value;
-  // Simple hash: XOR-based checksum (no crypto API needed)
-  var check = 0;
-  for(var i=0;i<pwd.length;i++) check = ((check<<5)-check)+pwd.charCodeAt(i);
-  // Expected checksum for '111plqawsok' = 582367843
-  if(check===754260437 && pwd.length===11){
+  var pwd = document.getElementById('pwdInput').value;
+  // atob: '111plqawsok'
+  if(pwd === atob('MTExcGxxYXdzb2s=')){
     localStorage.setItem(PWD_KEY,'1');
     document.getElementById('pwdOverlay').classList.add('hidden');
   }else{
-    err.textContent='密码错误 ('+pwd.length+'位)';
+    document.getElementById('pwdErr').textContent='密码错误';
     var b=document.querySelector('.pwd-box');b.classList.remove('pwd-shake');void b.offsetWidth;b.classList.add('pwd-shake');
-    if(btn) btn.textContent='确认';
-    input.value='';
-    input.focus();
+    document.getElementById('pwdInput').value='';
+    document.getElementById('pwdInput').focus();
   }
 }
 
