@@ -1347,7 +1347,7 @@ function renderCards(groups,filter,search){
         safetyTotal+=r.safety||0;
       }
     });
-    var clsLabels={BY:'主力',BZ:'多备',CX:'稳定',CY:'慎囤',CZ:'不囤'};
+    var clsLabels={'B-Y':'主力','B-Z':'多备','C-X':'稳定','C-Y':'慎囤','C-Z':'不囤'};
     var clsBadge=bestCls?'<span class="cls-badge '+bestCls+'">'+(clsLabels[bestCls]||bestCls)+'</span>':'';
     var safetyHint=safetyTotal>0?' · 🛡️'+safetyTotal:'';
     html+='<div class="card '+cs+'">'+
