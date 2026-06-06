@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Test</title>
+<style>
+.pwd-overlay{display:flex;position:fixed;inset:0;background:#f5f6f8;z-index:9999;justify-content:center;align-items:center}
+.pwd-overlay.hidden{display:none}
+.pwd-box{text-align:center}
+.pwd-box input{width:260px;padding:14px 20px;font-size:18px;text-align:center;border-radius:12px;border:1px solid #e8e8e8}
+.pwd-btn{background:#0891b2;color:#fff;border:none;padding:10px 40px;border-radius:8px;font-size:14px;cursor:pointer;margin-top:16px}
+.pwd-err{color:#dc2626;font-size:12px;margin-top:12px;min-height:18px}
+</style></head>
+<body>
+<div class="pwd-overlay" id="pwdOverlay">
+  <div class="pwd-box">
+    <h2>Test</h2>
+    <input type="password" id="pwdInput" placeholder="password" onkeydown="if(event.key==='Enter')checkPwd()" autofocus>
+    <div class="pwd-err" id="pwdErr"></div>
+    <button class="pwd-btn" onclick="checkPwd()">Confirm</button>
+  </div>
+</div>
+<h1>Content behind gate</h1>
+<script>
+var PWD_KEY='test_pwd';
+(function(){
+  if(localStorage.getItem(PWD_KEY)==='1') document.getElementById('pwdOverlay').classList.add('hidden');
+})();
+function checkPwd(){
+  var pwd=document.getElementById('pwdInput').value;
+  if(pwd===atob('MTExcGxxYXdzb2s=')){
+    localStorage.setItem(PWD_KEY,'1');
+    document.getElementById('pwdOverlay').classList.add('hidden');
+  }else{
+    document.getElementById('pwdErr').textContent='wrong';
+    document.getElementById('pwdInput').value='';
+  }
+}
+</script>
+</body></html>
