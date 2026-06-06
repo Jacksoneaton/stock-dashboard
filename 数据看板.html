@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 数据看板 · Wearing Notes</title>
+<style>
+:root{--brand:#0052d9;--brand-hover:#366ef4;--brand-light:#f2f3ff;--bg:#eee;--card:#fff;--border:#e8e8e8;--text:rgba(0,0,0,.9);--muted:rgba(0,0,0,.6);--dim:rgba(0,0,0,.4);--shadow:0 1px 10px rgba(0,0,0,.05), 0 4px 5px rgba(0,0,0,.08);--radius:6px;--radius-lg:9px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;font-size:14px;line-height:1.6;color:var(--text);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased}
+.page{padding:20px 24px;max-width:1200px;margin:0 auto}
+.page-header{padding:12px 0 20px;display:flex;align-items:center;justify-content:space-between}
+.page-header h1{font-size:20px;font-weight:600;color:var(--text);letter-spacing:-.01em}
+.page-header .meta{font-size:12px;color:var(--dim)}
+.page-header a{font-size:12px;color:var(--brand);text-decoration:none;padding:4px 14px;border:1px solid var(--brand);border-radius:3px;transition:all .2s}
+.page-header a:hover{background:var(--brand);color:#fff}
+
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.kpi{background:var(--card);border-radius:var(--radius-lg);padding:20px 24px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.kpi-label{font-size:12px;color:var(--dim);margin-bottom:8px}
+.kpi-value{font-size:28px;font-weight:600;color:var(--text);font-family:'SF Mono','Menlo','Consolas',monospace;letter-spacing:-.02em}
+.kpi-value.accent{color:var(--brand)}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.kpi-sub.up{color:#2ba471}.kpi-sub.down{color:#d54941}
+
+/* 2-col content */
+.content{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:var(--card);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden}
+.card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:14px;background:var(--brand);border-radius:2px}
+.card svg{display:block;width:100%}
+
+/* Bottom row */
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+.footer{text-align:center;padding:20px;font-size:11px;color:var(--dim)}
+
+@media(max-width:768px){
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .content,.bottom-row{grid-template-columns:1fr}
+  .page{padding:12px 10px}
+  .kpi-value{font-size:22px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="page-header">
+  <div>
+    <h1>📊 数据看板</h1>
+    <div class="meta">Wearing Notes · 货憨憨数据 · 近3个月</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="dashboard.html">库存看板</a>
+    <a href="排行榜.html">排行榜</a>
+  </div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="kpi-label">总销售额（TWD）</div>
+    <div class="kpi-value accent">NT$ 351,305</div>
+    <div class="kpi-sub">842 笔订单</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">总销量</div>
+    <div class="kpi-value">1259</div>
+    <div class="kpi-sub">件 · 495 个 SKU</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">客单价</div>
+    <div class="kpi-value">NT$ 417</div>
+    <div class="kpi-sub">近7天动销 126 SKU</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">本月销量</div>
+    <div class="kpi-value">206</div>
+    <div class="kpi-sub down">↓ 76% vs 上月</div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="card">
+    <div class="card-title">近30天销量趋势</div>
+    <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif">
+<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0052d9" stop-opacity="0.3"/><stop offset="100%" stop-color="#0052d9" stop-opacity="0.02"/></linearGradient></defs>
+<line x1="50" y1="158" x2="705" y2="158" stroke="#f0f0f0" stroke-width="1"/>
+<text x="44" y="162" text-anchor="end" font-size="9" fill="rgba(0,0,0,.4)">13</text>
+<line x1="50" y1="110" x2="705" y2="110" stroke="#f0f0f0" stroke-width="1"/>
+<text x="44" y="114" text-anchor="end" font-size="9" fill="rgba(0,0,0,.4)">27</text>
+<line x1="50" y1="63" x2="705" y2="63" stroke="#f0f0f0" stroke-width="1"/>
+<text x="44" y="67" text-anchor="end" font-size="9" fill="rgba(0,0,0,.4)">41</text>
+<line x1="50" y1="15" x2="705" y2="15" stroke="#f0f0f0" stroke-width="1"/>
+<text x="44" y="19" text-anchor="end" font-size="9" fill="rgba(0,0,0,.4)">55</text>
+<text x="60" y="217" text-anchor="middle" font-size="9" fill="rgba(0,0,0,.6)">05-08</text>
+<text x="207" y="217" text-anchor="middle" font-size="9" fill="rgba(0,0,0,.6)">05-15</text>
+<text x="354" y="217" text-anchor="middle" font-size="9" fill="rgba(0,0,0,.6)">05-22</text>
+<text x="501" y="217" text-anchor="middle" font-size="9" fill="rgba(0,0,0,.6)">05-29</text>
+<text x="648" y="217" text-anchor="middle" font-size="9" fill="rgba(0,0,0,.6)">06-05</text>
+<text x="669" y="217" text-anchor="middle" font-size="9" fill="rgba(0,0,0,.6)">06-06</text>
+<path d="M60 205 L60 136 L81 91 L102 36 L123 112 L144 85 L165 112 L186 119 L207 116 L228 26 L249 157 L270 64 L291 140 L312 74 L333 105 L354 15 L375 105 L396 60 L417 53 L438 116 L459 98 L480 95 L501 147 L522 123 L543 140 L564 64 L585 43 L606 43 L627 98 L648 119 L669 154 L669 205 Z" fill="url(#ag)"/>
+<path d="M60 205 L60 136 L81 91 L102 36 L123 112 L144 85 L165 112 L186 119 L207 116 L228 26 L249 157 L270 64 L291 140 L312 74 L333 105 L354 15 L375 105 L396 60 L417 53 L438 116 L459 98 L480 95 L501 147 L522 123 L543 140 L564 64 L585 43 L606 43 L627 98 L648 119 L669 154 L669 205 Z" fill="none" stroke="#0052d9" stroke-width="1.5"/>
+<rect x="52" y="136" width="17" height="69" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-08: 20件</title></rect>
+<rect x="73" y="91" width="17" height="114" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-09: 33件</title></rect>
+<rect x="94" y="36" width="17" height="169" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-10: 49件</title></rect>
+<rect x="115" y="112" width="17" height="93" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-11: 27件</title></rect>
+<rect x="136" y="85" width="17" height="120" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-12: 35件</title></rect>
+<rect x="157" y="112" width="17" height="93" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-13: 27件</title></rect>
+<rect x="178" y="119" width="17" height="86" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-14: 25件</title></rect>
+<rect x="199" y="116" width="17" height="89" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-15: 26件</title></rect>
+<rect x="220" y="26" width="17" height="179" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-16: 52件</title></rect>
+<rect x="241" y="157" width="17" height="48" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-17: 14件</title></rect>
+<rect x="262" y="64" width="17" height="141" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-18: 41件</title></rect>
+<rect x="283" y="140" width="17" height="65" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-19: 19件</title></rect>
+<rect x="304" y="74" width="17" height="131" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-20: 38件</title></rect>
+<rect x="325" y="105" width="17" height="100" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-21: 29件</title></rect>
+<rect x="346" y="15" width="17" height="190" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-22: 55件</title></rect>
+<rect x="367" y="105" width="17" height="100" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-23: 29件</title></rect>
+<rect x="388" y="60" width="17" height="145" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-24: 42件</title></rect>
+<rect x="409" y="53" width="17" height="152" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-25: 44件</title></rect>
+<rect x="430" y="116" width="17" height="89" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-26: 26件</title></rect>
+<rect x="451" y="98" width="17" height="107" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-27: 31件</title></rect>
+<rect x="472" y="95" width="17" height="110" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-28: 32件</title></rect>
+<rect x="493" y="147" width="17" height="58" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-29: 17件</title></rect>
+<rect x="514" y="123" width="17" height="82" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-30: 24件</title></rect>
+<rect x="535" y="140" width="17" height="65" rx="1" fill="#0052d9" opacity="0.7"><title>2026-05-31: 19件</title></rect>
+<rect x="556" y="64" width="17" height="141" rx="1" fill="#0052d9" opacity="0.7"><title>2026-06-01: 41件</title></rect>
+<rect x="577" y="43" width="17" height="162" rx="1" fill="#0052d9" opacity="0.7"><title>2026-06-02: 47件</title></rect>
+<rect x="598" y="43" width="17" height="162" rx="1" fill="#0052d9" opacity="0.7"><title>2026-06-03: 47件</title></rect>
+<rect x="619" y="98" width="17" height="107" rx="1" fill="#0052d9" opacity="0.7"><title>2026-06-04: 31件</title></rect>
+<rect x="640" y="119" width="17" height="86" rx="1" fill="#0052d9" opacity="0.7"><title>2026-06-05: 25件</title></rect>
+<rect x="661" y="154" width="17" height="51" rx="1" fill="#0052d9" opacity="0.7"><title>2026-06-06: 15件</title></rect>
+</svg>
+  </div>
+  <div class="card">
+    <div class="card-title">订单状态分布</div>
+    <div style="text-align:center"><svg viewBox="0 0 260 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif">
+<path d="M130.0 45.0 A60 60 0 1 1 82.3 141.5 L106.2 123.2 A30 30 0 1 0 130.0 75.0 Z" fill="#0052d9" stroke="#fff" stroke-width="1.5"/>
+<text x="196.34312183016397" y="140.7809424182408" text-anchor="middle" font-size="8" fill="rgba(0,0,0,.6)">已完成 65%</text>
+<path d="M82.3 141.5 A60 60 0 0 1 71.0 94.1 L100.5 99.5 A30 30 0 0 0 106.2 123.2 Z" fill="#d54941" stroke="#fff" stroke-width="1.5"/>
+<text x="58.03496895160207" y="125.23468323477752" text-anchor="middle" font-size="8" fill="rgba(0,0,0,.6)">已取消 13%</text>
+<path d="M71.0 94.1 A60 60 0 0 1 82.3 68.5 L106.2 86.8 A30 30 0 0 0 100.5 99.5 Z" fill="#e37318" stroke="#fff" stroke-width="1.5"/>
+<text x="62.36772272424054" y="77.96876508541831" text-anchor="middle" font-size="8" fill="rgba(0,0,0,.6)">待收货 7%</text>
+<path d="M82.3 68.5 A60 60 0 0 1 103.2 51.3 L116.6 78.2 A30 30 0 0 0 106.2 86.8 Z" fill="#366ef4" stroke="#fff" stroke-width="1.5"/>
+<text x="82.88170131666442" y="50.93980433622774" text-anchor="middle" font-size="8" fill="rgba(0,0,0,.6)">待出货 7%</text>
+<path d="M103.2 51.3 A60 60 0 0 1 128.2 45.0 L129.1 75.0 A30 30 0 0 0 116.6 78.2 Z" fill="#2ba471" stroke="#fff" stroke-width="1.5"/>
+<text x="111.9608854087544" y="36.23238651896031" text-anchor="middle" font-size="8" fill="rgba(0,0,0,.6)">已出货 7%</text>
+<path d="M128.2 45.0 A60 60 0 0 1 130.0 45.0 L130.0 75.0 A30 30 0 0 0 129.1 75.0 Z" fill="#8b8b8b" stroke="#fff" stroke-width="1.5"/>
+<text x="130.0" y="103.0" text-anchor="middle" font-size="9" fill="rgba(0,0,0,.4)">订单</text>
+<text x="130.0" y="117.0" text-anchor="middle" font-size="14" font-weight="600" fill="rgba(0,0,0,.9)">842</text>
+</svg></div>
+  </div>
+</div>
+
+<div class="bottom-row">
+  <div class="card">
+    <div class="card-title">TOP10 热销商品</div>
+    <svg viewBox="0 0 420 286" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif">
+<line x1="126" y1="18.0" x2="350" y2="18.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="22.0" text-anchor="middle" font-size="11" font-weight="600" fill="#0052d9">1</text>
+<text x="122" y="16" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00267-03</text>
+<text x="122" y="26" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">粉色 | M 46-53KG</text>
+<rect x="126" y="8" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="8" width="224" height="20" rx="3" fill="##0052d9" opacity="0.85"><animate attributeName="width" from="0" to="224" dur="0.6s" fill="freeze"/></rect>
+<text x="356" y="22.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">40件</text>
+<line x1="126" y1="46.0" x2="350" y2="46.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="50.0" text-anchor="middle" font-size="11" font-weight="600" fill="#0052d9">2</text>
+<text x="122" y="44" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00261-01</text>
+<text x="122" y="54" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">卡其色 | 2XL</text>
+<rect x="126" y="36" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="36" width="151" height="20" rx="3" fill="##0052d9" opacity="0.85"><animate attributeName="width" from="0" to="151" dur="0.6s" fill="freeze"/></rect>
+<text x="283" y="50.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">27件</text>
+<line x1="126" y1="74.0" x2="350" y2="74.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="78.0" text-anchor="middle" font-size="11" font-weight="600" fill="#0052d9">3</text>
+<text x="122" y="72" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00269-01</text>
+<text x="122" y="82" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">黑色 | L</text>
+<rect x="126" y="64" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="64" width="117" height="20" rx="3" fill="##0052d9" opacity="0.85"><animate attributeName="width" from="0" to="117" dur="0.6s" fill="freeze"/></rect>
+<text x="249" y="78.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">21件</text>
+<line x1="126" y1="102.0" x2="350" y2="102.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="106.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">4</text>
+<text x="122" y="100" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00261-03</text>
+<text x="122" y="110" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">卡其色 | L</text>
+<rect x="126" y="92" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="92" width="112" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="112" dur="0.6s" fill="freeze"/></rect>
+<text x="244" y="106.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">20件</text>
+<line x1="126" y1="130.0" x2="350" y2="130.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="134.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">5</text>
+<text x="122" y="128" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00261-04</text>
+<text x="122" y="138" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">卡其色 | M</text>
+<rect x="126" y="120" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="120" width="106" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="106" dur="0.6s" fill="freeze"/></rect>
+<text x="238" y="134.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">19件</text>
+<line x1="126" y1="158.0" x2="350" y2="158.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="162.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">6</text>
+<text x="122" y="156" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">白色</text>
+<text x="122" y="166" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">白色 | M</text>
+<rect x="126" y="148" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="148" width="106" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="106" dur="0.6s" fill="freeze"/></rect>
+<text x="238" y="162.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">19件</text>
+<line x1="126" y1="186.0" x2="350" y2="186.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="190.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">7</text>
+<text x="122" y="184" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00267-02</text>
+<text x="122" y="194" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">粉色 | L 53-60KG</text>
+<rect x="126" y="176" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="176" width="95" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="95" dur="0.6s" fill="freeze"/></rect>
+<text x="227" y="190.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">17件</text>
+<line x1="126" y1="214.0" x2="350" y2="214.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="218.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">8</text>
+<text x="122" y="212" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">黑色</text>
+<text x="122" y="222" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">黑色 | L</text>
+<rect x="126" y="204" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="204" width="95" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="95" dur="0.6s" fill="freeze"/></rect>
+<text x="227" y="218.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">17件</text>
+<line x1="126" y1="242.0" x2="350" y2="242.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="246.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">9</text>
+<text x="122" y="240" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00267-05</text>
+<text x="122" y="250" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">米白色 | M 46-53KG</text>
+<rect x="126" y="232" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="232" width="95" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="95" dur="0.6s" fill="freeze"/></rect>
+<text x="227" y="246.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">17件</text>
+<line x1="126" y1="270.0" x2="350" y2="270.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="274.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">10</text>
+<text x="122" y="268" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">黑色</text>
+<text x="122" y="278" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">黑色 | L 建議50.0</text>
+<rect x="126" y="260" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="260" width="84" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="84" dur="0.6s" fill="freeze"/></rect>
+<text x="216" y="274.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">15件</text>
+</svg>
+  </div>
+  <div class="card">
+    <div class="card-title">TOP10 销售额贡献</div>
+    <svg viewBox="0 0 420 286" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif">
+<line x1="126" y1="18.0" x2="350" y2="18.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="22.0" text-anchor="middle" font-size="11" font-weight="600" fill="#0052d9">1</text>
+<text x="122" y="16" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00261-01</text>
+<text x="122" y="26" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">卡其色 | 2XL</text>
+<rect x="126" y="8" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="8" width="224" height="20" rx="3" fill="##0052d9" opacity="0.85"><animate attributeName="width" from="0" to="224" dur="0.6s" fill="freeze"/></rect>
+<text x="356" y="22.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">14428.0件</text>
+<line x1="126" y1="46.0" x2="350" y2="46.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="50.0" text-anchor="middle" font-size="11" font-weight="600" fill="#0052d9">2</text>
+<text x="122" y="44" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00261-03</text>
+<text x="122" y="54" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">卡其色 | L</text>
+<rect x="126" y="36" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="36" width="185" height="20" rx="3" fill="##0052d9" opacity="0.85"><animate attributeName="width" from="0" to="185" dur="0.6s" fill="freeze"/></rect>
+<text x="317" y="50.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">11980.0件</text>
+<line x1="126" y1="74.0" x2="350" y2="74.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="78.0" text-anchor="middle" font-size="11" font-weight="600" fill="#0052d9">3</text>
+<text x="122" y="72" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00261-04</text>
+<text x="122" y="82" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">卡其色 | M</text>
+<rect x="126" y="64" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="64" width="176" height="20" rx="3" fill="##0052d9" opacity="0.85"><animate attributeName="width" from="0" to="176" dur="0.6s" fill="freeze"/></rect>
+<text x="308" y="78.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">11381.0件</text>
+<line x1="126" y1="102.0" x2="350" y2="102.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="106.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">4</text>
+<text x="122" y="100" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00269-01</text>
+<text x="122" y="110" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">黑色 | L</text>
+<rect x="126" y="92" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="92" width="105" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="105" dur="0.6s" fill="freeze"/></rect>
+<text x="237" y="106.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">6769.0件</text>
+<line x1="126" y1="130.0" x2="350" y2="130.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="134.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">5</text>
+<text x="122" y="128" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00267-03</text>
+<text x="122" y="138" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">粉色 | M 46-53KG</text>
+<rect x="126" y="120" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="120" width="104" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="104" dur="0.6s" fill="freeze"/></rect>
+<text x="236" y="134.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">6762.0件</text>
+<line x1="126" y1="158.0" x2="350" y2="158.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="162.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">6</text>
+<text x="122" y="156" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00259-01</text>
+<text x="122" y="166" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">卡其色 | L</text>
+<rect x="126" y="148" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="148" width="102" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="102" dur="0.6s" fill="freeze"/></rect>
+<text x="234" y="162.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">6589.0件</text>
+<line x1="126" y1="186.0" x2="350" y2="186.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="190.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">7</text>
+<text x="122" y="184" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00261-02</text>
+<text x="122" y="194" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">卡其色 | XL</text>
+<rect x="126" y="176" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="176" width="92" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="92" dur="0.6s" fill="freeze"/></rect>
+<text x="224" y="190.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">5990.0件</text>
+<line x1="126" y1="214.0" x2="350" y2="214.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="218.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">8</text>
+<text x="122" y="212" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00261-05</text>
+<text x="122" y="222" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">卡其色 | S</text>
+<rect x="126" y="204" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="204" width="83" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="83" dur="0.6s" fill="freeze"/></rect>
+<text x="215" y="218.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">5391.0件</text>
+<line x1="126" y1="242.0" x2="350" y2="242.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="246.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">9</text>
+<text x="122" y="240" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00258-01</text>
+<text x="122" y="250" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">卡其色 | M</text>
+<rect x="126" y="232" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="232" width="74" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="74" dur="0.6s" fill="freeze"/></rect>
+<text x="206" y="246.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">4792.0件</text>
+<line x1="126" y1="270.0" x2="350" y2="270.0" stroke="#f5f5f5" stroke-width="1"/>
+<text x="18" y="274.0" text-anchor="middle" font-size="9" font-weight="600" fill="rgba(0,0,0,.4)">10</text>
+<text x="122" y="268" text-anchor="end" font-size="10" font-weight="500" fill="rgba(0,0,0,.9)">QTW00264-01</text>
+<text x="122" y="278" text-anchor="end" font-size="8" fill="rgba(0,0,0,.4)">軍綠色 | XL</text>
+<rect x="126" y="260" width="224" height="20" rx="3" fill="#f0f0f0"/>
+<rect x="126" y="260" width="69" height="20" rx="3" fill="#e8e8ff" opacity="0.85"><animate attributeName="width" from="0" to="69" dur="0.6s" fill="freeze"/></rect>
+<text x="201" y="274.0" font-size="11" font-weight="600" fill="rgba(0,0,0,.9)">4500.0件</text>
+</svg>
+  </div>
+</div>
+
+<div class="footer">数据源：货憨憨 API · 自动更新 · 2026-06-06 17:30</div>
+</div>
+</body>
+</html>
