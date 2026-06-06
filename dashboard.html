@@ -1054,17 +1054,24 @@ async function checkPwd(){
 async function sha256(m){var h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(m));return Array.from(new Uint8Array(h)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');}
 
 // ====== Tab ======
+function switchTab(page){
+  document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+  document.querySelector('.tab[data-page="'+page+'"]').classList.add('active');
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
+  document.getElementById('page-'+page).classList.add('active');
+  localStorage.setItem('activeTab',page);
+  if(page==='transit') renderTransitTab();
+  if(page==='replen') renderReplenTab();
+  if(page==='dataviz') return;
+}
 document.querySelectorAll('.tab').forEach(function(t){
-  t.addEventListener('click',function(){
-    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
-    t.classList.add('active');
-    document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
-    document.getElementById('page-'+t.dataset.page).classList.add('active');
-    if(t.dataset.page==='transit') renderTransitTab();
-    if(t.dataset.page==='replen') renderReplenTab();
-    if(t.dataset.page==='dataviz') return; // static content, no render needed
-  });
+  t.addEventListener('click',function(){ switchTab(t.dataset.page); });
 });
+// Restore last tab on load
+(function(){
+  var last = localStorage.getItem('activeTab');
+  if(last && document.querySelector('.tab[data-page="'+last+'"]')) switchTab(last);
+})();
 
 // ====== 在途管理 (GitHub + 包裹分组) ======
 var TRANSIT_API = 'https://api.github.com/repos/Jacksoneaton/stock-dashboard/contents/in_transit.json';
