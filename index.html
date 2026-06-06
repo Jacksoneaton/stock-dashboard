@@ -85,6 +85,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .cls-badge.CX{background:rgba(5,150,105,.08);color:var(--green)}
 .cls-badge.CY{background:rgba(107,114,128,.08);color:var(--muted)}
 .cls-badge.CZ{background:rgba(107,114,128,.05);color:var(--dim)}
+.cls-legend{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10px;color:var(--muted);margin-bottom:10px;padding:6px 10px;background:rgba(0,0,0,.02);border-radius:6px}
+.cls-legend-title{font-weight:600;margin-right:4px}
 @keyframes transit-glow{0%,100%{box-shadow:0 0 4px rgba(8,145,178,.3),0 0 10px rgba(8,145,178,.1)}50%{box-shadow:0 0 8px rgba(8,145,178,.6),0 0 20px rgba(8,145,178,.2)}}
 .card-footer{display:flex;align-items:center;gap:10px;margin-top:2px;font-size:10px}
 .total-stock{color:var(--muted);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
@@ -374,6 +376,14 @@ footer a{color:var(--dim);text-decoration:none}
   <!-- ═══ 库存看板 ═══ -->
   <div class="page active" id="page-dash">
     <div class="stats-row" id="statsRow"></div>
+    <div class="cls-legend" id="clsLegend" style="display:none">
+      <span class="cls-legend-title">分类说明：</span>
+      <span class="cls-badge BY">B-Y</span> 主力·波动中
+      <span class="cls-badge BZ">B-Z</span> 主力·波动大·多备安全库存
+      <span class="cls-badge CX">C-X</span> 低销·稳定
+      <span class="cls-badge CY">C-Y</span> 低销·慎囤
+      <span class="cls-badge CZ">C-Z</span> 不建议囤·卖完再进
+    </div>
     <div class="chart-row" id="chartRow">
       <div class="chart-card"><h3>🚨 急补货 Top 10</h3><div class="bar-list" id="restockBars"></div></div>
       <div class="chart-card"><h3>🔥 销售 Top 10</h3><div class="bar-list" id="salesBars"></div></div>
@@ -1266,6 +1276,8 @@ function renderDashboard(groups){
     '<div class="stat"><div class="num" style="color:var(--yellow)">'+low+'</div><div class="lbl">低库存</div></div>'+
     '<div class="stat"><div class="num" style="color:var(--green)">'+(total-out-low)+'</div><div class="lbl">正常</div></div>'+
     '<div class="stat"><div class="num" style="color:var(--yellow)">'+tran+'</div><div class="lbl">🚚 在途</div></div>';
+  // Show classification legend if any DATA has cls
+  if(DATA.some(function(d){return d.cls;})) document.getElementById('clsLegend').style.display='flex';
   document.getElementById('filterBar').innerHTML=
     '<div class="filter-tag active" onclick="setFilter(this,\'all\')">全部 '+total+'</div>'+
     '<div class="filter-tag" onclick="setFilter(this,\'out\')">🔴 缺货 '+out+'</div>'+
