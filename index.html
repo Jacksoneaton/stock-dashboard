@@ -308,6 +308,8 @@ footer a{color:var(--dim);text-decoration:none}
 .pwd-box input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(8,145,178,.08)}
 .pwd-box .pwd-err{color:var(--red);font-size:12px;margin-top:12px;min-height:18px}
 .pwd-box .pwd-shake{animation:pwdShake .4s ease}
+.pwd-btn{background:var(--cyan);color:#fff;border:none;padding:10px 40px;border-radius:8px;font-size:14px;cursor:pointer;margin-top:16px}
+.pwd-btn:hover{opacity:0.85}
 @keyframes pwdShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 
 /* ═══ 数据看板 ═══ */
@@ -354,6 +356,7 @@ footer a{color:var(--dim);text-decoration:none}
     <p>请输入访问密码</p>
     <input type="password" id="pwdInput" placeholder="······" onkeydown="if(event.key==='Enter')checkPwd()" autofocus>
     <div class="pwd-err" id="pwdErr"></div>
+    <button class="pwd-btn" onclick="checkPwd()">确认</button>
   </div>
 </div>
 
@@ -476,12 +479,12 @@ footer a{color:var(--dim);text-decoration:none}
 <!-- ═══ 数据看板 ═══ -->
 <div class="page" id="page-dataviz">
 <div class="kpi">
-  <div class="k"><div class="kl">总销售额</div><div class="kv ac">NT$ 376,675</div><div class="ks">842 笔订单</div></div>
-  <div class="k"><div class="kl">总销量</div><div class="kv">1,338</div><div class="ks">531 SKU 动销</div></div>
-  <div class="k"><div class="kl">客单价</div><div class="kv">NT$ 447</div><div class="ks">件均 NT$ 282</div></div>
-  <div class="k"><div class="kl">本月销量</div><div class="kv">209</div><div class="ks">↓ 77% vs上月</div></div>
+  <div class="k"><div class="kl">总销售额</div><div class="kv ac">NT$ 383,306</div><div class="ks">860 笔订单</div></div>
+  <div class="k"><div class="kl">总销量</div><div class="kv">1,362</div><div class="ks">534 SKU 动销</div></div>
+  <div class="k"><div class="kl">客单价</div><div class="kv">NT$ 446</div><div class="ks">件均 NT$ 281</div></div>
+  <div class="k"><div class="kl">本月销量</div><div class="kv">233</div><div class="ks">↓ 75% vs上月</div></div>
 </div>
-<div class="sbar"><span class="sb">已完成 <b>544</b></span> <span class="sb">已取消 <b>112</b></span> <span class="sb">已出货 <b>58</b></span> <span class="sb">待收货 <b>63</b></span> <span class="sb">待出货 <b>61</b></span> <span class="sb">退货中 <b>4</b></span></div>
+<div class="sbar"><span class="sb">已完成 <b>557</b></span> <span class="sb">已取消 <b>113</b></span> <span class="sb">已出货 <b>57</b></span> <span class="sb">待收货 <b>59</b></span> <span class="sb">待出货 <b>67</b></span> <span class="sb">退货中 <b>4</b></span></div>
 <div class="row">
   <div class="card"><h3>📈 近30天销量趋势</h3><svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="width:100%">
 <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0052d9" stop-opacity="0.25"/><stop offset="100%" stop-color="#0052d9" stop-opacity="0.02"/></linearGradient></defs>
@@ -527,10 +530,10 @@ footer a{color:var(--dim);text-decoration:none}
 <rect x="608.5" y="84" width="17" height="101" rx="1" fill="#0052d9" opacity="0.6"><title>2026-06-04: 32件</title></rect>
 <rect x="629.5" y="106" width="17" height="79" rx="1" fill="#0052d9" opacity="0.6"><title>2026-06-05: 25件</title></rect>
 <text x="638" y="197" text-anchor="middle" font-size="8" fill="rgba(0,0,0,.6)">06-05</text>
-<rect x="650.5" y="138" width="17" height="47" rx="1" fill="#0052d9" opacity="0.6"><title>2026-06-06: 15件</title></rect>
+<rect x="650.5" y="61" width="17" height="124" rx="1" fill="#0052d9" opacity="0.6"><title>2026-06-06: 39件</title></rect>
 <text x="659" y="197" text-anchor="middle" font-size="8" fill="rgba(0,0,0,.6)">06-06</text>
-<path d="M50 185 L50 109 L71 68 L92 14 L113 87 L134 68 L155 90 L176 103 L197 96 L218 17 L239 138 L260 55 L281 122 L302 58 L323 87 L344 10 L365 90 L386 49 L407 39 L428 103 L449 87 L470 80 L491 125 L512 109 L533 125 L554 52 L575 33 L596 36 L617 84 L638 106 L659 138 L659 185 Z" fill="url(#ag)"/>
-<path d="M50 109 L50 109 L71 68 L92 14 L113 87 L134 68 L155 90 L176 103 L197 96 L218 17 L239 138 L260 55 L281 122 L302 58 L323 87 L344 10 L365 90 L386 49 L407 39 L428 103 L449 87 L470 80 L491 125 L512 109 L533 125 L554 52 L575 33 L596 36 L617 84 L638 106 L659 138" fill="none" stroke="#0052d9" stroke-width="1.5"/>
+<path d="M50 185 L50 109 L71 68 L92 14 L113 87 L134 68 L155 90 L176 103 L197 96 L218 17 L239 138 L260 55 L281 122 L302 58 L323 87 L344 10 L365 90 L386 49 L407 39 L428 103 L449 87 L470 80 L491 125 L512 109 L533 125 L554 52 L575 33 L596 36 L617 84 L638 106 L659 61 L659 185 Z" fill="url(#ag)"/>
+<path d="M50 109 L50 109 L71 68 L92 14 L113 87 L134 68 L155 90 L176 103 L197 96 L218 17 L239 138 L260 55 L281 122 L302 58 L323 87 L344 10 L365 90 L386 49 L407 39 L428 103 L449 87 L470 80 L491 125 L512 109 L533 125 L554 52 L575 33 L596 36 L617 84 L638 106 L659 61" fill="none" stroke="#0052d9" stroke-width="1.5"/>
 </svg></div>
   <div class="card"><h3>🏆 热销商品 TOP30</h3><div class="pc-grid"><div class="pc">
   <div class="pc-rank">#1</div>
@@ -538,7 +541,7 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="pc-info">
     <div class="pc-code">QTW00267-03</div>
     <div class="pc-spec">粉色,M 46-53kg</div>
-    <div class="pc-qty">44 件</div>
+    <div class="pc-qty">46 件</div>
   </div>
 </div>
 <div class="pc">
@@ -556,7 +559,7 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="pc-info">
     <div class="pc-code">QTW00269-01</div>
     <div class="pc-spec">黑色,L</div>
-    <div class="pc-qty">30 件</div>
+    <div class="pc-qty">31 件</div>
   </div>
 </div>
 <div class="pc">
@@ -565,7 +568,7 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="pc-info">
     <div class="pc-code">QTW00261-01</div>
     <div class="pc-spec">卡其色,2XL</div>
-    <div class="pc-qty">29 件</div>
+    <div class="pc-qty">30 件</div>
   </div>
 </div>
 <div class="pc">
@@ -581,17 +584,17 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="pc-rank">#6</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260j-mkchruc3i0w097.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
-    <div class="pc-code">QTW00267-02</div>
-    <div class="pc-spec">粉色,L 53-60kg</div>
-    <div class="pc-qty">20 件</div>
+    <div class="pc-code">QTW00267-05</div>
+    <div class="pc-spec">米白色,M 46-53kg</div>
+    <div class="pc-qty">21 件</div>
   </div>
 </div>
 <div class="pc">
   <div class="pc-rank">#7</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260j-mkchruc3i0w097.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
-    <div class="pc-code">QTW00267-05</div>
-    <div class="pc-spec">米白色,M 46-53kg</div>
+    <div class="pc-code">QTW00267-02</div>
+    <div class="pc-spec">粉色,L 53-60kg</div>
     <div class="pc-qty">20 件</div>
   </div>
 </div>
@@ -615,6 +618,15 @@ footer a{color:var(--dim);text-decoration:none}
 </div>
 <div class="pc">
   <div class="pc-rank">#10</div>
+  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-825zn-mk8aqoel6tjcff.webp" onerror="this.style.display='none'" loading="lazy" />
+  <div class="pc-info">
+    <div class="pc-code">QTW00268-04</div>
+    <div class="pc-spec">白色,XL 建議60.0-65.0kg</div>
+    <div class="pc-qty">15 件</div>
+  </div>
+</div>
+<div class="pc">
+  <div class="pc-rank">#11</div>
   <img class="pc-img" src="https://cf.shopee.tw/file/sg-11134202-82627-mk17njr1sa9u85_tn" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">黑色,L 建議50.0-57.5kg</div>
@@ -623,7 +635,7 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#11</div>
+  <div class="pc-rank">#12</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260j-mkchruc3i0w097.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">QTW00267-01</div>
@@ -632,16 +644,16 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#12</div>
-  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-825zn-mk8aqoel6tjcff.webp" onerror="this.style.display='none'" loading="lazy" />
+  <div class="pc-rank">#13</div>
+  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-82601-mk9plj3livb868@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
-    <div class="pc-code">QTW00268-04</div>
-    <div class="pc-spec">白色,XL 建議60.0-65.0kg</div>
+    <div class="pc-code">QTW00264-02</div>
+    <div class="pc-spec">軍綠色,2XL</div>
     <div class="pc-qty">14 件</div>
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#13</div>
+  <div class="pc-rank">#14</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-825zn-mk8aqoel6tjcff.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">QTW00268-05</div>
@@ -650,7 +662,7 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#14</div>
+  <div class="pc-rank">#15</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260j-mkchruc3i0w097.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">QTW00267-04</div>
@@ -659,7 +671,7 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#15</div>
+  <div class="pc-rank">#16</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/tw-11134207-820lg-mkky9w4uabrafd.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">QTW00275-01</div>
@@ -668,21 +680,12 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#16</div>
+  <div class="pc-rank">#17</div>
   <img class="pc-img" src="https://cf.shopee.tw/file/sg-11134202-81ztl-mmldnaotjojz67_tn" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">白色,M</div>
     <div class="pc-spec">白色=m</div>
     <div class="pc-qty">13 件</div>
-  </div>
-</div>
-<div class="pc">
-  <div class="pc-rank">#17</div>
-  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-82601-mk9plj3livb868@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
-  <div class="pc-info">
-    <div class="pc-code">QTW00264-02</div>
-    <div class="pc-spec">軍綠色,2XL</div>
-    <div class="pc-qty">12 件</div>
   </div>
 </div>
 <div class="pc">
@@ -696,6 +699,15 @@ footer a{color:var(--dim);text-decoration:none}
 </div>
 <div class="pc">
   <div class="pc-rank">#19</div>
+  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260c-mk9plj63p3ba99@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
+  <div class="pc-info">
+    <div class="pc-code">QTW00261-06</div>
+    <div class="pc-spec">卡其色,3XL</div>
+    <div class="pc-qty">11 件</div>
+  </div>
+</div>
+<div class="pc">
+  <div class="pc-rank">#20</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-82601-mk9plj3livb868@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">QTW00264-01</div>
@@ -704,7 +716,7 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#20</div>
+  <div class="pc-rank">#21</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260c-mk9plj63p3ba99@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">QTW00261-05</div>
@@ -713,16 +725,25 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#21</div>
-  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260c-mk9plj63p3ba99@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
+  <div class="pc-rank">#22</div>
+  <img class="pc-img" src="https://cf.shopee.tw/file/sg-11134202-8261a-mkchs8e9fbba8f_tn" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
-    <div class="pc-code">QTW00261-06</div>
-    <div class="pc-spec">卡其色,3XL</div>
+    <div class="pc-code">灰色,XL 60-68kg</div>
+    <div class="pc-spec">QTW00277-04</div>
     <div class="pc-qty">10 件</div>
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#22</div>
+  <div class="pc-rank">#23</div>
+  <img class="pc-img" src="https://cf.shopee.tw/file/sg-11134202-8262b-mjy5geejlekm3d_tn" onerror="this.style.display='none'" loading="lazy" />
+  <div class="pc-info">
+    <div class="pc-code">淺綠色,XL 57.5-65.0KG</div>
+    <div class="pc-spec">QTW00276-04</div>
+    <div class="pc-qty">10 件</div>
+  </div>
+</div>
+<div class="pc">
+  <div class="pc-rank">#24</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-825zn-mk8aqoel6tjcff.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">QTW00268-03</div>
@@ -731,16 +752,7 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#23</div>
-  <img class="pc-img" src="https://cf.shopee.tw/file/sg-11134202-8261a-mkchs8e9fbba8f_tn" onerror="this.style.display='none'" loading="lazy" />
-  <div class="pc-info">
-    <div class="pc-code">灰色,XL 60-68kg</div>
-    <div class="pc-spec">灰色=xl</div>
-    <div class="pc-qty">9 件</div>
-  </div>
-</div>
-<div class="pc">
-  <div class="pc-rank">#24</div>
+  <div class="pc-rank">#25</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-825zn-mk8aqoel6tjcff.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">QTW00268-02</div>
@@ -749,20 +761,11 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <div class="pc">
-  <div class="pc-rank">#25</div>
+  <div class="pc-rank">#26</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-82608-mk9plhral7nsfc.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="pc-info">
     <div class="pc-code">QTW00274-02</div>
     <div class="pc-spec">迷彩,M</div>
-    <div class="pc-qty">9 件</div>
-  </div>
-</div>
-<div class="pc">
-  <div class="pc-rank">#26</div>
-  <img class="pc-img" src="https://cf.shopee.tw/file/sg-11134202-8262b-mjy5geejlekm3d_tn" onerror="this.style.display='none'" loading="lazy" />
-  <div class="pc-info">
-    <div class="pc-code">淺綠色,XL 57.5-65.0斤</div>
-    <div class="pc-spec">淺綠色=XL 57.5-65.0斤</div>
     <div class="pc-qty">9 件</div>
   </div>
 </div>
@@ -824,7 +827,7 @@ footer a{color:var(--dim);text-decoration:none}
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260c-mk9plj63p3ba99@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
     <div class="rc-code">QTW00261-01</div>
-    <div class="rc-amt">NT$ 15,626</div>
+    <div class="rc-amt">NT$ 16,225</div>
   </div>
 </div>
 <div class="rc">
@@ -840,7 +843,7 @@ footer a{color:var(--dim);text-decoration:none}
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260d-mkb09xmifvnp70.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
     <div class="rc-code">QTW00269-01</div>
-    <div class="rc-amt">NT$ 9,442</div>
+    <div class="rc-amt">NT$ 9,781</div>
   </div>
 </div>
 <div class="rc">
@@ -848,14 +851,14 @@ footer a{color:var(--dim);text-decoration:none}
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260j-mkchruc3i0w097.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
     <div class="rc-code">QTW00267-03</div>
-    <div class="rc-amt">NT$ 7,400</div>
+    <div class="rc-amt">NT$ 7,738</div>
   </div>
 </div>
 <div class="rc">
   <div class="rc-rank">#7</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260c-mk9plj63p3ba99@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
-    <div class="rc-code">QTW00261-05</div>
+    <div class="rc-code">QTW00261-06</div>
     <div class="rc-amt">NT$ 6,589</div>
   </div>
 </div>
@@ -863,24 +866,24 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="rc-rank">#8</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260c-mk9plj63p3ba99@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
-    <div class="rc-code">QTW00261-06</div>
-    <div class="rc-amt">NT$ 5,990</div>
+    <div class="rc-code">QTW00261-05</div>
+    <div class="rc-amt">NT$ 6,589</div>
   </div>
 </div>
 <div class="rc">
   <div class="rc-rank">#9</div>
-  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-82601-mk9plj3livb868@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
+  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-825zn-mk8aqoel6tjcff.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
-    <div class="rc-code">QTW00264-01</div>
-    <div class="rc-amt">NT$ 5,500</div>
+    <div class="rc-code">QTW00268-04</div>
+    <div class="rc-amt">NT$ 5,676</div>
   </div>
 </div>
 <div class="rc">
   <div class="rc-rank">#10</div>
-  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-825zn-mk8aqoel6tjcff.webp" onerror="this.style.display='none'" loading="lazy" />
+  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-82601-mk9plj3livb868@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
-    <div class="rc-code">QTW00268-04</div>
-    <div class="rc-amt">NT$ 5,456</div>
+    <div class="rc-code">QTW00264-01</div>
+    <div class="rc-amt">NT$ 5,500</div>
   </div>
 </div>
 <div class="rc">
@@ -901,6 +904,14 @@ footer a{color:var(--dim);text-decoration:none}
 </div>
 <div class="rc">
   <div class="rc-rank">#13</div>
+  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-82601-mk9plj3livb868@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
+  <div class="rc-info">
+    <div class="rc-code">QTW00264-02</div>
+    <div class="rc-amt">NT$ 4,500</div>
+  </div>
+</div>
+<div class="rc">
+  <div class="rc-rank">#14</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-825zn-mk8aqoel6tjcff.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
     <div class="rc-code">QTW00268-03</div>
@@ -908,19 +919,11 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <div class="rc">
-  <div class="rc-rank">#14</div>
+  <div class="rc-rank">#15</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-82608-mk9plhral7nsfc.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
     <div class="rc-code">QTW00274-03</div>
     <div class="rc-amt">NT$ 4,190</div>
-  </div>
-</div>
-<div class="rc">
-  <div class="rc-rank">#15</div>
-  <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-82601-mk9plj3livb868@resize_w450_nl.webp" onerror="this.style.display='none'" loading="lazy" />
-  <div class="rc-info">
-    <div class="rc-code">QTW00264-02</div>
-    <div class="rc-amt">NT$ 4,000</div>
   </div>
 </div>
 <div class="rc">
@@ -943,16 +946,16 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="rc-rank">#18</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260j-mkchruc3i0w097.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
-    <div class="rc-code">QTW00267-02</div>
-    <div class="rc-amt">NT$ 3,392</div>
+    <div class="rc-code">QTW00267-05</div>
+    <div class="rc-amt">NT$ 3,530</div>
   </div>
 </div>
 <div class="rc">
   <div class="rc-rank">#19</div>
   <img class="pc-img" src="https://down-tw.img.susercontent.com/file/sg-11134202-8260j-mkchruc3i0w097.webp" onerror="this.style.display='none'" loading="lazy" />
   <div class="rc-info">
-    <div class="rc-code">QTW00267-05</div>
-    <div class="rc-amt">NT$ 3,361</div>
+    <div class="rc-code">QTW00267-02</div>
+    <div class="rc-amt">NT$ 3,392</div>
   </div>
 </div>
 <div class="rc">
@@ -1043,7 +1046,7 @@ footer a{color:var(--dim);text-decoration:none}
     <div class="rc-amt">NT$ 2,472</div>
   </div>
 </div></div></div>
-<div class="ft" style="text-align:center;padding:16px;font-size:10px;color:rgba(0,0,0,.4)">数据源：货憨憨 API · 整店 531 SKU 全量 · 2026-06-06 21:44</div>
+<div class="ft" style="text-align:center;padding:16px;font-size:10px;color:rgba(0,0,0,.4)">数据源：货憨憨 API · 整店 534 SKU 全量 · 2026-06-07 05:02</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1060,14 +1063,19 @@ var PWD_KEY = 'hermes_pwd_ok';
   if(localStorage.getItem(PWD_KEY)==='1') document.getElementById('pwdOverlay').classList.add('hidden');
 })();
 async function checkPwd(){
-  var hash = await sha256(document.getElementById('pwdInput').value);
-  if(hash===PWD_HASH){
-    localStorage.setItem(PWD_KEY,'1');
-    document.getElementById('pwdOverlay').classList.add('hidden');
-  }else{
-    document.getElementById('pwdErr').textContent='密码错误';
-    var b=document.querySelector('.pwd-box');b.classList.remove('pwd-shake');void b.offsetWidth;b.classList.add('pwd-shake');
-    document.getElementById('pwdInput').value='';
+  try{
+    var hash = await sha256(document.getElementById('pwdInput').value);
+    if(hash===PWD_HASH){
+      localStorage.setItem(PWD_KEY,'1');
+      document.getElementById('pwdOverlay').classList.add('hidden');
+    }else{
+      document.getElementById('pwdErr').textContent='密码错误';
+      var b=document.querySelector('.pwd-box');b.classList.remove('pwd-shake');void b.offsetWidth;b.classList.add('pwd-shake');
+      setTimeout(function(){document.getElementById('pwdInput').value='';},500);
+    }
+  }catch(e){
+    document.getElementById('pwdErr').textContent='出错了，请刷新页面重试';
+    console.error(e);
   }
 }
 async function sha256(m){var h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(m));return Array.from(new Uint8Array(h)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');}
