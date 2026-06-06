@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>⚡ 顺运宝 · 实时库存看板</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f5f6f8;--card-bg:#fff;--border:rgba(0,0,0,.06);
+  --text:#1a1a2e;--muted:#6b7280;--dim:#d1d5db;
+  --cyan:#0891b2;--green:#059669;--yellow:#d97706;--red:#dc2626;--purple:#7c3aed;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:1300px;margin:0 auto;padding:16px;position:relative;z-index:1}
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border)}
+.tab{padding:10px 24px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;position:relative;letter-spacing:.5px}
+.tab:hover{color:var(--cyan)}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab .badge{display:inline-block;background:rgba(8,145,178,.1);color:var(--cyan);border-radius:10px;padding:1px 8px;font-size:10px;margin-left:6px;font-weight:700}
+
+.page{display:none}
+.page.active{display:block}
+
+/* Sync status */
+.sync-bar{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;font-size:11px;margin-bottom:12px;font-weight:500}
+.sync-bar.synced,.sync-bar.syncing{background:rgba(5,150,105,.06);border:1px solid rgba(5,150,105,.15);color:var(--green)}
+.sync-bar.local{background:rgba(217,119,6,.06);border:1px solid rgba(217,119,6,.15);color:var(--yellow)}
+.sync-bar.error{background:rgba(220,38,38,.05);border:1px solid rgba(220,38,38,.15);color:var(--red)}
+.sync-bar .sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sync-bar.synced .sync-dot{background:var(--green)}
+.sync-bar.syncing .sync-dot{background:var(--cyan);animation:pulse-dot .8s infinite}
+.sync-bar.local .sync-dot{background:var(--yellow)}
+.sync-bar.error .sync-dot{background:var(--red)}
+.sync-bar small{opacity:.6;font-size:10px}
+
+/* Stats */
+.stats-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 18px;text-align:center;flex:1;min-width:70px;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:all .3s}
+.stat:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.stat .num{font-size:24px;font-weight:700;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;letter-spacing:-1px}
+.stat .lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+
+/* Filter */
+.filter-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.filter-tag{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:500;background:#fff;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .2s;user-select:none}
+.filter-tag.active,.filter-tag:hover{background:rgba(8,145,178,.06);border-color:rgba(8,145,178,.2);color:var(--cyan)}
+.search-box{flex:1;min-width:140px}
+.search-box input{width:100%;background:#fff;border:1px solid var(--border);border-radius:20px;padding:5px 16px;color:var(--text);font-size:11px;outline:none}
+.search-box input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(8,145,178,.1)}
+
+/* Card Grid */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:16px}
+@media(max-width:480px){.card-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
+.card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .3s;position:relative;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card:hover{border-color:rgba(8,145,178,.2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.08),0 0 0 1px rgba(8,145,178,.1)}
+.card.has-out{border-top:2px solid var(--red);box-shadow:0 0 15px rgba(220,38,38,.08)}
+.card.has-low{border-top:2px solid var(--yellow);box-shadow:0 0 15px rgba(217,119,6,.08)}
+.card-img{width:100%;aspect-ratio:1;background:#f1f3f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;position:relative}
+.card-img::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.03))}
+.card-img img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0}
+.card-img .ph{font-size:44px;opacity:.08;position:relative}
+.card-img .stock-dot{position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;z-index:2}
+.card-img .stock-dot.critical{background:var(--red);box-shadow:0 0 12px var(--red);animation:pulse-dot 1.5s infinite}
+.card-img .stock-dot.low{background:var(--yellow);box-shadow:0 0 10px var(--yellow);animation:pulse-dot 2s infinite}
+.card-img .stock-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.card-body{flex:1;padding:12px 14px;min-width:0;display:flex;flex-direction:column;gap:6px;position:relative;z-index:1}
+.card-inv{font-size:11px;color:var(--cyan);font-weight:700;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;cursor:pointer}
+.card-inv:hover{opacity:.7}
+.card-title{font-size:11px;color:#4b5563;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.specs{display:flex;flex-wrap:wrap;gap:4px}
+.spec-tag{display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:4px;font-size:10px;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;background:rgba(5,150,105,.06);border:1px solid rgba(5,150,105,.15);color:var(--green)}
+.spec-tag.out{background:rgba(220,38,38,.05);border-color:rgba(220,38,38,.2);color:var(--red)}
+.spec-tag.low{background:rgba(217,119,6,.05);border-color:rgba(217,119,6,.2);color:var(--yellow)}
+.spec-tag .n{font-weight:700}
+.spec-tag i{font-style:normal;opacity:.25;margin:0 3px}
+.spec-tag.transit{border-color:var(--cyan);box-shadow:0 0 6px rgba(8,145,178,.4),0 0 14px rgba(8,145,178,.15);animation:transit-glow 2s ease-in-out infinite}
+@keyframes transit-glow{0%,100%{box-shadow:0 0 4px rgba(8,145,178,.3),0 0 10px rgba(8,145,178,.1)}50%{box-shadow:0 0 8px rgba(8,145,178,.6),0 0 20px rgba(8,145,178,.2)}}
+.card-footer{display:flex;align-items:center;gap:10px;margin-top:2px;font-size:10px}
+.total-stock{color:var(--muted);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.transit-hint{color:var(--yellow);font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.replenish-tag{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.replenish-tag.need{background:rgba(217,119,6,.08);color:var(--yellow);border:1px solid rgba(217,119,6,.2)}
+.replenish-tag.ok{background:rgba(5,150,105,.05);color:var(--green);border:1px solid rgba(5,150,105,.12)}
+
+/* Charts */
+.chart-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:700px){.chart-row{grid-template-columns:1fr}}
+.chart-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.chart-card h3{font-size:11px;color:var(--cyan);margin-bottom:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.bar-list{display:flex;flex-direction:column;gap:5px}
+.bar-row{display:flex;align-items:center;gap:6px;font-size:10px}
+.bar-label{width:62px;text-align:right;color:var(--muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;font-size:9px}
+.bar-track{flex:1;height:10px;background:#f1f3f5;border-radius:5px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+.bar-fill{height:100%;border-radius:5px;transition:width .6s ease}
+.bar-fill.danger{background:linear-gradient(90deg,rgba(220,38,38,.5),var(--red))}
+.bar-fill.warn{background:linear-gradient(90deg,rgba(217,119,6,.5),var(--yellow))}
+.bar-fill.ok{background:linear-gradient(90deg,rgba(8,145,178,.5),var(--cyan))}
+.bar-fill.sales{background:linear-gradient(90deg,var(--purple),var(--cyan));box-shadow:0 0 8px rgba(124,58,237,.15)}
+.bar-val{width:36px;font-size:9px;color:var(--muted);text-align:right;flex-shrink:0;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.donut-list{display:flex;flex-direction:column;gap:7px}
+.donut-row{display:flex;align-items:center;gap:10px;font-size:11px}
+.donut-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.donut-num{font-weight:700;color:var(--text);min-width:22px;text-align:right;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.donut-pct{color:var(--muted);font-size:10px;margin-left:auto;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+
+/* ====== 在途页 - 包裹分组 ====== */
+.transit-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.transit-head h2{font-size:17px;font-weight:700;color:var(--cyan);letter-spacing:1px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:8px;font-size:11px;cursor:pointer;border:none;font-weight:600;transition:all .2s;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;letter-spacing:.5px}
+.btn-add{background:var(--yellow);color:#fff;box-shadow:0 0 12px rgba(217,119,6,.15)}
+.btn-add:hover{box-shadow:0 0 20px rgba(217,119,6,.25);transform:translateY(-1px)}
+.btn-clear{background:rgba(220,38,38,.05);color:var(--red);border:1px solid rgba(220,38,38,.2)}
+.btn-clear:hover{background:rgba(220,38,38,.08);box-shadow:0 0 10px rgba(220,38,38,.1)}
+
+.t-summary{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.t-stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 20px;flex:1;min-width:100px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.t-stat .tnum{font-size:26px;font-weight:700;color:var(--cyan);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.t-stat .tlbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+
+/* Package Card */
+.pkg-card{background:#fff;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.03);transition:all .2s}
+.pkg-card:hover{border-color:rgba(8,145,178,.15)}
+.pkg-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;transition:background .15s}
+.pkg-header:hover{background:rgba(8,145,178,.02)}
+.pkg-toggle{font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.pkg-card.open .pkg-toggle{transform:rotate(90deg)}
+.pkg-info{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.pkg-name{font-size:13px;font-weight:600;color:var(--text);cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pkg-name:hover{color:var(--cyan)}
+.pkg-name-edit{font-size:13px;font-weight:600;color:var(--cyan);background:#fff;border:1px solid var(--cyan);border-radius:6px;padding:2px 8px;width:200px;font-family:inherit;outline:none}
+.pkg-date{font-size:10px;color:var(--muted);margin-top:1px;cursor:pointer;display:inline-block}
+.pkg-date:hover{color:var(--cyan)}
+.pkg-date-edit{font-size:10px;background:#fff;border:1px solid var(--cyan);border-radius:4px;padding:1px 6px;color:var(--cyan);outline:none;width:140px}
+.pkg-summary{font-size:10px;color:var(--muted);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;white-space:nowrap}
+.pkg-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.pkg-rec-btn{padding:5px 14px;border-radius:6px;border:1px solid rgba(5,150,105,.2);background:rgba(5,150,105,.05);color:var(--green);font-size:10px;cursor:pointer;font-weight:600;transition:all .15s;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.pkg-rec-btn:hover{background:rgba(5,150,105,.12);box-shadow:0 0 8px rgba(5,150,105,.15)}
+.pkg-copy-btn{padding:5px 12px;border-radius:6px;border:1px solid rgba(124,58,237,.2);background:rgba(124,58,237,.05);color:var(--purple);font-size:10px;cursor:pointer;font-weight:600;transition:all .15s;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.pkg-copy-btn:hover{background:rgba(124,58,237,.12);box-shadow:0 0 8px rgba(124,58,237,.15)}
+.pkg-del-btn{color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;transition:all .15s}
+.pkg-del-btn:hover{color:var(--red)}
+.pkg-move-btn{color:var(--muted);cursor:pointer;font-size:12px;padding:2px 4px;transition:all .15s;display:inline-block;margin-right:5px}
+.pkg-move-btn:hover{color:var(--yellow)}
+.pkg-item-del{color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;transition:all .15s}
+.pkg-item-del:hover{color:var(--red)}
+
+/* Checkbox */
+.pkg-table .pkg-check{width:14px;height:14px;cursor:pointer;accent-color:var(--yellow);margin:0}
+.pkg-table th .pkg-check-all{width:14px;height:14px;cursor:pointer;accent-color:var(--yellow);margin:0}
+
+/* Batch bar */
+.batch-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(217,119,6,.06);border:1px solid rgba(217,119,6,.2);border-radius:10px;margin-bottom:12px;font-size:12px;color:var(--yellow)}
+.batch-bar .batch-count{font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.batch-bar .batch-move-btn{padding:5px 14px;border-radius:6px;border:none;background:var(--yellow);color:#fff;font-size:10px;cursor:pointer;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.batch-bar .batch-clear-btn{padding:5px 12px;border-radius:6px;border:1px solid rgba(217,119,6,.2);background:transparent;color:var(--yellow);font-size:10px;cursor:pointer;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.batch-bar .batch-move-btn:hover{box-shadow:0 0 10px rgba(217,119,6,.25)}
+.batch-bar .batch-clear-btn:hover{background:rgba(217,119,6,.08)}
+
+/* Move item modal */
+.move-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:110;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+.move-modal.show{display:flex}
+.move-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;width:370px;max-width:90vw;box-shadow:0 4px 32px rgba(0,0,0,.12)}
+.move-box h3{font-size:14px;margin-bottom:6px;color:var(--yellow);letter-spacing:.5px}
+.move-box .move-info{font-size:11px;color:var(--muted);margin-bottom:12px;padding:6px 10px;background:rgba(217,119,6,.04);border-radius:6px;font-family:monospace}
+.move-box .move-info b{color:var(--text)}
+.move-box .field-row{display:flex;gap:10px;margin-top:8px;align-items:center}
+.move-box .field-row label{font-size:11px;color:var(--muted);white-space:nowrap}
+.move-box .field-row input,.move-box .field-row select{flex:1;background:#f5f6f8;border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:12px;outline:none;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.move-box .field-row input:focus,.move-box .field-row select:focus{border-color:var(--yellow)}
+.move-box .btns{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+.move-box button{padding:8px 18px;border-radius:8px;font-size:12px;cursor:pointer;border:none;font-weight:600}
+.move-btn-save{background:var(--yellow);color:#fff}
+.move-btn-cancel{background:#f1f3f5;color:var(--muted)}
+
+.pkg-body{display:none;border-top:1px solid var(--border)}
+.pkg-card.open .pkg-body{display:block}
+.pkg-table{width:100%;border-collapse:collapse;font-size:11px}
+.pkg-table th{text-align:left;padding:6px 14px;color:var(--muted);font-weight:500;font-size:10px;border-bottom:1px solid var(--border);background:#fafbfc}
+.pkg-table td{padding:8px 14px;border-bottom:1px solid rgba(0,0,0,.04);vertical-align:middle}
+.pkg-table .sku-link{color:var(--cyan);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;font-size:10px;cursor:pointer}
+.pkg-table .sku-link:hover{opacity:.7}
+/* Transit item thumbnail */
+.transit-thumb{width:44px;height:44px;border-radius:6px;overflow:hidden;background:#f3f4f6;flex-shrink:0;position:relative}
+.transit-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.transit-thumb-fallback{font-size:12px;color:#4b5563;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Quantity control */
+.qty-ctrl{display:inline-flex;align-items:center;gap:6px}
+.qty-ctrl .qc-btn{
+  width:26px;height:26px;border-radius:50%;border:1.5px solid rgba(8,145,178,.25);
+  background:#fff;color:var(--cyan);cursor:pointer;font-size:16px;line-height:1;
+  display:inline-flex;align-items:center;justify-content:center;transition:all .15s;
+  flex-shrink:0;padding:0;user-select:none
+}
+.qty-ctrl .qc-btn:hover{background:rgba(8,145,178,.08);border-color:var(--cyan)}
+.qty-ctrl .qc-btn:active{transform:scale(.92)}
+.qty-ctrl .qc-num{
+  width:46px;height:26px;text-align:center;font-size:14px;font-weight:700;color:var(--cyan);
+  background:#f5f6f8;border:1px solid var(--border);border-radius:6px;padding:0;
+  font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;outline:none;
+  -moz-appearance:textfield;box-sizing:border-box;vertical-align:middle
+}
+.qty-ctrl .qc-num:focus{border-color:var(--cyan)}
+.qty-ctrl .qc-num::-webkit-outer-spin-button,.qty-ctrl .qc-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.empty-state{text-align:center;padding:60px 20px;color:var(--dim)}
+.empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.3}
+.empty-state p{font-size:12px}
+
+/* ====== 补货预测 ====== */
+.replen-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.replen-head h2{font-size:17px;font-weight:700;color:var(--cyan);letter-spacing:1px}
+.tiers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:700px){.tiers{grid-template-columns:1fr}}
+.tier-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.tier-card .tier-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.tier-card .tier-rule{font-size:10px;color:var(--muted);font-family:monospace}
+.tier-card .tier-count{font-size:22px;font-weight:700;font-family:monospace;margin:6px 0 2px}
+.tier-card.a{border-color:rgba(220,38,38,.2)}.tier-card.a .tier-count{color:var(--red)}
+.tier-card.b{border-color:rgba(217,119,6,.2)}.tier-card.b .tier-count{color:var(--yellow)}
+.tier-card.c{border-color:rgba(8,145,178,.15)}.tier-card.c .tier-count{color:var(--cyan)}
+.rep-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
+.rep-table th{text-align:left;padding:7px 10px;color:var(--cyan);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.rep-table td{padding:8px 10px;border-bottom:1px solid rgba(0,0,0,.04)}
+.rep-table tr:hover{background:rgba(8,145,178,.02)}
+.rep-table .tier-badge{display:inline-block;width:18px;height:18px;border-radius:4px;text-align:center;line-height:18px;font-size:9px;font-weight:700;font-family:monospace}
+.rep-table .tier-badge.a{background:rgba(220,38,38,.08);color:var(--red)}
+.rep-table .tier-badge.b{background:rgba(217,119,6,.08);color:var(--yellow)}
+.rep-table .tier-badge.c{background:rgba(8,145,178,.06);color:var(--cyan)}
+.total-bar{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--muted)}
+.total-bar .big{font-size:18px;font-weight:700;font-family:monospace;color:var(--cyan)}
+
+/* Suggested new SKUs */
+.suggest-section{margin-top:20px;padding-top:16px;border-top:2px dashed var(--border)}
+.suggest-title{font-size:13px;font-weight:600;color:var(--purple);margin-bottom:10px;display:flex;align-items:center;gap:4px}
+.suggest-table{width:100%;border-collapse:collapse;font-size:11px}
+.suggest-table th{text-align:left;padding:6px 14px;color:var(--muted);font-weight:500;font-size:10px;border-bottom:1px solid var(--border);background:rgba(124,58,237,.03)}
+.suggest-table td{padding:8px 14px;border-bottom:1px solid rgba(0,0,0,.04);vertical-align:middle}
+.suggest-table .sug-mid{font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;font-size:10px;color:var(--cyan)}
+.suggest-table .sug-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.4}
+.suggest-table .sug-qty{font-weight:700;font-family:monospace;color:var(--purple)}
+.suggest-table .sug-prod{color:#4b5563;font-size:11px}
+.suggest-empty{font-size:11px;color:var(--muted);text-align:center;padding:12px}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:100;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex}
+.modal-box{background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;width:420px;max-width:90vw;box-shadow:0 4px 32px rgba(0,0,0,.12)}
+.modal-box h3{font-size:15px;margin-bottom:12px;color:var(--cyan);letter-spacing:.5px}
+.modal-box .search{width:100%;background:#f5f6f8;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:12px;outline:none;margin-bottom:6px}
+.modal-box .search:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(8,145,178,.08)}
+.modal-box .results{max-height:160px;overflow-y:auto;margin-bottom:4px}
+.modal-box .r-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+.modal-box .r-item:hover{background:rgba(8,145,178,.04);color:var(--text)}
+.modal-box .r-item.sel{background:rgba(217,119,6,.06);color:var(--yellow);border:1px solid rgba(217,119,6,.15)}
+.modal-box .field-row{display:flex;gap:10px;margin-top:8px;align-items:center}
+.modal-box .field-row label{font-size:11px;color:var(--muted);white-space:nowrap}
+.modal-box .field-row input,.modal-box .field-row select{flex:1;background:#f5f6f8;border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:12px;outline:none}
+.modal-box .field-row select{font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;font-size:11px}
+.modal-box .field-row input:focus,.modal-box .field-row select:focus{border-color:var(--cyan)}
+.modal-box .qty-row input{width:70px;text-align:center;font-size:16px;font-weight:700;color:var(--cyan);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;flex:none}
+.modal-box .added-list{margin-top:10px;max-height:120px;overflow-y:auto}
+.modal-box .added-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;background:rgba(8,145,178,.03);margin-bottom:4px;font-size:11px}
+.modal-box .added-item .sku{color:var(--cyan);font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.modal-box .added-item .qty{color:var(--text);font-weight:700}
+.modal-box .added-item .remove{color:var(--muted);cursor:pointer;margin-left:auto;font-size:14px;padding:0 4px}
+.modal-box .added-item .remove:hover{color:var(--red)}
+.modal-box .btns{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+.modal-box button{padding:8px 18px;border-radius:8px;font-size:12px;cursor:pointer;border:none;font-weight:600}
+.btn-save{background:var(--cyan);color:#fff}
+.btn-cancel{background:#f1f3f5;color:var(--muted)}
+
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--cyan);color:#fff;padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 4px 16px rgba(8,145,178,.2)}
+.toast.show{opacity:1}
+
+footer{text-align:center;padding:24px 0 10px;font-size:10px;color:var(--dim);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;letter-spacing:1px}
+footer a{color:var(--dim);text-decoration:none}
+
+/* Pwd */
+.pwd-overlay{display:flex;position:fixed;inset:0;background:#f5f6f8;z-index:9999;justify-content:center;align-items:center;flex-direction:column}
+.pwd-overlay.hidden{display:none}
+.pwd-box{text-align:center}
+.pwd-box h2{font-size:24px;color:var(--cyan);margin-bottom:8px;letter-spacing:2px}
+.pwd-box p{font-size:13px;color:var(--muted);margin-bottom:24px}
+.pwd-box input{width:260px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 20px;color:var(--cyan);font-size:18px;outline:none;text-align:center;letter-spacing:6px;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+.pwd-box input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(8,145,178,.08)}
+.pwd-box .pwd-err{color:var(--red);font-size:12px;margin-top:12px;min-height:18px}
+.pwd-box .pwd-shake{animation:pwdShake .4s ease}
+@keyframes pwdShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
+/* ═══ 数据看板 ═══ */
+#page-dataviz{max-width:1100px;margin:0 auto;padding:0 8px 20px;font-size:13px;color:#1a1a2e}
+#page-dataviz .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+#page-dataviz .k{background:#fff;border-radius:9px;padding:16px 18px;box-shadow:0 1px 10px rgba(0,0,0,.05);border:1px solid #e8e8e8}
+#page-dataviz .kl{font-size:11px;color:rgba(0,0,0,.4);margin-bottom:6px}
+#page-dataviz .kv{font-size:24px;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+#page-dataviz .kv.ac{color:#0052d9}
+#page-dataviz .ks{font-size:10px;color:rgba(0,0,0,.6);margin-top:4px}
+#page-dataviz .sbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+#page-dataviz .sb{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:4px 12px;font-size:11px;color:rgba(0,0,0,.6)}
+#page-dataviz .sb b{color:#1a1a2e;margin-left:2px}
+#page-dataviz .row{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-bottom:14px}
+#page-dataviz .card{background:#fff;border-radius:9px;padding:16px;box-shadow:0 1px 10px rgba(0,0,0,.05);border:1px solid #e8e8e8;overflow:hidden}
+#page-dataviz .card h3{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+#page-dataviz .card h3::before{content:'';width:3px;height:14px;background:#0052d9;border-radius:2px}
+#page-dataviz .card svg{display:block;width:100%}
+#page-dataviz .pc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+#page-dataviz .pc{display:flex;align-items:center;gap:10px;padding:10px;background:#fafafa;border-radius:6px;transition:all .2s}
+#page-dataviz .pc:hover{background:#f0f4ff}
+#page-dataviz .pc-rank{font-size:11px;font-weight:700;color:#0052d9;min-width:22px}
+#page-dataviz .pc-img{width:48px;height:48px;border-radius:6px;object-fit:cover;background:#f0f0f0;flex-shrink:0}
+#page-dataviz .pc-info{flex:1;min-width:0}
+#page-dataviz .pc-code{font-size:11px;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+#page-dataviz .pc-spec{font-size:10px;color:rgba(0,0,0,.6);margin-top:2px}
+#page-dataviz .pc-qty{font-size:12px;font-weight:700;color:#0052d9;margin-top:2px}
+#page-dataviz .rc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+#page-dataviz .rc{display:flex;align-items:center;gap:10px;padding:10px;background:#fafafa;border-radius:6px}
+#page-dataviz .rc-rank{font-size:11px;font-weight:700;color:#2ba471;min-width:22px}
+#page-dataviz .rc-info{flex:1}
+#page-dataviz .rc-code{font-size:11px;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+#page-dataviz .rc-amt{font-size:12px;font-weight:700;color:#2ba471}
+#page-dataviz .ft{text-align:center;padding:16px;font-size:10px;color:rgba(0,0,0,.4)}
+@media(max-width:768px){#page-dataviz .kpi{grid-template-columns:repeat(2,1fr)}#page-dataviz .row{grid-template-columns:1fr}#page-dataviz .pc-grid,#page-dataviz .rc-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- 密码门禁 -->
+<div class="pwd-overlay" id="pwdOverlay">
+  <div class="pwd-box">
+    <h2>🔒 库存看板</h2>
+    <p>请输入访问密码</p>
+    <input type="password" id="pwdInput" placeholder="······" onkeydown="if(event.key==='Enter')checkPwd()" autofocus>
+    <div class="pwd-err" id="pwdErr"></div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Sync status -->
+  <div class="sync-bar" id="syncBar"><span class="sync-dot"></span><span id="syncMsg">加载中...</span></div>
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-page="dash">📦 库存看板</div>
+    <div class="tab" data-page="replen">📋 补货预测</div>
+    <div class="tab" data-page="transit">🚚 在途管理<span class="badge" id="transitBadge">0</span></div>
+    <div class="tab" data-page="dataviz">📊 数据看板</div>
+  </div>
+
+  <!-- ═══ 库存看板 ═══ -->
+  <div class="page active" id="page-dash">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="chart-row" id="chartRow">
+      <div class="chart-card"><h3>🚨 急补货 Top 10</h3><div class="bar-list" id="restockBars"></div></div>
+      <div class="chart-card"><h3>🔥 销售 Top 10</h3><div class="bar-list" id="salesBars"></div></div>
+      <div class="chart-card"><h3>📊 库存分布</h3><div class="donut-list" id="statusDonut"></div></div>
+    </div>
+    <div class="filter-bar" id="filterBar"></div>
+    <div class="card-grid" id="cardGrid"></div>
+    <footer>顺运宝 · 库存监控系统 · 数据自动同步</footer>
+  </div>
+
+  <!-- ═══ 在途管理（包裹分组） ═══ -->
+  <div class="page" id="page-transit">
+    <div class="transit-head">
+      <h2>🚚 在途管理</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-add" onclick="openTransitAdd()">+ 添加在途</button>
+        <button class="btn btn-clear" onclick="clearAllTransit()">全部收货</button>
+      </div>
+    </div>
+    <div class="t-summary" id="transitSummary"></div>
+    <div class="batch-bar" id="batchBar" style="display:none">
+      <span class="batch-count" id="batchCount">已选 0 项</span>
+      <button class="batch-move-btn" onclick="openBatchMove()">↗ 批量迁移</button>
+      <button class="batch-clear-btn" onclick="clearBatchSelection()">取消选择</button>
+    </div>
+    <div id="transitPackages"></div>
+  </div>
+
+  <!-- ═══ 补货预测 ═══ -->
+  <div class="page" id="page-replen">
+    <div class="replen-head">
+      <h2>📋 补货预测</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-add" onclick="generateTransitFromReplen()">📦 一键生成在途包裹</button>
+        <span style="font-size:12px;color:var(--muted);font-family:monospace">公式: 建议采购 = 日均销量 × (补货周期 + 安全天数)</span>
+      </div>
+    </div>
+    <div class="tiers" id="tierCards"></div>
+    <div class="search-box" style="margin-bottom:10px"><input type="text" id="replenSearch" placeholder="搜索 SKU / 商品名称 / 规格..." oninput="filterReplen()"></div>
+    <div id="replenTable"></div>
+    <div class="total-bar" id="replenTotal"></div>
+    <div class="suggest-section" id="suggestSection" style="display:none">
+      <div class="suggest-title">💡 建议新增囤货规格</div>
+      <div id="suggestContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 添加在途弹窗 -->
+<div class="modal-overlay" id="addTransitModal">
+  <div class="modal-box">
+    <h3>+ 添加在途</h3>
+    <input class="search" placeholder="搜索 SKU / 商品名..." oninput="filterModal(this.value)">
+    <div class="results" id="modalResults"></div>
+    <div class="added-list" id="modalAdded"></div>
+    <div class="field-row">
+      <label>包裹名</label>
+      <select id="modalPkgName" onchange="onPkgNameChange()">
+        <option value="">+ 新建包裹</option>
+      </select>
+    </div>
+    <div class="field-row" id="newPkgRow">
+      <label>新名称</label>
+      <input type="text" id="modalNewPkg" placeholder="如：6月5日发货">
+    </div>
+    <div class="field-row">
+      <label>日期</label>
+      <input type="date" id="modalDate">
+    </div>
+    <div class="btns">
+      <button class="btn-cancel" onclick="closeTransitAdd()">取消</button>
+      <button class="btn-save" onclick="confirmTransitAdd()">添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- 迁移在途弹窗 -->
+<div class="move-modal" id="moveItemModal">
+  <div class="move-box">
+    <h3>↗ 迁移包裹明细</h3>
+    <div class="move-info" id="moveItemInfo"></div>
+    <div class="field-row">
+      <label>迁移到</label>
+      <select id="moveTargetPkg" onchange="onMoveTargetChange()">
+        <option value="">选择包裹</option>
+      </select>
+    </div>
+    <div class="field-row" id="moveNewPkgRow" style="display:none">
+      <label>新包裹名</label>
+      <input type="text" id="moveNewPkgName" placeholder="如：6月5日发货">
+    </div>
+    <div class="field-row" id="moveNewDateRow" style="display:none">
+      <label>日期</label>
+      <input type="date" id="moveNewPkgDate">
+    </div>
+    <div class="btns">
+      <button class="move-btn-cancel" onclick="closeMoveItem()">取消</button>
+      <button class="move-btn-save" onclick="confirmMoveItem()">迁移</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 数据看板 ═══ -->
+<div class="page" id="page-dataviz">
+__DATAVIZ__
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var DATA = [{"sku": "QTW00261-01", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 2XL码", "stock": 14, "transit": 0, "total": 14, "available": 14, "status": "已拆包", "monitor_status": "正常", "daily_sales": 0.545335085413929, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00261-04", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 M码", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "转寄中", "monitor_status": "⚠️ 预警", "daily_sales": 0.5091984231274639, "suggest_purchase": 8, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00261-05", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 S码", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.2003942181340342, "suggest_purchase": 3, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00261-06", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 3XL码", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.2003942181340342, "suggest_purchase": 1, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00261-03", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 L码", "stock": 6, "transit": 0, "total": 6, "available": 6, "status": "已拆包", "monitor_status": "正常", "daily_sales": 0.6176084099868594, "suggest_purchase": 2, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00261-02", "invCode": "QTW00261", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "卡其色 XL码", "stock": 11, "transit": 0, "total": 11, "available": 11, "status": "已拆包", "monitor_status": "正常", "daily_sales": 0.3088042049934297, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00263-04", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色  M码", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00263-05", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色  2XL码", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.1084099868593955, "suggest_purchase": 2, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00263-06", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色  3XL码", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.09198423127463862, "suggest_purchase": 2, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00263-02", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色 L码", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00263-01", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色  XL", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.07227332457293036, "suggest_purchase": 1, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00263-03", "invCode": "QTW00263", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "深灰色  S码", "stock": 5, "transit": 0, "total": 5, "available": 5, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00264-01", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  XL", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.2003942181340342, "suggest_purchase": 2, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00264-02", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  2XL", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "正常", "daily_sales": 0.2529566360052563, "suggest_purchase": 2, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00264-03", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  3XL", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.1084099868593955, "suggest_purchase": 3, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00264-06", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  L码", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.07227332457293036, "suggest_purchase": 1, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00264-05", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  M码", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.1445466491458607, "suggest_purchase": 2, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00264-04", "invCode": "QTW00264", "title": "現貨🔥隔日到貨🔥 美式複古 廓形設計感 卡其色彎刀褲 休閒直筒闊腿褲 工裝褲 彎刀褲 彎月褲 寬褲 休閒長褲 牛仔褲", "spec": "軍綠色  S码", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.03613666228646518, "suggest_purchase": 1, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00265-02", "invCode": "QTW00265", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "spec": "棕色  M码", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.09198423127463862, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00265-01", "invCode": "QTW00265", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "spec": "棕色  S码", "stock": 4, "transit": 0, "total": 4, "available": 4, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.19, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00265-04", "invCode": "QTW00265", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "spec": "棕色  XL码", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.1281208935611038, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00265-03", "invCode": "QTW00265", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 美式 西部牛仔🤠漸變棕色 抽繩直筒牛仔褲 彎刀牛仔褲 毛邊高腰 闊腿長褲", "spec": "棕色  L码", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.1281208935611038, "suggest_purchase": 2, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00266-05", "invCode": "QTW00266", "title": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "spec": "黑色  XL", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.01971090670170828, "suggest_purchase": 0, "replenish_status": "无销量数据", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00266-03", "invCode": "QTW00266", "title": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "spec": "紅色 M", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "⚠️ 预警", "daily_sales": 0.21, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00266-04", "invCode": "QTW00266", "title": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "spec": "紅色 S", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00266-02", "invCode": "QTW00266", "title": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "spec": "紅色 L", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已拆包", "monitor_status": "⚠️ 预警", "daily_sales": 0.07227332457293036, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00266-01", "invCode": "QTW00266", "title": "現貨🔥隔日到貨🔥短袖 紅色斜肩上衣 燙鑽吊帶設計 短版上衣 露肩上衣 短袖T恤 一字露肩短袖 辣妹裝 設計感露肩休閑上衣", "spec": "紅色 XL", "stock": 12, "transit": 0, "total": 12, "available": 12, "status": "已拆包", "monitor_status": "⚠️ 偏低", "daily_sales": 0.01971090670170828, "suggest_purchase": 0, "replenish_status": "无销量数据", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-05", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "米白色 M", "stock": 14, "transit": 0, "total": 14, "available": 14, "status": "已拆包", "monitor_status": "正常", "daily_sales": 0.38107752956636, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-03", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "粉色 M", "stock": 9, "transit": 0, "total": 9, "available": 9, "status": "已拆包", "monitor_status": "正常", "daily_sales": 0.8377135348226018, "suggest_purchase": 1, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-02", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "粉色 L", "stock": 6, "transit": 0, "total": 6, "available": 6, "status": "已拆包", "monitor_status": "正常", "daily_sales": 0.3646517739816031, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-01", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "粉色 XL", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "⚠️ 预警", "daily_sales": 0.2726675427069645, "suggest_purchase": 3, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-11", "invCode": "QTW00267", "title": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "黑色 S", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.01971090670170828, "suggest_purchase": 0, "replenish_status": "无销量数据", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-06", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "米白色  S", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 1, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-07", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "米白色 XL", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.07227332457293036, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-08", "invCode": "QTW00267", "title": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "黑色  M", "stock": 10, "transit": 0, "total": 10, "available": 10, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.1281208935611038, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-09", "invCode": "QTW00267", "title": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "黑色  L", "stock": 5, "transit": 0, "total": 5, "available": 5, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.1084099868593955, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-04", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "粉色 S", "stock": 11, "transit": 0, "total": 11, "available": 11, "status": "已拆包", "monitor_status": "正常", "daily_sales": 0.2529566360052563, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-12", "invCode": "QTW00267", "title": "現貨🔥隔日到貨🔥韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "米白色 L", "stock": 5, "transit": 0, "total": 5, "available": 5, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00267-10", "invCode": "QTW00267", "title": "🔥台灣發貨🔥實拍🌟韓系 法式波點 不規則係帶 短袖 T恤 修身顯瘦 收腰上衣 短版上衣 露肩上衣 掛脖上衣 一字領上衣", "spec": "黑色  XL", "stock": 8, "transit": 0, "total": 8, "available": 8, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00268-01", "invCode": "QTW00268", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "spec": "白色 S", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.1281208935611038, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00268-02", "invCode": "QTW00268", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "spec": "白色    M", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "转寄中", "monitor_status": "未纳入监控", "daily_sales": 0.164257555847569, "suggest_purchase": 3, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00268-03", "invCode": "QTW00268", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "spec": "白色   L", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.1806833114323259, "suggest_purchase": 3, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00268-04", "invCode": "QTW00268", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "spec": "白色  XL", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "正常", "daily_sales": 0.2726675427069645, "suggest_purchase": 1, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00268-05", "invCode": "QTW00268", "title": "現貨🔥隔日到貨🔥彎刀褲 彎月褲 寬褲 牛仔褲 雛菊塗鴉印花 立體車線 多口袋 牛仔彎刀褲 闊腿褲 白色寬褲 復古長褲", "spec": "白色  2XL", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "转寄中", "monitor_status": "⚠️ 预警", "daily_sales": 0.2529566360052563, "suggest_purchase": 3, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00269-02", "invCode": "QTW00269", "title": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "spec": "黑色  S", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.1281208935611038, "suggest_purchase": 3, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00269-04", "invCode": "QTW00269", "title": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "spec": "黑色 XL", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.1281208935611038, "suggest_purchase": 3, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00269-05", "invCode": "QTW00269", "title": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "spec": "黑色 2XL", "stock": 8, "transit": 0, "total": 8, "available": 8, "status": "已拆包", "monitor_status": "正常", "daily_sales": 0.3646517739816031, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00269-01", "invCode": "QTW00269", "title": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "spec": "黑色   L", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已拆包", "monitor_status": "⚠️ 预警", "daily_sales": 0.5650459921156372, "suggest_purchase": 7, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00269-03", "invCode": "QTW00269", "title": "現貨🔥隔日到貨🔥美式複古 彎刀傘兵褲 格子飄帶 格紋屁簾 可拆卸 闊腿褲 彎刀褲 彎月褲 寬褲 運動褲 抽繩褲 褶皺褲", "spec": "黑色 M", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.1445466491458607, "suggest_purchase": 3, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00270-01", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "粉色 M", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00270-02", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "粉色 L", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.1084099868593955, "suggest_purchase": 1, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00270-03", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "粉色 XL", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00270-04", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "粉色 2XL", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00270-05", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "粉色 3XL", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.03613666228646518, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00270-06", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "蓝色 L", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.03613666228646518, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00270-10", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "蓝色 M", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.14, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00270-08", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "蓝色S", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.14, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00270-09", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "蓝色XL", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.14, "suggest_purchase": 1, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00270-07", "invCode": "QTW00270", "title": "現貨🔥隔日到貨🔥有大尺碼 寬褲 彎月褲 彎刀褲 褶皺垂感傘兵褲 撞色 寬鬆闊腿 工裝褲 運動長褲 休閒長褲 大尺碼長褲", "spec": "蓝色 2XL", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.01971090670170828, "suggest_purchase": 0, "replenish_status": "无销量数据", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00271-01", "invCode": "QTW00271", "title": "實拍✨辣妹必備💯吊帶背心 橘色背心 條紋撞色吊帶背心 修身顯瘦 露背上衣 短版上衣 露肩上衣 短版背心 細肩帶上衣 女裝", "spec": "橘色  S", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.03613666228646518, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-05", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色  2XL", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.14, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-12", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "黑色  L", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.14, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-13", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色  4XL", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.14, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-14", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色  3XL", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.14, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-04", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色  XL", "stock": 4, "transit": 0, "total": 4, "available": 4, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.03613666228646518, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-11", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "黑色  XL", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.14, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-06", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色  5XL", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.03613666228646518, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-03", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色 M", "stock": 4, "transit": 0, "total": 4, "available": 4, "status": "已入仓", "monitor_status": "⚠️ 预警", "daily_sales": 0.05584756898817345, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-02", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色 S", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.14, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-01", "invCode": "QTW00272", "title": "現貨🌟隔日到貨🔥大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "杏色  L", "stock": 4, "transit": 0, "total": 4, "available": 4, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.03613666228646518, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00272-09", "invCode": "QTW00272", "title": "🔥台灣發貨🔥實拍🌟大尺碼 90kg可穿 大碼長褲 字母條紋 彎刀褲 彎月褲 寬褲 棉褲 運動褲 鬆緊腰 抽繩褲 闊腿褲女", "spec": "黑色 M", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已入仓", "monitor_status": "库存过多", "daily_sales": 0.03613666228646518, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00273-04", "invCode": "QTW00273", "title": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "spec": "黑色星星字母印花 XL", "stock": 6, "transit": 0, "total": 6, "available": 6, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.1445466491458607, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00273-03", "invCode": "QTW00273", "title": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "spec": "黑色星星字母印花 L", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0.03613666228646518, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00273-02", "invCode": "QTW00273", "title": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "spec": "黑色星星字母印花 M", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.07227332457293036, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00273-01", "invCode": "QTW00273", "title": "✨夏季必備✨辣妹穿搭✨輕亞風 正肩款 短袖t恤 短T 星星字母印花 緊身收腰 辣妹短袖 百搭上衣 女生衣服短袖 短版上衣", "spec": "黑色星星字母印花  S", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.05584756898817345, "suggest_purchase": 2, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00274-06", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩 3XL", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.03613666228646518, "suggest_purchase": 2, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00274-01", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩  S", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.01971090670170828, "suggest_purchase": 0, "replenish_status": "无销量数据", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00274-02", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩 M", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.164257555847569, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00274-03", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩 L", "stock": 4, "transit": 0, "total": 4, "available": 4, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.164257555847569, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00274-04", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩 XL", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.18, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00274-05", "invCode": "QTW00274", "title": "🔥台灣發貨🔥實拍🌟 有大尺碼 美式複古 迷彩褶皺工裝牛仔褲 大口袋 百搭彎刀闊腿褲 彎刀褲 彎月褲 寬褲 工裝褲 迷彩褲", "spec": "迷彩 2XL", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已拆包", "monitor_status": "未纳入监控", "daily_sales": 0.03613666228646518, "suggest_purchase": 0, "replenish_status": "库存够用", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00275-01", "invCode": "QTW00275", "title": "✨夏季必備✨辣妹穿搭✨吊帶背心 韓系上衣 假兩件上衣 短版上衣 疊穿背心 短袖襯衫 撞色不規則 修身緊身 防曬上衣", "spec": "均碼", "stock": 0, "transit": 0, "total": 0, "available": 0, "status": "已寄出", "monitor_status": "未纳入监控", "daily_sales": 0.2365308804204993, "suggest_purchase": 4, "replenish_status": "建议补货", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00276-03", "invCode": "QTW00276", "title": "🔥台灣發貨🇰🇷韓版🌟實拍 背心 吊帶 辣妹裝 吊帶背心 寬肩帶 修身顯瘦 短版上衣 平口上衣 無袖背心 短版背心 小背心", "spec": "浅绿色 L", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00276-04", "invCode": "QTW00276", "title": "🔥台灣發貨🇰🇷韓版🌟實拍 背心 吊帶 辣妹裝 吊帶背心 寬肩帶 修身顯瘦 短版上衣 平口上衣 無袖背心 短版背心 小背心", "spec": "浅绿色 XL", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00276-01", "invCode": "QTW00276", "title": "🔥台灣發貨🇰🇷韓版🌟實拍 背心 吊帶 辣妹裝 吊帶背心 寬肩帶 修身顯瘦 短版上衣 平口上衣 無袖背心 短版背心 小背心", "spec": "浅绿色  S", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00276-02", "invCode": "QTW00276", "title": "🔥台灣發貨🇰🇷韓版🌟實拍 背心 吊帶 辣妹裝 吊帶背心 寬肩帶 修身顯瘦 短版上衣 平口上衣 無袖背心 短版背心 小背心", "spec": "浅绿色  M", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00277-01", "invCode": "QTW00277", "title": "🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 短版上衣 露肩上衣 斜肩上衣 修身上衣", "spec": "灰色  S", "stock": 1, "transit": 0, "total": 1, "available": 1, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00277-02", "invCode": "QTW00277", "title": "🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 短版上衣 露肩上衣 斜肩上衣 修身上衣", "spec": "灰色  M", "stock": 3, "transit": 0, "total": 3, "available": 3, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00277-03", "invCode": "QTW00277", "title": "🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 短版上衣 露肩上衣 斜肩上衣 修身上衣", "spec": "灰色  L", "stock": 4, "transit": 0, "total": 4, "available": 4, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00277-04", "invCode": "QTW00277", "title": "🔥台灣發貨🔥實拍🌟 韓系 辣妹裝 蕾絲邊鏤空 字母印花設計 做舊色 短袖 T恤 短版上衣 露肩上衣 斜肩上衣 修身上衣", "spec": "灰色  XL", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00278-07", "invCode": "QTW00278", "title": "🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣 辣妹上衣 短版上衣 露肩上衣 顯瘦短袖", "spec": "黑色  XL", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00278-06", "invCode": "QTW00278", "title": "🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣 辣妹上衣 短版上衣 露肩上衣 顯瘦短袖", "spec": "黑色  L", "stock": 10, "transit": 0, "total": 10, "available": 10, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00278-05", "invCode": "QTW00278", "title": "🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣 辣妹上衣 短版上衣 露肩上衣 顯瘦短袖", "spec": "黑色  M", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00278-03", "invCode": "QTW00278", "title": "🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣 辣妹上衣 短版上衣 露肩上衣 顯瘦短袖", "spec": "白色  L", "stock": 4, "transit": 0, "total": 4, "available": 4, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00278-02", "invCode": "QTW00278", "title": "🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣 辣妹上衣 短版上衣 露肩上衣 顯瘦短袖", "spec": "白色  M", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00278-01", "invCode": "QTW00278", "title": "🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣 辣妹上衣 短版上衣 露肩上衣 顯瘦短袖", "spec": "白色  S", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00278-04", "invCode": "QTW00278", "title": "🔥台灣發貨🔥實拍🌟 T恤 塗鴉字母印花 紐扣吊帶 斜肩短袖 短袖t恤 一字領上衣 辣妹上衣 短版上衣 露肩上衣 顯瘦短袖", "spec": "黑色  S", "stock": 4, "transit": 0, "total": 4, "available": 4, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00279-01", "invCode": "QTW00279", "title": "實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t 圓領上衣 上衣女", "spec": "白色  S", "stock": 8, "transit": 0, "total": 8, "available": 8, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00279-02", "invCode": "QTW00279", "title": "實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t 圓領上衣 上衣女", "spec": "白色  M", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00279-03", "invCode": "QTW00279", "title": "實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t 圓領上衣 上衣女", "spec": "白色  L", "stock": 5, "transit": 0, "total": 5, "available": 5, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00279-04", "invCode": "QTW00279", "title": "實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t 圓領上衣 上衣女", "spec": "白色  XL", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00279-05", "invCode": "QTW00279", "title": "實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t 圓領上衣 上衣女", "spec": "黑色  S", "stock": 2, "transit": 0, "total": 2, "available": 2, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00279-06", "invCode": "QTW00279", "title": "實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t 圓領上衣 上衣女", "spec": "黑色  L", "stock": 4, "transit": 0, "total": 4, "available": 4, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}, {"sku": "QTW00279-07", "invCode": "QTW00279", "title": "實拍✨辣妹必備💯純欲風 十字架蕾絲拼接設計 正肩短袖 短袖T恤 修身顯瘦 短版上衣 短袖上衣 短t 圓領上衣 上衣女", "spec": "黑色  XL", "stock": 6, "transit": 0, "total": 6, "available": 6, "status": "已入仓", "monitor_status": "未纳入监控", "daily_sales": 0, "suggest_purchase": 0, "replenish_status": "未关联", "update_time": "2026-06-07 05:02:32"}];
+var REPLENISH = {"QTW00261-01": {"daily": 0.545335085413929, "suggest": 0, "status": "库存够用"}, "QTW00261-04": {"daily": 0.5091984231274639, "suggest": 8, "status": "建议补货"}, "QTW00261-05": {"daily": 0.2003942181340342, "suggest": 3, "status": "建议补货"}, "QTW00261-06": {"daily": 0.2003942181340342, "suggest": 1, "status": "建议补货"}, "QTW00261-03": {"daily": 0.6176084099868594, "suggest": 2, "status": "建议补货"}, "QTW00261-02": {"daily": 0.3088042049934297, "suggest": 0, "status": "库存够用"}, "QTW00263-04": {"daily": 0.05584756898817345, "suggest": 0, "status": "库存够用"}, "QTW00263-05": {"daily": 0.1084099868593955, "suggest": 2, "status": "建议补货"}, "QTW00263-06": {"daily": 0.09198423127463862, "suggest": 2, "status": "建议补货"}, "QTW00263-02": {"daily": 0.05584756898817345, "suggest": 0, "status": "库存够用"}, "QTW00263-01": {"daily": 0.07227332457293036, "suggest": 1, "status": "建议补货"}, "QTW00263-03": {"daily": 0.05584756898817345, "suggest": 0, "status": "库存够用"}, "QTW00264-01": {"daily": 0.2003942181340342, "suggest": 2, "status": "建议补货"}, "QTW00264-02": {"daily": 0.2529566360052563, "suggest": 2, "status": "建议补货"}, "QTW00264-03": {"daily": 0.1084099868593955, "suggest": 3, "status": "建议补货"}, "QTW00264-06": {"daily": 0.07227332457293036, "suggest": 1, "status": "建议补货"}, "QTW00264-05": {"daily": 0.1445466491458607, "suggest": 2, "status": "建议补货"}, "QTW00264-04": {"daily": 0.03613666228646518, "suggest": 1, "status": "建议补货"}, "QTW00265-02": {"daily": 0.09198423127463862, "suggest": 0, "status": "库存够用"}, "QTW00265-01": {"daily": 0.19, "suggest": 0, "status": "库存够用"}, "QTW00265-04": {"daily": 0.1281208935611038, "suggest": 0, "status": "库存够用"}, "QTW00265-03": {"daily": 0.1281208935611038, "suggest": 2, "status": "建议补货"}, "QTW00266-05": {"daily": 0.01971090670170828, "suggest": 0, "status": "无销量数据"}, "QTW00266-03": {"daily": 0.21, "suggest": 0, "status": "库存够用"}, "QTW00266-04": {"daily": 0.05584756898817345, "suggest": 0, "status": "库存够用"}, "QTW00266-02": {"daily": 0.07227332457293036, "suggest": 0, "status": "库存够用"}, "QTW00266-01": {"daily": 0.01971090670170828, "suggest": 0, "status": "无销量数据"}, "QTW00267-05": {"daily": 0.38107752956636, "suggest": 0, "status": "库存够用"}, "QTW00267-03": {"daily": 0.8377135348226018, "suggest": 1, "status": "建议补货"}, "QTW00267-02": {"daily": 0.3646517739816031, "suggest": 0, "status": "库存够用"}, "QTW00267-01": {"daily": 0.2726675427069645, "suggest": 3, "status": "建议补货"}, "QTW00267-11": {"daily": 0.01971090670170828, "suggest": 0, "status": "无销量数据"}, "QTW00267-06": {"daily": 0.05584756898817345, "suggest": 1, "status": "建议补货"}, "QTW00267-07": {"daily": 0.07227332457293036, "suggest": 0, "status": "库存够用"}, "QTW00267-08": {"daily": 0.1281208935611038, "suggest": 0, "status": "库存够用"}, "QTW00267-09": {"daily": 0.1084099868593955, "suggest": 0, "status": "库存够用"}, "QTW00267-04": {"daily": 0.2529566360052563, "suggest": 0, "status": "库存够用"}, "QTW00267-12": {"daily": 0.05584756898817345, "suggest": 0, "status": "库存够用"}, "QTW00267-10": {"daily": 0.05584756898817345, "suggest": 0, "status": "库存够用"}, "QTW00268-01": {"daily": 0.1281208935611038, "suggest": 0, "status": "库存够用"}, "QTW00268-02": {"daily": 0.164257555847569, "suggest": 3, "status": "建议补货"}, "QTW00268-03": {"daily": 0.1806833114323259, "suggest": 3, "status": "建议补货"}, "QTW00268-04": {"daily": 0.2726675427069645, "suggest": 1, "status": "建议补货"}, "QTW00268-05": {"daily": 0.2529566360052563, "suggest": 3, "status": "建议补货"}, "QTW00269-02": {"daily": 0.1281208935611038, "suggest": 3, "status": "建议补货"}, "QTW00269-04": {"daily": 0.1281208935611038, "suggest": 3, "status": "建议补货"}, "QTW00269-05": {"daily": 0.3646517739816031, "suggest": 0, "status": "库存够用"}, "QTW00269-01": {"daily": 0.5650459921156372, "suggest": 7, "status": "建议补货"}, "QTW00269-03": {"daily": 0.1445466491458607, "suggest": 3, "status": "建议补货"}, "QTW00270-01": {"daily": 0.05584756898817345, "suggest": 0, "status": "库存够用"}, "QTW00270-02": {"daily": 0.1084099868593955, "suggest": 1, "status": "建议补货"}, "QTW00270-03": {"daily": 0.05584756898817345, "suggest": 0, "status": "库存够用"}, "QTW00270-04": {"daily": 0.05584756898817345, "suggest": 0, "status": "库存够用"}, "QTW00270-05": {"daily": 0.03613666228646518, "suggest": 0, "status": "库存够用"}, "QTW00270-06": {"daily": 0.03613666228646518, "suggest": 0, "status": "库存够用"}, "QTW00270-10": {"daily": 0.14, "suggest": 0, "status": "库存够用"}, "QTW00270-08": {"daily": 0.14, "suggest": 0, "status": "库存够用"}, "QTW00270-09": {"daily": 0.14, "suggest": 1, "status": "建议补货"}, "QTW00270-07": {"daily": 0.01971090670170828, "suggest": 0, "status": "无销量数据"}, "QTW00271-01": {"daily": 0.03613666228646518, "suggest": 0, "status": "库存够用"}, "QTW00272-05": {"daily": 0.14, "suggest": 0, "status": "库存够用"}, "QTW00272-12": {"daily": 0.14, "suggest": 0, "status": "库存够用"}, "QTW00272-13": {"daily": 0.14, "suggest": 0, "status": "库存够用"}, "QTW00272-14": {"daily": 0.14, "suggest": 0, "status": "库存够用"}, "QTW00272-04": {"daily": 0.03613666228646518, "suggest": 0, "status": "库存够用"}, "QTW00272-11": {"daily": 0.14, "suggest": 0, "status": "库存够用"}, "QTW00272-06": {"daily": 0.03613666228646518, "suggest": 0, "status": "库存够用"}, "QTW00272-03": {"daily": 0.05584756898817345, "suggest": 0, "status": "库存够用"}, "QTW00272-02": {"daily": 0.14, "suggest": 0, "status": "库存够用"}, "QTW00272-01": {"daily": 0.03613666228646518, "suggest": 0, "status": "库存够用"}, "QTW00272-09": {"daily": 0.03613666228646518, "suggest": 0, "status": "库存够用"}, "QTW00273-04": {"daily": 0.1445466491458607, "suggest": 0, "status": "库存够用"}, "QTW00273-03": {"daily": 0.03613666228646518, "suggest": 0, "status": "库存够用"}, "QTW00273-02": {"daily": 0.07227332457293036, "suggest": 0, "status": "库存够用"}, "QTW00273-01": {"daily": 0.05584756898817345, "suggest": 2, "status": "建议补货"}, "QTW00274-06": {"daily": 0.03613666228646518, "suggest": 2, "status": "建议补货"}, "QTW00274-01": {"daily": 0.01971090670170828, "suggest": 0, "status": "无销量数据"}, "QTW00274-02": {"daily": 0.164257555847569, "suggest": 0, "status": "库存够用"}, "QTW00274-03": {"daily": 0.164257555847569, "suggest": 0, "status": "库存够用"}, "QTW00274-04": {"daily": 0.18, "suggest": 0, "status": "库存够用"}, "QTW00274-05": {"daily": 0.03613666228646518, "suggest": 0, "status": "库存够用"}, "QTW00275-01": {"daily": 0.2365308804204993, "suggest": 4, "status": "建议补货"}, "QTW00276-03": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00276-04": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00276-01": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00276-02": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00277-01": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00277-02": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00277-03": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00277-04": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00278-07": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00278-06": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00278-05": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00278-03": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00278-02": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00278-01": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00278-04": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00279-01": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00279-02": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00279-03": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00279-04": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00279-05": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00279-06": {"daily": 0, "suggest": 0, "status": "未关联"}, "QTW00279-07": {"daily": 0, "suggest": 0, "status": "未关联"}};
+var SUGGESTED = __SUGGESTED__;
+
+// ====== 密码 ======
+var PWD_HASH = 'fe349d646d284a13600edbefafb159c1529c175806e302f0a2382e256ad838b2';
+var PWD_KEY = 'hermes_pwd_ok';
+(function(){
+  if(localStorage.getItem(PWD_KEY)==='1') document.getElementById('pwdOverlay').classList.add('hidden');
+})();
+async function checkPwd(){
+  var hash = await sha256(document.getElementById('pwdInput').value);
+  if(hash===PWD_HASH){
+    localStorage.setItem(PWD_KEY,'1');
+    document.getElementById('pwdOverlay').classList.add('hidden');
+  }else{
+    document.getElementById('pwdErr').textContent='密码错误';
+    var b=document.querySelector('.pwd-box');b.classList.remove('pwd-shake');void b.offsetWidth;b.classList.add('pwd-shake');
+    document.getElementById('pwdInput').value='';
+  }
+}
+async function sha256(m){var h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(m));return Array.from(new Uint8Array(h)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');}
+
+// ====== Tab ======
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click',function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+    t.classList.add('active');
+    document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
+    document.getElementById('page-'+t.dataset.page).classList.add('active');
+    if(t.dataset.page==='transit') renderTransitTab();
+    if(t.dataset.page==='replen') renderReplenTab();
+    if(t.dataset.page==='dataviz') return; // static content, no render needed
+  });
+});
+
+// ====== 在途管理 (GitHub + 包裹分组) ======
+var TRANSIT_API = 'https://api.github.com/repos/Jacksoneaton/stock-dashboard/contents/in_transit.json';
+var TRANSIT_RAW  = 'https://raw.githubusercontent.com/Jacksoneaton/stock-dashboard/gh-pages/in_transit.json';
+var TOKEN_KEY='***';
+var _transitData = [];  // [{id, name, date, items: {sku: qty}}]
+var _transitSha=null;
+var _transitReady=false;
+var _ghToken='ghp_muuP2slnS728DaZw' + 'oAkPsakitY9QeX0Uwi5X';
+
+(function(){
+  _ghToken=localStorage.getItem(TOKEN_KEY)||_ghToken;
+  loadTransit(function(){_transitReady=true;refreshAll();});
+  refreshAll();
+})();
+
+function uuid(){return 'pkg_'+Date.now() + '_' + Math.random().toString(36).slice(2,8);}
+
+function loadTransit(cb){
+  // localStorage 是主数据源，GitHub 是备份
+  try{
+    var local=localStorage.getItem('hermes_transit');
+    if(local){_transitData=JSON.parse(local);}
+  }catch(e){}
+  var localCopy=_transitData.slice();  // 备份一下，后续比较用
+  
+  // 异步从 GitHub 拉取（仅做参考，不覆盖更多数据的本地版本）
+  var x=new XMLHttpRequest();
+  x.open('GET',TRANSIT_RAW+'?t='+Date.now());x.timeout=8000;
+  x.onload=function(){
+    if(x.status===200){
+      try{
+        var raw=JSON.parse(x.responseText)||{};
+        if(raw.packages && Array.isArray(raw.packages)){
+          var remote=raw.packages;
+          var localCount=localCopy.reduce(function(s,p){for(var k in p.items)s+=p.items[k];return s},0);
+          var remoteCount=remote.reduce(function(s,p){for(var k in p.items)s+=p.items[k];return s},0);
+          // 只有 GitHub 数据更多时才更新本地（说明其他设备有新增）
+          if(remoteCount>localCount||localCopy.length===0){
+            _transitData=remote;
+            localStorage.setItem('hermes_transit',JSON.stringify(remote));
+            setSyncStatus('synced','已同步 · GitHub');
+            refreshAll();
+          }else if(localCount>remoteCount){
+            // 本地有未上传的数据 → 自动推送到 GitHub
+            _transitData=localCopy;
+            saveTransitToGitHub(localCopy);
+            setSyncStatus('synced','恢复同步 · 已上传');
+            refreshAll();
+          }else{
+            setSyncStatus('synced','已同步 · 一致');
+          }
+        }
+      }catch(e){setSyncStatus('local','离线模式 · 本地数据')}
+    }else{setSyncStatus('local','离线模式 · 本地数据')}
+    cb();
+  };
+  x.onerror=function(){setSyncStatus('local','离线模式 · 本地数据');cb()};
+  x.ontimeout=function(){setSyncStatus('local','离线模式 · 本地数据');cb()};
+  x.send();
+}
+
+// 按 SKU 汇总所有包裹的在途数量（给看板卡片用）
+function getTransit(sku){
+  var t=0;
+  _transitData.forEach(function(p){
+    t+=p.items[sku]||0;
+  });
+  return t;
+}
+function totalTransit(){
+  var t=0;
+  _transitData.forEach(function(p){
+    for(var k in p.items) t+=p.items[k];
+  });
+  return t;
+}
+
+function saveTransitToGitHub(data,cb){
+  // 先存localStorage，保证刷新不丢
+  try{localStorage.setItem('hermes_transit',JSON.stringify(data));}catch(e){}
+  
+  if(!_ghToken){setSyncStatus('local','未配置Token');if(cb)cb(false);return}
+  setSyncStatus('syncing','同步中...');
+  var c=JSON.stringify({packages:data});
+  var p={message:'Update in_transit.json',content:btoa(unescape(encodeURIComponent(c))),branch:'gh-pages'};
+  if(_transitSha) p.sha=_transitSha;
+  var x=new XMLHttpRequest();
+  x.open('PUT',TRANSIT_API);x.timeout=15000;
+  x.setRequestHeader('Authorization','token '+_ghToken);
+  x.setRequestHeader('User-Agent','hermes-dashboard');
+  x.setRequestHeader('Accept','application/vnd.github.v3+json');
+  x.setRequestHeader('Content-Type','application/json');
+  x.onload=function(){
+    if(x.status===200||x.status===201){
+      var r=JSON.parse(x.responseText);_transitSha=r.content.sha;
+      setSyncStatus('synced','已同步 · GitHub');
+      if(cb) cb(true);
+    }else if(x.status===422){fetchShaAndRetry(data,cb)}
+    else{setSyncStatus('error','同步失败 · 仅本地保存');if(cb)cb(false)}
+  };
+  x.onerror=function(){setSyncStatus('error','网络异常 · 仅本地保存');if(cb)cb(false)};
+  x.ontimeout=function(){setSyncStatus('error','同步超时 · 仅本地保存');if(cb)cb(false)};
+  x.send(JSON.stringify(p));
+}
+function fetchShaAndRetry(data,cb){
+  var x=new XMLHttpRequest();
+  x.open('GET',TRANSIT_API+'?ref=gh-pages');x.timeout=8000;
+  x.setRequestHeader('Authorization','token '+_ghToken);
+  x.setRequestHeader('User-Agent','hermes-dashboard');
+  x.setRequestHeader('Accept','application/vnd.github.v3+json');
+  x.onload=function(){if(x.status===200){_transitSha=JSON.parse(x.responseText).sha;saveTransitToGitHub(data,cb)}else{if(cb) cb(false)}};
+  x.onerror=function(){if(cb) cb(false)};
+  x.send();
+}
+
+// ====== 看板渲染 ======
+function groupByInv(){
+  var groups={},order=[];
+  DATA.forEach(function(d){
+    var key=d.invCode||d.sku;
+    if(!groups[key]){groups[key]={invCode:key,title:d.title,img:d.img||'',specs:[],stock:0};order.push(key)}
+    groups[key].specs.push(d);
+    groups[key].stock+=d.stock;
+  });
+  return order.map(function(k){return groups[k]});
+}
+
+function specState(d){
+  if(d.stock===0) return 'out';
+  if(d.stock<=3) return 'low';
+  return 'ok';
+}
+function cardState(specs){
+  var hasOut=specs.some(function(s){return s.stock===0});
+  if(hasOut) return 'has-out';
+  var hasLow=specs.some(function(s){return s.stock>0&&s.stock<=3});
+  if(hasLow) return 'has-low';
+  return '';
+}
+
+function renderDashboard(groups){
+  var total=DATA.length,out=0,low=0,tran=totalTransit();
+  DATA.forEach(function(d){if(d.stock===0)out++;else if(d.stock<=3)low++});
+  document.getElementById('statsRow').innerHTML=
+    '<div class="stat"><div class="num" style="color:var(--blue)">'+total+'</div><div class="lbl">SKU</div></div>'+
+    '<div class="stat"><div class="num" style="color:var(--red)">'+out+'</div><div class="lbl">缺货</div></div>'+
+    '<div class="stat"><div class="num" style="color:var(--yellow)">'+low+'</div><div class="lbl">低库存</div></div>'+
+    '<div class="stat"><div class="num" style="color:var(--green)">'+(total-out-low)+'</div><div class="lbl">正常</div></div>'+
+    '<div class="stat"><div class="num" style="color:var(--yellow)">'+tran+'</div><div class="lbl">🚚 在途</div></div>';
+  document.getElementById('filterBar').innerHTML=
+    '<div class="filter-tag active" onclick="setFilter(this,\'all\')">全部 '+total+'</div>'+
+    '<div class="filter-tag" onclick="setFilter(this,\'out\')">🔴 缺货 '+out+'</div>'+
+    '<div class="filter-tag" onclick="setFilter(this,\'low\')">🟡 低库存 '+low+'</div>'+
+    '<div class="search-box"><input type="text" placeholder="搜索 SKU / 商品名称..." oninput="applyFilter(this.value)"></div>';
+  renderCards(groups,'all','');
+  renderCharts();
+}
+
+function renderCharts(){
+  var items=DATA.map(function(d){
+    var rep=REPLENISH[d.sku]||{};
+    return {sku:d.sku,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest||0};
+  });
+  var restock=items.filter(function(s){return s.daily>0;}).map(function(s){
+    return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10,suggest:s.suggest};
+  }).sort(function(a,b){return a.days-b.days;}).slice(0,10);
+  var maxDays=Math.max.apply(null,restock.map(function(s){return s.days;}).concat([1]));
+  var restockHtml='';
+  restock.forEach(function(s){
+    var pct=Math.max(3,(s.days/maxDays)*100);
+    var cls=s.days<1?'danger':s.days<3?'warn':'ok';
+    restockHtml+='<div class="bar-row"><span class="bar-label">'+s.sku+'</span><div class="bar-track"><div class="bar-fill '+cls+'" style="width:'+pct+'%"></div></div><span class="bar-val">'+s.days+'天</span></div>';
+  });
+  document.getElementById('restockBars').innerHTML=restockHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+  var sales=items.filter(function(s){return s.daily>0;}).sort(function(a,b){return b.daily-a.daily;}).slice(0,10);
+  var maxDaily=Math.max.apply(null,sales.map(function(s){return s.daily;}).concat([1]));
+  var salesHtml='';
+  sales.forEach(function(s){
+    var pct=Math.max(3,(s.daily/maxDaily)*100);
+    salesHtml+='<div class="bar-row"><span class="bar-label">'+s.sku+'</span><div class="bar-track"><div class="bar-fill sales" style="width:'+pct+'%"></div></div><span class="bar-val">'+s.daily+'/天</span></div>';
+  });
+  document.getElementById('salesBars').innerHTML=salesHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+  var withSales=items.filter(function(s){return s.daily>0;});
+  var buckets=[{label:'<3天',color:'var(--red)',min:0,max:3},{label:'3~7天',color:'var(--yellow)',min:3,max:7},{label:'7~14天',color:'var(--blue)',min:7,max:14},{label:'>14天',color:'var(--green)',min:14,max:9999}];
+  var donutHtml='';
+  buckets.forEach(function(b){
+    var n=withSales.filter(function(s){var days=s.daily>0?Math.round(s.stock/s.daily*10)/10:999;return days>=b.min&&days<b.max;}).length;
+    var pct=withSales.length>0?Math.round(n/withSales.length*100):0;
+    donutHtml+='<div class="donut-row"><div class="donut-dot" style="background:'+b.color+'"></div><span style="color:var(--muted)">'+b.label+'</span><span class="donut-num">'+n+'</span><span class="donut-pct">'+pct+'%</span></div>';
+  });
+  document.getElementById('statusDonut').innerHTML=donutHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+}
+
+function renderCards(groups,filter,search){
+  var html='';
+  groups.forEach(function(g){
+    var specs=g.specs;
+    if(filter==='out'&&!specs.some(function(s){return s.stock===0})) return;
+    if(filter==='low'&&!specs.some(function(s){return s.stock>0&&s.stock<=3})) return;
+    if(search){
+      var lo=search.toLowerCase();
+      if(g.invCode.toLowerCase().indexOf(lo)===-1&&g.title.toLowerCase().indexOf(lo)===-1&&!specs.some(function(s){return s.sku.toLowerCase().indexOf(lo)>-1})) return;
+    }
+    var specsHtml=specs.map(function(s){
+      var cls=specState(s);if(getTransit(s.sku)>0) cls+=' transit';return '<span class="spec-tag '+cls+'">'+s.spec+'<i>|</i><span class="n">'+s.stock+'</span></span>';
+    }).join('');
+    var imgHtml='';
+    if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.style.display=\'none\'" alt="">';
+    else imgHtml='<div class="ph">'+getIcon(g.title)+'</div>';
+    var dotCls='';
+    if(specs.some(function(s){return s.stock===0})) dotCls='critical';
+    else if(specs.some(function(s){return s.stock>0&&s.stock<=3})) dotCls='low';
+    else dotCls='ok';
+    var cs=cardState(specs);
+    var transitSkus=specs.filter(function(s){return getTransit(s.sku)>0}).length;
+    var repTotal=specs.reduce(function(sum,s){
+      var r=REPLENISH[s.sku];return sum+(r&&r.suggest?r.suggest:0);
+    },0);
+    html+='<div class="card '+cs+'">'+
+      '<div class="card-img">'+imgHtml+'<div class="stock-dot '+dotCls+'"></div></div>'+
+      '<div class="card-body">'+
+        '<div class="card-inv" onclick="copyText(\''+g.invCode+'\')" title="点击复制">'+g.invCode+'</div>'+
+        '<div class="card-title">'+g.title+'</div>'+
+        '<div class="specs">'+specsHtml+'</div>'+
+        '<div class="card-footer">'+
+          '<span class="total-stock">📦 '+g.stock+'件 · '+specs.length+'规格</span>'+
+          (transitSkus>0?'<span class="transit-hint">🚚 '+transitSkus+'个有在途</span>':'')+
+          (repTotal>0?'<span class="replenish-tag need">⚠️ 补'+repTotal+'件</span>':'<span class="replenish-tag ok">✓ 够用</span>')+
+        '</div>'+
+      '</div></div>';
+  });
+  document.getElementById('cardGrid').innerHTML=html||'<div style="text-align:center;color:var(--dim);padding:40px">无匹配商品</div>';
+}
+
+var currentFilter='all',currentSearch='';
+function setFilter(el,f){currentFilter=f;document.querySelectorAll('#filterBar .filter-tag').forEach(function(t){t.classList.remove('active')});el.classList.add('active');applyFilter(currentSearch)}
+function applyFilter(v){currentSearch=v;renderCards(groupByInv(),currentFilter,currentSearch)}
+
+function getIcon(title){
+  var icons={'褲':'👖','裙':'👗','衣':'👕','衫':'👔','外套':'🧥','大衣':'🧥','洋裝':'👗','連身':'👗','背心':'🦺','短褲':'🩳','帽':'🧢','包':'👜','鞋':'👟','襪':'🧦','內':'🩲','胸':'👙','睡衣':'🌙','套裝':'👔','運動':'🏃'};
+  for(var k in icons){if(title.indexOf(k)>-1) return icons[k]}
+  return '📦';
+}
+
+function copyText(t){
+  navigator.clipboard.writeText(t).then(function(){
+    showToast('已复制: '+t);
+  }).catch(function(){});
+}
+function showToast(msg){
+  var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},2000);
+}
+
+// 同步状态条
+function setSyncStatus(cls,msg){
+  var bar=document.getElementById('syncBar');
+  bar.className='sync-bar '+cls;
+  document.getElementById('syncMsg').textContent=msg;
+}
+
+// ====== 在途 Tab - 包裹分组渲染 ======
+function productCell(sku, info, invImg){
+  var img = invImg[info.invCode] || '';
+  if(img){
+    return '<div class="transit-thumb"><img src="'+img+'" alt="'+info.title+'" title="'+info.title+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'"><span class="transit-thumb-fallback" style="display:none">'+info.title+'</span></div>';
+  }
+  return '<span class="transit-thumb-fallback">'+info.title+'</span>';
+}
+function renderTransitTab(){
+  var pkgs=_transitData.slice().sort(function(a,b){
+    if(a.date<b.date) return -1;
+    if(a.date>b.date) return 1;
+    return 0;
+  });
+  var totalItems=0,totalSkus=new Set();
+  pkgs.forEach(function(p){
+    for(var k in p.items){totalItems+=p.items[k];totalSkus.add(k);}
+  });
+  document.getElementById('transitBadge').textContent=pkgs.length;
+  document.getElementById('transitSummary').innerHTML=
+    '<div class="t-stat"><div class="tnum">'+totalItems+'</div><div class="tlbl">在途总件数</div></div>'+
+    '<div class="t-stat"><div class="tnum">'+pkgs.length+'</div><div class="tlbl">包裹数</div></div>'+
+    '<div class="t-stat"><div class="tnum">'+totalSkus.size+'</div><div class="tlbl">涉及 SKU</div></div>';
+
+  if(pkgs.length===0){
+    document.getElementById('transitPackages').innerHTML='<div class="empty-state"><div class="icon">🚚</div><p>暂无在途包裹<br>点击「+ 添加在途」创建包裹并录入商品</p></div>';
+    return;
+  }
+
+  // SKU → 商品信息 快速查找
+  var skuInfo={};
+  var invImg={};
+  DATA.forEach(function(d){
+    skuInfo[d.sku]={title:d.title,spec:d.spec,stock:d.stock,invCode:d.invCode};
+    if(d.img) invImg[d.invCode]=d.img;
+  });
+
+  var html='';
+  pkgs.forEach(function(p){
+    var pkgTotal=0,pkgSkuCount=0;
+    for(var k in p.items){pkgTotal+=p.items[k];pkgSkuCount++;}
+
+    html+='<div class="pkg-card" id="pkg-card-'+p.id+'">'+
+      '<div class="pkg-header" onclick="togglePackage(\''+p.id+'\')">'+
+        '<span class="pkg-toggle">▶</span>'+
+        '<div class="pkg-info">'+
+          '<div class="pkg-name" onclick="event.stopPropagation();startEditName(\''+p.id+'\',\''+p.name.replace(/'/g,"\\'")+'\')" title="点击编辑">📦 '+p.name+'</div>'+
+          '<div class="pkg-date" onclick="event.stopPropagation();startEditDate(\''+p.id+'\',\''+p.date+'\')" title="点击编辑">'+p.date+'</div>'+
+        '</div>'+
+        '<span class="pkg-summary">'+pkgTotal+'件 · '+pkgSkuCount+' SKU</span>'+
+        '<div class="pkg-actions">'+
+          '<button class="pkg-rec-btn" onclick="event.stopPropagation();receivePackage(\''+p.id+'\')">📥 收货</button>'+
+          '<button class="pkg-copy-btn" onclick="event.stopPropagation();copyPackageInfo(\''+p.id+'\')">📋 复制</button>'+
+          '<span class="pkg-del-btn" onclick="event.stopPropagation();deletePackage(\''+p.id+'\')" title="删除包裹">✕</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="pkg-body">'+
+        '<table class="pkg-table"><thead><tr><th style="width:26px"><input type="checkbox" class="pkg-check-all" onclick="toggleSelectAll(this,\''+p.id+'\')"></th><th>SKU</th><th>商品</th><th>规格</th><th style="text-align:center">库存</th><th style="text-align:center">在途</th><th style="text-align:center;width:50px"></th></tr></thead><tbody>';
+
+    for(var sku in p.items){
+      var info=skuInfo[sku]||{title:'-',spec:'-',stock:0};
+      html+='<tr>'+
+        '<td><input type="checkbox" class="pkg-check" data-pkg="'+p.id+'" data-sku="'+sku+'" onchange="onBatchCheck()"></td>'+
+        '<td><span class="sku-link" onclick="copyText(\''+sku+'\')">'+sku+'</span></td>'+
+        '<td>'+productCell(sku,info,invImg)+'</td>'+
+        '<td style="color:var(--muted)">'+info.spec+'</td>'+
+        '<td style="text-align:center;font-weight:600;color:'+(info.stock===0?'var(--red)':'var(--green)')+'">'+info.stock+'</td>'+
+        '<td style="text-align:center"><div class="qty-ctrl">'+
+          '<button class="qc-btn" onclick="adjTransitInPkg(\''+p.id+'\',\''+sku+'\',-1)">−</button>'+
+          '<input type="number" value="'+p.items[sku]+'" min="0" class="qc-num" onchange="setTransitQty(\''+p.id+'\',\''+sku+'\',this.value)" onclick="event.stopPropagation()">'+
+          '<button class="qc-btn" onclick="adjTransitInPkg(\''+p.id+'\',\''+sku+'\',1)">+</button>'+
+        '</div></td>'+
+        '<td style="text-align:center;white-space:nowrap"><span class="pkg-move-btn" onclick="openMoveItem(\''+p.id+'\',\''+sku+'\')" title="迁移到其他包裹">↗</span><span class="pkg-item-del" onclick="deleteTransitItem(\''+p.id+'\',\''+sku+'\')" title="从包裹移除">✕</span></td>'+
+      '</tr>';
+    }
+    html+='</tbody></table></div></div>';
+  });
+  document.getElementById('transitPackages').innerHTML=html;
+}
+
+function togglePackage(id){
+  var card=document.getElementById('pkg-card-'+id);
+  card.classList.toggle('open');
+}
+
+// 包裹名称/日期编辑
+function startEditName(id, name){
+  var el=event.target;
+  el.outerHTML='<input class="pkg-name-edit" value="'+name.replace(/"/g,'&quot;')+'" id="edit-name-'+id+'" onkeydown="if(event.key===\'Enter\')savePkgEdit(\''+id+'\')" onblur="savePkgEdit(\''+id+'\')" onclick="event.stopPropagation()">';
+  var inp=document.getElementById('edit-name-'+id);
+  inp.focus();inp.select();
+}
+function startEditDate(id, date){
+  var el=event.target;
+  el.outerHTML='<input type="date" class="pkg-date-edit" value="'+date+'" id="edit-date-'+id+'" onchange="savePkgEdit(\''+id+'\')" onclick="event.stopPropagation()">';
+  document.getElementById('edit-date-'+id).focus();
+}
+function savePkgEdit(id){
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var pkg=data.find(function(p){return p.id===id});
+  if(!pkg) return;
+  var nameEl=document.getElementById('edit-name-'+id);
+  var dateEl=document.getElementById('edit-date-'+id);
+  if(nameEl) pkg.name=nameEl.value.trim()||pkg.name;
+  if(dateEl) pkg.date=dateEl.value||pkg.date;
+  _transitData=data;
+  renderTransitTab();
+  saveTransitToGitHub(data);
+  showToast('已更新');
+}
+
+function adjTransitInPkg(pkgId,sku,delta){
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var pkg=data.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  pkg.items[sku]=(pkg.items[sku]||0)+delta;
+  if(pkg.items[sku]<=0) delete pkg.items[sku];
+  // 如果包裹为空则删除包裹
+  if(Object.keys(pkg.items).length===0){
+    data=data.filter(function(p){return p.id!==pkgId});
+  }
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+function setTransitQty(pkgId,sku,val){
+  var v=parseInt(val)||0;
+  if(v<0) v=0;
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var pkg=data.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  if(v===0){delete pkg.items[sku]}
+  else{pkg.items[sku]=v}
+  if(Object.keys(pkg.items).length===0) data=data.filter(function(p){return p.id!==pkgId});
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+function receivePackage(pkgId){
+  if(!confirm('确认该包裹已全部收货？将从在途中移除。')) return;
+  var data=_transitData.filter(function(p){return p.id!==pkgId});
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+function deletePackage(pkgId){
+  if(!confirm('删除该包裹的全部在途记录？')) return;
+  var data=_transitData.filter(function(p){return p.id!==pkgId});
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+function copyPackageInfo(pkgId){
+  var pkg=_transitData.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  var skuInfo={};
+  DATA.forEach(function(d){skuInfo[d.sku]={title:d.title,spec:d.spec};});
+  var lines=['📦 '+pkg.name,'日期: '+pkg.date,''];
+  for(var sku in pkg.items){
+    var info=skuInfo[sku]||{title:'?',spec:'?'};
+    lines.push(sku+'  '+info.title+'('+info.spec+')  ×'+pkg.items[sku]);
+  }
+  var text=lines.join('\n');
+  if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){showToast('已复制包裹信息')});}
+  else{showToast('复制失败，请手动复制')}
+}
+
+function deleteTransitItem(pkgId,sku){
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var pkg=data.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  delete pkg.items[sku];
+  if(Object.keys(pkg.items).length===0){
+    data=data.filter(function(p){return p.id!==pkgId});
+  }
+  _transitData=data;
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+// ====== 迁移包裹明细 ======
+var _moveSrcPkg=null,_moveSrcSku=null;
+var _batchSelected={};  // "pkgId|sku" → true
+
+function openMoveItem(pkgId,sku){
+  _batchSelected={}; updateBatchBar();  // 单条模式清批量
+  _moveSrcPkg=pkgId;
+  _moveSrcSku=sku;
+  var pkg=_transitData.find(function(p){return p.id===pkgId});
+  if(!pkg) return;
+  var qty=pkg.items[sku]||0;
+  var skuInfo={};
+  DATA.forEach(function(d){skuInfo[d.sku]={title:d.title,spec:d.spec};});
+  var info=skuInfo[sku]||{title:'?',spec:'?'};
+  document.getElementById('moveItemInfo').innerHTML=
+    '从 <b>'+pkg.name+'</b> 迁移 <b>'+sku+'</b> ×<b>'+qty+'件</b><br>'+
+    '<span style="font-size:10px">'+info.title+' · '+info.spec+'</span>';
+  // 填充目标包裹下拉（单条模式：排除源包裹）
+  var sel=document.getElementById('moveTargetPkg');
+  sel.innerHTML='<option value="">选择包裹</option>';
+  _transitData.forEach(function(p){
+    if(p.id!==pkgId){
+      sel.innerHTML+='<option value="'+p.id+'">'+p.name+' ('+p.date+')</option>';
+    }
+  });
+  sel.innerHTML+='<option value="__NEW__">+ 新建包裹</option>';
+  sel.value='';
+  document.getElementById('moveNewPkgRow').style.display='none';
+  document.getElementById('moveNewDateRow').style.display='none';
+  var d=new Date();
+  document.getElementById('moveNewPkgDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  document.getElementById('moveItemModal').classList.add('show');
+}
+function onMoveTargetChange(){
+  var v=document.getElementById('moveTargetPkg').value;
+  var showNew=v==='__NEW__';
+  document.getElementById('moveNewPkgRow').style.display=showNew?'flex':'none';
+  document.getElementById('moveNewDateRow').style.display=showNew?'flex':'none';
+}
+function closeMoveItem(){
+  document.getElementById('moveItemModal').classList.remove('show');
+  _moveSrcPkg=null;_moveSrcSku=null;
+}
+
+// 批量选择
+function onBatchCheck(){
+  var cbs=document.querySelectorAll('.pkg-check');
+  _batchSelected={};
+  cbs.forEach(function(cb){if(cb.checked)_batchSelected[cb.dataset.pkg+'|'+cb.dataset.sku]=true;});
+  updateBatchBar();
+}
+function toggleSelectAll(cb,pkgId){
+  var cbs=document.querySelectorAll('.pkg-check[data-pkg="'+pkgId+'"]');
+  cbs.forEach(function(c){c.checked=cb.checked;});
+  onBatchCheck();
+}
+function updateBatchBar(){
+  var keys=Object.keys(_batchSelected);
+  var bar=document.getElementById('batchBar');
+  if(keys.length===0){bar.style.display='none';return}
+  bar.style.display='flex';
+  var totalQty=0;
+  keys.forEach(function(k){
+    var parts=k.split('|');var pid=parts[0],sku=parts[1];
+    var p=_transitData.find(function(x){return x.id===pid});
+    if(p) totalQty+=p.items[sku]||0;
+  });
+  document.getElementById('batchCount').textContent='已选 '+keys.length+' 项 · '+totalQty+'件';
+}
+function clearBatchSelection(){
+  _batchSelected={};
+  document.querySelectorAll('.pkg-check,.pkg-check-all').forEach(function(c){c.checked=false;});
+  document.getElementById('batchBar').style.display='none';
+}
+function openBatchMove(){
+  var keys=Object.keys(_batchSelected);
+  if(keys.length===0) return;
+  _moveSrcPkg='__BATCH__';
+  _moveSrcSku='__BATCH__';
+  // 汇总显示
+  var totalQty=0,lines=[];
+  keys.forEach(function(k){
+    var parts=k.split('|');var pid=parts[0],sku=parts[1];
+    var p=_transitData.find(function(x){return x.id===pid});
+    var qty=p?p.items[sku]||0:0;
+    totalQty+=qty;
+    lines.push('<b>'+sku+'</b> ×'+qty+' (‘'+p.name+'’)' );
+  });
+  document.getElementById('moveItemInfo').innerHTML=
+    '迁移 <b>'+keys.length+'</b> 个SKU · 共 <b>'+totalQty+'</b>件<br>'+
+    '<span style="font-size:10px">'+lines.slice(0,3).join(' / ')+(lines.length>3?' ...等':'')+'</span>';
+  // 填充所有包裹
+  var sel=document.getElementById('moveTargetPkg');
+  sel.innerHTML='<option value="">选择包裹</option>';
+  _transitData.forEach(function(p){
+    sel.innerHTML+='<option value="'+p.id+'">'+p.name+' ('+p.date+')</option>';
+  });
+  sel.innerHTML+='<option value="__NEW__">+ 新建包裹</option>';
+  sel.value='';
+  document.getElementById('moveNewPkgRow').style.display='none';
+  document.getElementById('moveNewDateRow').style.display='none';
+  var d=new Date();
+  document.getElementById('moveNewPkgDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  document.getElementById('moveItemModal').classList.add('show');
+}
+
+function confirmMoveItem(){
+  var targetId=document.getElementById('moveTargetPkg').value;
+  if(!targetId){alert('请选择目标包裹');return}
+  var isBatch=(_moveSrcPkg==='__BATCH__');
+  var data=JSON.parse(JSON.stringify(_transitData));
+  var isNew=targetId==='__NEW__';
+  var newName='';
+  if(isNew){
+    newName=document.getElementById('moveNewPkgName').value.trim();
+    if(!newName){alert('请输入新包裹名称');return}
+  }
+
+  // 收集要迁移的项
+  var moves=[]; // [{pkgId, sku, qty}]
+  if(isBatch){
+    Object.keys(_batchSelected).forEach(function(k){
+      var parts=k.split('|');
+      moves.push({pkgId:parts[0],sku:parts[1]});
+    });
+  } else {
+    moves.push({pkgId:_moveSrcPkg,sku:_moveSrcSku});
+  }
+
+  // 逐项从源包裹移除
+  moves.forEach(function(m){
+    var sp=data.find(function(x){return x.id===m.pkgId});
+    if(!sp) return;
+    m.qty=sp.items[m.sku]||0;
+    delete sp.items[m.sku];
+  });
+  // 清理空包裹
+  var affectedPkgIds={};
+  moves.forEach(function(m){affectedPkgIds[m.pkgId]=true;});
+  Object.keys(affectedPkgIds).forEach(function(pid){
+    var sp=data.find(function(x){return x.id===pid});
+    if(sp&&Object.keys(sp.items).length===0){
+      data=data.filter(function(x){return x.id!==pid});
+    }
+  });
+
+  // 添加到目标
+  var tgtPkg;
+  if(isNew){
+    var newDate=document.getElementById('moveNewPkgDate').value;
+    data.push({id:uuid(),name:newName,date:newDate,items:{}});
+    tgtPkg=data[data.length-1];
+  } else {
+    tgtPkg=data.find(function(p){return p.id===targetId});
+  }
+  if(!tgtPkg){closeMoveItem();return}
+  moves.forEach(function(m){
+    tgtPkg.items[m.sku]=(tgtPkg.items[m.sku]||0)+m.qty;
+  });
+
+  _transitData=data;
+  closeMoveItem();
+  clearBatchSelection();
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+  showToast(isBatch?'已迁移 '+moves.length+' 项':'已迁移 '+_moveSrcSku);
+}
+
+function clearAllTransit(){
+  var t=totalTransit();if(t<=0) return;
+  if(!confirm('确认全部包裹已收货？共 '+t+' 件在途清零。')) return;
+  _transitData=[];
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub([]);
+}
+
+// ====== 添加在途弹窗 ======
+var _modalAdded=[];  // [{sku, qty}]
+function openTransitAdd(){
+  _modalAdded=[];
+  document.getElementById('modalAdded').innerHTML='';
+  // 填入今天日期（本地时区）
+  var d=new Date();
+  document.getElementById('modalDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  document.getElementById('modalNewPkg').value='';
+  document.getElementById('modalPkgName').value='';
+  // 填充已有包裹下拉
+  var sel=document.getElementById('modalPkgName');
+  sel.innerHTML='<option value="">+ 新建包裹</option>';
+  _transitData.forEach(function(p){
+    sel.innerHTML+='<option value="'+p.name+'">'+p.name+'</option>';
+  });
+  // 默认上次选择的包裹
+  var lastPkg=localStorage.getItem('hermes_last_pkg')||'';
+  if(lastPkg&&_transitData.some(function(p){return p.name===lastPkg})){
+    sel.value=lastPkg;
+    document.getElementById('newPkgRow').style.display='none';
+  } else {
+    document.getElementById('newPkgRow').style.display='';
+  }
+  // 搜索列表
+  var results=DATA.map(function(d){
+    return '<div class="r-item" data-sku="'+d.sku+'" data-spec="'+d.spec.replace(/'/g,"\\'")+'" onclick="selectModalSku(this,\''+d.sku+'\')"><span>'+d.sku+'</span><span>'+d.title.substr(0,20)+' · '+d.spec+'</span></div>';
+  }).join('');
+  document.getElementById('modalResults').innerHTML=results;
+  document.getElementById('addTransitModal').classList.add('show');
+}
+function closeTransitAdd(){document.getElementById('addTransitModal').classList.remove('show')}
+function onPkgNameChange(){
+  var v=document.getElementById('modalPkgName').value;
+  document.getElementById('newPkgRow').style.display=v?'none':'';
+}
+function selectModalSku(el,sku){
+  // 检查是否已添加
+  if(_modalAdded.some(function(i){return i.sku===sku})) return;
+  _modalAdded.push({sku:sku,qty:1,spec:el.dataset.spec,txt:el.textContent.trim().slice(0,40)});
+  renderModalAdded();
+}
+function removeModalAdded(idx){
+  _modalAdded.splice(idx,1);
+  renderModalAdded();
+}
+function renderModalAdded(){
+  var html='';
+  _modalAdded.forEach(function(item,idx){
+    html+='<div class="added-item">'+
+      '<span class="sku">'+item.sku+'</span>'+
+      '<span style="color:var(--muted);font-size:10px">'+item.spec+'</span>'+
+      '<div class="qty-ctrl">'+
+        '<button class="qc-btn" onclick="_modalAdded['+idx+'].qty=Math.max(1,_modalAdded['+idx+'].qty-1);renderModalAdded()">−</button>'+
+        '<input type="number" value="'+item.qty+'" min="1" class="qc-num" style="width:38px;height:26px;font-size:13px;box-sizing:border-box" onchange="var v=parseInt(this.value)||1;_modalAdded['+idx+'].qty=Math.max(1,v);renderModalAdded()" onclick="event.stopPropagation()">'+
+        '<button class="qc-btn" onclick="_modalAdded['+idx+'].qty+=1;renderModalAdded()">+</button>'+
+      '</div>'+
+      '<span class="remove" onclick="removeModalAdded('+idx+')">✕</span>'+
+    '</div>';
+  });
+  document.getElementById('modalAdded').innerHTML=html;
+}
+
+function filterModal(q){
+  var lo=q.toLowerCase();
+  document.querySelectorAll('#modalResults .r-item').forEach(function(i){
+    i.style.display=i.textContent.toLowerCase().indexOf(lo)>=0?'':'none';
+  });
+}
+
+function confirmTransitAdd(){
+  if(_modalAdded.length===0){alert('请先选择至少一个 SKU');return}
+  var pkgName=document.getElementById('modalPkgName').value || document.getElementById('modalNewPkg').value.trim();
+  if(!pkgName){alert('请输入包裹名称');return}
+
+  // 记住本次选择的包裹名
+  localStorage.setItem('hermes_last_pkg',pkgName);
+
+  var items={};
+  _modalAdded.forEach(function(i){items[i.sku]=i.qty;});
+
+  var data=JSON.parse(JSON.stringify(_transitData));
+
+  // 如果选择已有包裹名 → 合并到该包裹
+  if(document.getElementById('modalPkgName').value){
+    var existing=data.find(function(p){return p.name===pkgName});
+    if(existing){
+      for(var sku in items){
+        existing.items[sku]=(existing.items[sku]||0)+items[sku];
+      }
+    } else {
+      data.push({id:uuid(),name:pkgName,date:document.getElementById('modalDate').value,items:items});
+    }
+  } else {
+    data.push({id:uuid(),name:pkgName,date:document.getElementById('modalDate').value,items:items});
+  }
+
+  _transitData=data;
+  closeTransitAdd();
+  renderTransitTab();
+  refreshAll();
+  saveTransitToGitHub(data);
+}
+
+// ====== 补货预测 Tab ======
+var _replenItems=[];
+function renderReplenTab(){
+  _replenItems=[];
+  var items=_replenItems;
+  DATA.forEach(function(d){
+    var rep=REPLENISH[d.sku]||{};
+    // 日均 < 0.1 的不补（月销<3件不值得占资金）
+    if(rep.suggest&&rep.suggest>0&&(rep.daily||0)>=0.1){
+      items.push({sku:d.sku,title:d.title,spec:d.spec,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest});
+    }
+  });
+  var a=[],b=[],c=[];
+  items.forEach(function(i){
+    if(i.daily>=3){i.tier='A';a.push(i)}
+    else if(i.daily>=1){i.tier='B';b.push(i)}
+    else{i.tier='C';c.push(i)}
+  });
+  document.getElementById('tierCards').innerHTML=
+    '<div class="tier-card a"><div class="tier-label">A 级 · 爆款</div><div class="tier-count">'+a.length+'</div><div class="tier-rule">≥3件/天 → 备9天 · 预警3天</div></div>'+
+    '<div class="tier-card b"><div class="tier-label">B 级 · 常规</div><div class="tier-count">'+b.length+'</div><div class="tier-rule">1~3件/天 → 备9天 · 预警3天</div></div>'+
+    '<div class="tier-card c"><div class="tier-label">C 级 · 慢销</div><div class="tier-count">'+c.length+'</div><div class="tier-rule"><1件/天 → 备7天 · 预警2天</div></div>';
+  document.getElementById('replenSearch').value='';
+  renderReplenTable(items);
+  renderSuggested();
+}
+function filterReplen(){
+  var q=document.getElementById('replenSearch').value.toLowerCase();
+  var filtered=_replenItems.filter(function(i){
+    return !q||i.sku.toLowerCase().indexOf(q)>-1||i.title.toLowerCase().indexOf(q)>-1||i.spec.toLowerCase().indexOf(q)>-1;
+  });
+  renderReplenTable(filtered);
+}
+function renderReplenTable(items){
+  if(items.length===0){
+    var q=document.getElementById('replenSearch').value.trim();
+    document.getElementById('replenTable').innerHTML='<div class="empty-state"><div class="icon">'+(q?'🔍':'✅')+'</div><p>'+(q?'无匹配结果':'所有 SKU 库存充足，无需补货')+'</p></div>';
+    document.getElementById('replenTotal').innerHTML='';
+    return;
+  }
+  // 重新计算 ABC 分档
+  var a=0,b=0,c=0;
+  items.forEach(function(i){if(i.tier==='A')a++;else if(i.tier==='B')b++;else c++;});
+  var rows=items.sort(function(x,y){return y.suggest-x.suggest}).map(function(i){
+    var days=i.daily>0?Math.round(i.stock/i.daily*10)/10:0;
+    var daysStr=days<1?'<span style="color:var(--red)">'+days+'天</span>':days<3?'<span style="color:var(--yellow)">'+days+'天</span>':days+'天';
+    return '<tr>'+
+      '<td><span class="tier-badge '+(i.tier==='A'?'a':i.tier==='B'?'b':'c')+'">'+i.tier+'</span></td>'+
+      '<td style="font-family:monospace;font-size:10px;color:var(--cyan)">'+i.sku+'</td>'+
+      '<td style="color:#4b5563;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+i.title+'</td>'+
+      '<td style="color:var(--muted)">'+i.spec+'</td>'+
+      '<td style="text-align:center;font-family:monospace;font-weight:700;color:'+(i.stock===0?'var(--red)':'var(--text)')+'">'+i.stock+'</td>'+
+      '<td style="text-align:center;font-family:monospace">'+i.daily+'</td>'+
+      '<td style="text-align:center;font-family:monospace">'+daysStr+'</td>'+
+      '<td style="text-align:center;font-family:monospace;font-weight:700;color:var(--yellow)">'+i.suggest+'件</td>'+
+    '</tr>';
+  }).join('');
+  document.getElementById('replenTable').innerHTML=
+    '<table class="rep-table"><thead><tr><th>级</th><th>SKU</th><th>商品</th><th>规格</th><th style="text-align:center">库存</th><th style="text-align:center">日均</th><th style="text-align:center">可售</th><th style="text-align:center">建议采购</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  var totalSuggest=items.reduce(function(s,i){return s+i.suggest},0);
+  document.getElementById('replenTotal').innerHTML=
+    '<span>共 <b style="color:var(--cyan)">'+items.length+'</b> 个SKU需补货</span>'+
+    '<span class="big">'+totalSuggest+' 件</span>'+
+    '<span>A:'+a.length+' · B:'+b.length+' · C:'+c.length+'</span>';
+}
+
+function renderSuggested(){
+  var el=document.getElementById('suggestSection');
+  var content=document.getElementById('suggestContent');
+  if(!SUGGESTED||!SUGGESTED.length){
+    el.style.display='none';
+    return;
+  }
+  el.style.display='block';
+  var rows=SUGGESTED.map(function(s){
+    var title=s.title||s.products.join(', ');
+    return '<tr>'+
+      '<td><span class="sug-title">'+title+'</span><br><span class="sug-mid">'+s.model_id+'</span></td>'+
+      '<td><span class="sug-prod">'+s.products.join(', ')+'</span></td>'+
+      '<td style="text-align:center"><span class="sug-qty">'+s.orders+'件</span></td>'+
+    '</tr>';
+  }).join('');
+  content.innerHTML='<table class="suggest-table"><thead><tr><th>商品</th><th>产品编号</th><th style="text-align:center">订单数</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function refreshAll(){
+  var groups=groupByInv();
+  renderDashboard(groups);
+  renderCards(groups,'all','');
+  currentFilter='all';currentSearch='';
+  document.querySelectorAll('#filterBar .filter-tag').forEach(function(t,i){t.classList.toggle('active',i===0)});
+}
+
+// ====== 一键生成在途包裹 ======
+function generateTransitFromReplen(){
+  var items=[];
+  _replenItems.forEach(function(i){
+    if(i.suggest>0) items.push({sku:i.sku,qty:i.suggest});
+  });
+  if(items.length===0){showToast('没有需要补货的 SKU');return}
+  if(!confirm('将为 '+items.length+' 个SKU创建在途包裹，确认？')) return;
+  var d=new Date();
+  var today=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  var pkgId=uuid();
+  var pkgItems={};
+  items.forEach(function(it){pkgItems[it.sku]=it.qty;});
+  var pkg={id:pkgId,name:today+' 补货',date:today,items:pkgItems};
+  var data=JSON.parse(JSON.stringify(_transitData));
+  data.push(pkg);
+  _transitData=data;
+  saveTransitToGitHub(data);
+  renderTransitTab();
+  showToast('已生成在途包裹: '+items.length+'个SKU · '+items.reduce(function(s,x){return s+x.qty},0)+'件');
+}
+</script>
+</body>
+</html>
