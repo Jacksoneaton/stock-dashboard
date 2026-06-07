@@ -1318,7 +1318,7 @@ function renderReplenTab(){
   DATA.forEach(function(d){
     var rep=REPLENISH[d.sku]||{};
     // 日均 < 0.1 的不补（月销<3件不值得占资金）
-    if(rep.suggest&&rep.suggest>0&&(rep.daily||0)>=0.1){
+    if(rep.suggest&&rep.suggest>0){
       items.push({sku:d.sku,title:d.title,spec:d.spec,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest});
     }
   });
