@@ -1465,7 +1465,7 @@ function renderDatavizTab(){
     donutHtml+='<circle cx="100" cy="100" r="45" fill="#f5f6f8"/><text x="100" y="96" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a2e">'+withSales.length+'</text><text x="100" y="112" text-anchor="middle" font-size="10" fill="rgba(0,0,0,.5)">有销量 SKU</text></svg>';
   }
   var legendHtml=segs.map(function(s){return '<div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:2px;background:'+s.color+'"></div><span style="font-size:11px">'+s.label+'</span></div>';}).join('');
-  document.getElementById('dvDonut').outerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">'+donutHtml+'<div style="display:flex;flex-direction:column;gap:6px">'+legendHtml+'</div></div>';
+  document.getElementById('dvDonut').outerHTML='<div id="dvDonut" style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">'+donutHtml+'<div style="display:flex;flex-direction:column;gap:6px">'+legendHtml+'</div></div>';
 
   // 急补货排行
   var restock=items.filter(function(s){return s.daily>0&&s.stock>0;}).map(function(s){return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10};}).sort(function(a,b){return a.days-b.days;}).slice(0,10);
