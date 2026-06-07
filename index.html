@@ -36,6 +36,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .sync-bar.error .sync-dot{background:var(--red)}
 .sync-bar small{opacity:.6;font-size:10px}
 
+/* Update time */
+.update-time{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);margin-bottom:8px;padding:4px 0}
+.update-time .ut-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.update-time .ut-text{font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
+
 /* Stats */
 .stats-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
 .stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 18px;text-align:center;flex:1;min-width:70px;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:all .3s}
@@ -405,6 +410,7 @@ footer a{color:var(--dim);text-decoration:none}
 
   <!-- ═══ 库存看板 ═══ -->
   <div class="page active" id="page-dash">
+    <div class="update-time"><span class="ut-dot"></span><span class="ut-text" id="utDash">加载中...</span></div>
     <div class="stats-row" id="statsRow"></div>
     <div class="chart-row" id="chartRow">
       <div class="chart-card"><h3>🚨 急补货 Top 10</h3><div class="bar-list" id="restockBars"></div></div>
@@ -510,6 +516,7 @@ footer a{color:var(--dim);text-decoration:none}
 
 <!-- ═══ 数据看板 ═══ -->
 <div class="page" id="page-dataviz">
+  <div class="update-time"><span class="ut-dot"></span><span class="ut-text" id="utDataviz">加载中...</span></div>
   <div class="kpi" id="dvKpi"></div>
   <div class="row">
     <div class="card"><h3>🚨 急补货排行</h3><div class="rc-grid" id="dvRestock"></div></div>
@@ -524,6 +531,7 @@ footer a{color:var(--dim);text-decoration:none}
 
 <!-- ═══ 销售数据 ═══ -->
 <div class="page" id="page-sales">
+  <div class="update-time"><span class="ut-dot"></span><span class="ut-text" id="utSales">加载中...</span></div>
   <div class="sales-periods" id="salesPeriods">
     <button class="sp-btn active" data-period="today">今天</button>
     <button class="sp-btn" data-period="yesterday">昨天</button>
@@ -1627,6 +1635,14 @@ function renderSalesTab(){
   document.getElementById('salesOrders').innerHTML=
     '<table><thead><tr><th>日期</th><th>时间</th><th>订单号</th><th>商品</th><th>规格</th><th>数量</th><th>单价</th></tr></thead><tbody>'+rows+'</tbody></table>';
 }
+
+// ====== 更新时间戳 ======
+function updateTimestamps(){
+  var t=SALES&&SALES.generated?SALES.generated:'未知';
+  var els=[document.getElementById('utDash'),document.getElementById('utDataviz'),document.getElementById('utSales')];
+  els.forEach(function(el){if(el)el.textContent='🕐 数据更新于 '+t;});
+}
+updateTimestamps();
 </script>
 </body>
 </html>
