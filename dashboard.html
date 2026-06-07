@@ -361,6 +361,11 @@ footer a{color:var(--dim);text-decoration:none}
 .sales-orders .so-qty{text-align:center;font-weight:600}
 .sales-orders .so-price{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px}
 .sales-orders .so-name{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.sales-trend{display:flex;align-items:flex-end;gap:8px;height:160px;padding-top:8px}
+.sales-trend .bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.sales-trend .bar-fill{width:100%;background:linear-gradient(180deg,var(--cyan),rgba(8,145,178,.3));border-radius:4px 4px 0 0;transition:height .4s ease;min-height:2px}
+.sales-trend .bar-val{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:4px;text-align:center}
+.sales-trend .bar-label{font-size:10px;color:var(--dim);margin-top:6px;text-align:center}
 @media(max-width:768px){.sales-kpi{grid-template-columns:repeat(2,1fr)}.sales-row{grid-template-columns:1fr}.sales-orders .so-name{max-width:100px}}
 
 </style>
@@ -523,6 +528,10 @@ footer a{color:var(--dim);text-decoration:none}
     <div class="sales-card">
       <h3>🔥 热销商品 Top 10</h3>
       <div class="sales-top" id="salesTop"></div>
+    </div>
+    <div class="sales-card">
+      <h3>📈 近7天销售趋势</h3>
+      <div class="sales-trend" id="salesTrend"></div>
     </div>
   </div>
   <div class="sales-card">
@@ -1504,6 +1513,7 @@ function renderDatavizTab(){
 // ====== 销售数据 Tab ======
 var _salesPeriod='today';
 function renderSalesTab(){
+  var now=new Date();
   // Period buttons
   document.querySelectorAll('.sp-btn').forEach(function(b){
     b.classList.toggle('active', b.dataset.period===_salesPeriod);
@@ -1538,8 +1548,32 @@ function renderSalesTab(){
   });
   document.getElementById('salesTop').innerHTML=topHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
 
+  // 近7天销售趋势
+  var orders=SALES.orders||[];
+  var trendDays=[];
+  for(var i=6;i>=0;i--){
+    var td=new Date(now-i*864e5);
+    trendDays.push(td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0')+'-'+String(td.getDate()).padStart(2,'0'));
+  }
+  var dailyRev={};
+  orders.forEach(function(o){
+    if(trendDays.indexOf(o.date)>=0) dailyRev[o.date]=(dailyRev[o.date]||0)+o.price;
+  });
+  trendDays.forEach(function(d){if(!dailyRev[d]) dailyRev[d]=0;});
+  var trendMax=Math.max.apply(null,trendDays.map(function(d){return dailyRev[d]}))||1;
+  var total7=trendDays.reduce(function(s,d){return s+dailyRev[d]},0);
+  var trendHtml='';
+  trendDays.forEach(function(d){
+    var amt=dailyRev[d];
+    var h=Math.max(Math.round(amt/trendMax*140),2);
+    var label=d.slice(5);
+    trendHtml+='<div class="bar"><div class="bar-val">'+(amt>=1000?'NT$'+(amt/1000).toFixed(1)+'k':'NT$'+Math.round(amt))+'</div><div class="bar-fill" style="height:'+h+'px" title="'+d+': NT$'+Math.round(amt).toLocaleString()+'"></div><div class="bar-label">'+label+'</div></div>';
+  });
+  document.getElementById('salesTrend').innerHTML=
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">7天总计 <b style="color:var(--text)">NT$ '+Math.round(total7).toLocaleString()+'</b> · 日均 <b style="color:var(--text)">NT$ '+Math.round(total7/7).toLocaleString()+'</b></div>'+
+    '<div class="sales-trend">'+trendHtml+'</div>';
+
   // Order detail (filtered by period)
-  var now=new Date();
   var pd=_salesPeriod;
   var fromDate='';
   if(pd==='today'){fromDate=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');}
@@ -1547,7 +1581,7 @@ function renderSalesTab(){
   else if(pd==='7days'){var d7=new Date(now-7*864e5);fromDate=d7.getFullYear()+'-'+String(d7.getMonth()+1).padStart(2,'0')+'-'+String(d7.getDate()).padStart(2,'0');}
   else if(pd==='30days'){var d30=new Date(now-30*864e5);fromDate=d30.getFullYear()+'-'+String(d30.getMonth()+1).padStart(2,'0')+'-'+String(d30.getDate()).padStart(2,'0');}
   else if(pd==='month'){fromDate=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';}
-  var orders=SALES.orders||[];
+  orders=SALES.orders||[];
   var filteredOrders=fromDate?orders.filter(function(o){return o.date>=fromDate;}):orders;
   var rows=filteredOrders.slice().reverse().slice(0,100).map(function(o){
     return '<tr>'+
