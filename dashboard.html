@@ -1940,7 +1940,7 @@ function renderMarketTrends(){
   
   document.getElementById('trendsFilter').innerHTML=
     '<span class="filter-tag active" onclick="filterTrends(\'all\')">全部</span>'+
-    '<span class="filter-tag" onclick="filterTrends(\'top\')">热门</span>';
+    '<span class="filter-tag" onclick="filterTrends(\'top\')">蓝海</span>';
   
   renderTrendsGrid('all');
 }
@@ -2119,7 +2119,12 @@ function renderTrendsGrid(filter){
     }] : [k, v]);
   });
   entries.sort(function(a,b){ return b[1].avg - a[1].avg });
-  if (filter==='top') entries=entries.slice(0,20);
+  // 热门 = 只显示蓝海+关注 (ratio≥20)，红海不展示
+  if (filter==='top') entries=entries.filter(function(e){
+    if (!isYouying) return true;
+    var sv = e[1].avg||0, tc = e[1].items||0;
+    return sv/tc >= 20;
+  });
   
   var html='';
   entries.forEach(function(e){
