@@ -421,7 +421,7 @@ footer a{color:var(--dim);text-decoration:none}
 .premium-card .pc-value.up{color:var(--green)}.pc-value.down{color:var(--red)}
 .premium-card .pc-bar-wrap{height:4px;background:#f0f0f0;border-radius:2px;margin:4px 0;overflow:hidden}
 .premium-card .pc-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
-.premium-card .pc-spark{font-family:monospace;font-size:11px;color:var(--muted);letter-spacing:2px;margin-top:4px;opacity:.6}
+.premium-card .pc-spark{height:32px;margin-top:8px;opacity:.8}
 .trend-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;transition:all .2s}
 .trend-card:hover{border-color:rgba(8,145,178,.2);box-shadow:0 4px 16px rgba(0,0,0,.06)}
 .trend-card .tc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
@@ -1506,6 +1506,46 @@ function renderReplenTable(items){
     '<span>A:'+a.length+' · B:'+b.length+' · C:'+c.length+'</span>';
 }
 
+
+function sparkSVG(keyword, color){
+  var gtData = TRENDS && TRENDS.keywords && TRENDS.keywords[keyword];
+  if (!gtData || !gtData.data) return '<div class="pc-spark" style="text-align:center;font-size:10px;opacity:.3">暂无走势</div>';
+  
+  var points = [];
+  Object.keys(gtData.data).sort().forEach(function(d){ points.push(gtData.data[d]); });
+  if (points.length < 3) return '<div class="pc-spark" style="text-align:center;font-size:10px;opacity:.3">暂无走势</div>';
+  
+  // Take last 40 points
+  points = points.slice(-40);
+  var max = Math.max.apply(null, points) || 1;
+  var min = Math.min.apply(null, points);
+  var range = max - min || 1;
+  var w = 200, h = 32, padX = 2, padY = 4;
+  var stepX = (w - padX*2) / (points.length - 1);
+  
+  var path = '';
+  points.forEach(function(v, i){
+    var x = padX + i * stepX;
+    var y = padY + (h - padY*2) * (1 - (v - min) / range);
+    path += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+  });
+  
+  // Determine trend
+  var firstHalf = points.slice(0, Math.floor(points.length/2));
+  var secondHalf = points.slice(Math.floor(points.length/2));
+  var avg1 = firstHalf.reduce(function(a,b){return a+b},0)/firstHalf.length;
+  var avg2 = secondHalf.reduce(function(a,b){return a+b},0)/secondHalf.length;
+  var trendLabel = avg2 > avg1*1.05 ? '↑ 上升' : (avg2 < avg1*0.95 ? '↓ 下降' : '→ 平稳');
+  var trendColor = avg2 > avg1*1.05 ? 'var(--green)' : (avg2 < avg1*0.95 ? 'var(--red)' : 'var(--muted)');
+  
+  return '<div class="pc-spark">'+
+    '<svg width="100%" height="32" viewBox="0 0 '+w+' '+h+'" style="display:block">'+
+      '<path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'+
+    '</svg>'+
+    '<div style="text-align:center;font-size:9px;color:'+trendColor+';font-weight:600">'+trendLabel+' (30天)</div>'+
+  '</div>';
+}
+
 function renderSuggested(){
   var el=document.getElementById('suggestSection');
   var content=document.getElementById('suggestContent');
@@ -1959,7 +1999,7 @@ function renderStoreTrends(){
       (tc ? '<div class="pc-row"><span class="pc-label">竞品数量</span><span class="pc-value">'+Number(tc).toLocaleString()+'</span></div>' : '')+
       '<div class="pc-row"><span class="pc-label">关联 SKU</span><span class="pc-value">'+it.sku_count+'</span></div>'+
       '<div class="pc-bar-wrap"><div class="pc-bar-fill" style="background:var(--cyan);width:'+barPct+'%"></div></div>'+
-      '<div class="pc-spark">╱‾‾╲╱‾‾‾ 本店品类</div>'+
+      sparkSVG(it.keyword, ratio>50?'var(--green)':(ratio>20?'var(--yellow)':'var(--dim)'))+
     '</div>';
   });
   document.getElementById('storeGrid').innerHTML=grid||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
@@ -2082,7 +2122,7 @@ function renderTrendsGrid(filter){
         (info.price ? '<div class="pc-row"><span class="pc-label">推荐出价</span><span class="pc-value">NT$'+info.price+'</span></div>' : '')+
         (info.avgSold ? '<div class="pc-row"><span class="pc-label">均销量</span><span class="pc-value up">'+info.avgSold+' 件/月</span></div>' : '')+
         '<div class="pc-divider"></div>'+
-        '<div class="pc-spark">╱‾‾╲╱‾‾‾‾╲╱‾ 热度稳定</div>'+
+        sparkSVG(name, ratio>50?'var(--green)':(ratio>20?'var(--yellow)':'var(--dim)'))+
       '</div>';
     } else {
       var icon=info.trend==='up'?'📈':'📉';
