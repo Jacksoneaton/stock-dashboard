@@ -550,19 +550,19 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
   <div class="sales-kpi" id="salesKpi"></div>
   <div class="sales-row">
-    <div class="sales-card">
+    <div class="sales-card" style="align-self:stretch">
       <h3>🔥 热销商品 Top 10</h3>
       <div class="sales-top" id="salesTop"></div>
     </div>
-    <div class="sales-card">
-      <h3>📊 今天 vs 昨天</h3>
-      <div class="sales-wow" id="salesDod"></div>
-    </div>
-  </div>
-  <div class="sales-row">
-    <div class="sales-card" style="flex:1">
-      <h3>📈 近7天销售趋势</h3>
-      <div class="sales-trend" id="salesTrend"></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="sales-card">
+        <h3>📊 今天 vs 昨天</h3>
+        <div class="sales-wow" id="salesDod"></div>
+      </div>
+      <div class="sales-card">
+        <h3>📈 近7天销售趋势</h3>
+        <div class="sales-trend" id="salesTrend"></div>
+      </div>
     </div>
   </div>
   <div class="sales-wow" id="salesWow"></div>
