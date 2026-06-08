@@ -392,12 +392,32 @@ footer a{color:var(--dim);text-decoration:none}
 
 
 /* Sub-tabs */
-.sub-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border)}
-.sub-tab{padding:8px 20px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
-.sub-tab:hover{color:var(--cyan)}
-.sub-tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.sub-tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border-radius:10px;padding:4px;border:1px solid var(--border)}
+.sub-tab{padding:8px 18px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-radius:8px;transition:all .2s;border:none;background:transparent}
+.sub-tab:hover{color:var(--cyan);background:rgba(8,145,178,.04)}
+.sub-tab.active{color:#fff;background:var(--cyan);font-weight:600}
 .sub-page{display:none}
-.sub-page.active{display:block}
+.sub-page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+/* Trend cards */
+.trend-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;transition:all .2s}
+.trend-card:hover{border-color:rgba(8,145,178,.2);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.trend-card .tc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.trend-card .tc-name{font-weight:600;font-size:14px;color:var(--text)}
+.trend-card .tc-badge{padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700}
+.trend-card .tc-badge.green{background:rgba(5,150,105,.1);color:var(--green)}
+.trend-card .tc-badge.amber{background:rgba(217,119,6,.1);color:var(--yellow)}
+.trend-card .tc-badge.gray{background:rgba(107,114,128,.1);color:var(--muted)}
+.trend-card .tc-bar{height:4px;border-radius:2px;margin:6px 0;background:var(--dim);overflow:hidden}
+.trend-card .tc-bar-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.trend-card .tc-meta{display:flex;gap:12px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.trend-card .tc-meta span{display:inline-flex;align-items:center;gap:3px}
+/* Insight panel */
+.insight-box{background:linear-gradient(135deg,rgba(8,145,178,.03),rgba(124,58,237,.03));border:1px solid rgba(8,145,178,.1);border-radius:12px;padding:16px;line-height:1.7}
+.insight-box .insight-title{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.insight-box .insight-item{font-size:11px;padding:3px 0;color:var(--muted)}
+.insight-box .insight-item b{color:var(--text)}
+.insight-box .insight-hint{font-size:10px;color:var(--cyan);margin-top:6px;padding-top:6px;border-top:1px solid rgba(8,145,178,.1)}
 </style>
 </head>
 <body>
@@ -1892,21 +1912,21 @@ function renderStoreTrends(){
   // Grid cards
   var grid='';
   items.forEach(function(it){
-    var yy = it.youying_volume ? Number(it.youying_volume).toLocaleString() : '—';
+    var yy = it.youying_volume ? (it.youying_volume/1000).toFixed(0)+'K' : '—';
     var comp = it.youying_items ? Number(it.youying_items).toLocaleString() : '—';
     var bid = it.youying_price || '—';
-    grid+='<div class="card" style="padding:14px">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
-        '<span style="font-weight:600;font-size:13px">'+it.keyword+'</span>'+
-        '<span style="color:#059669;font-weight:700;font-size:11px">本店销 '+it.store_sales+'</span>'+
+    var barPct = it.youying_volume ? Math.min(Math.round(it.youying_volume/500000*100), 100) : 0;
+    grid+='<div class="trend-card">'+
+      '<div class="tc-header">'+
+        '<span class="tc-name">'+it.keyword+'</span>'+
+        '<span class="tc-badge green">销 '+it.store_sales+'</span>'+
       '</div>'+
-      '<div style="font-family:monospace;font-size:10px;color:var(--muted);margin-bottom:6px">'+it.sku_count+' SKU</div>'+
-      '<div style="display:flex;gap:8px;font-size:10px;color:var(--muted)">'+
-        '<span>🔍 月搜 '+yy+'</span>'+
+      '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">'+it.sku_count+' SKU</div>'+
+      '<div class="tc-bar"><div class="tc-bar-fill" style="width:'+barPct+'%;background:var(--cyan)"></div></div>'+
+      '<div class="tc-meta">'+
+        '<span>🔍 '+yy+' 月搜</span>'+
         '<span>📦 '+comp+' 竞品</span>'+
-      '</div>'+
-      '<div style="display:flex;gap:8px;margin-top:3px;font-size:10px;color:var(--muted)">'+
-        '<span>💰 出价 NT$'+bid+'</span>'+
+        '<span>💰 NT$'+bid+'</span>'+
       '</div>'+
     '</div>';
   });
@@ -1962,23 +1982,22 @@ function renderGapTrends(){
   // Grid cards — sorted by ratio (best opportunity first)
   var grid='';
   sorted.forEach(function(it){
-    var sv = it.search_volume ? Number(it.search_volume).toLocaleString() : '-';
+    var sv = it.search_volume ? (it.search_volume/1000).toFixed(0)+'K' : '-';
     var tc = it.competitors ? Number(it.competitors).toLocaleString() : '-';
-    var ratioColor = it.ratio > 50 ? '#059669' : (it.ratio > 20 ? '#d97706' : 'var(--muted)');
-    var barLen = Math.min(Math.round(it.search_volume/20000), 25);
-    grid+='<div class="card" style="padding:14px">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">'+
-        '<span style="font-weight:600;font-size:13px">'+it.keyword+'</span>'+
-        '<span style="color:'+ratioColor+';font-weight:700;font-size:14px">'+it.ratio+'×</span>'+
+    var ratioGrade = it.ratio > 50 ? 'green' : (it.ratio > 20 ? 'amber' : 'gray');
+    var barPct = Math.min(Math.round(it.search_volume/500000*100), 100);
+    var barColor = it.ratio > 50 ? 'var(--green)' : (it.ratio > 20 ? 'var(--yellow)' : 'var(--dim)');
+    grid+='<div class="trend-card">'+
+      '<div class="tc-header">'+
+        '<span class="tc-name">'+it.keyword+'</span>'+
+        '<span class="tc-badge '+ratioGrade+'">'+it.ratio+'×</span>'+
       '</div>'+
-      '<div style="font-family:monospace;font-size:10px;color:'+ratioColor+';margin-bottom:6px">'+Array(barLen).fill('▌').join('')+'</div>'+
-      '<div style="display:flex;gap:8px;font-size:10px;color:var(--muted)">'+
+      '<div class="tc-bar"><div class="tc-bar-fill" style="width:'+barPct+'%;background:'+barColor+'"></div></div>'+
+      '<div class="tc-meta">'+
         '<span>🔍 '+sv+' 月搜</span>'+
         '<span>📦 '+tc+' 竞品</span>'+
-      '</div>'+
-      '<div style="display:flex;gap:8px;margin-top:3px;font-size:10px;color:var(--muted)">'+
         (it.avg_price ? '<span>💰 NT$'+(it.avg_price|0)+'</span>' : '')+
-        (it.avg_sold ? '<span>📈 均销 '+it.avg_sold+'</span>' : '')+
+        (it.avg_sold ? '<span>📈 '+it.avg_sold+'件/月</span>' : '')+
       '</div>'+
     '</div>';
   });
