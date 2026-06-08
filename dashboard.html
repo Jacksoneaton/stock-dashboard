@@ -1497,14 +1497,17 @@ function renderSuggested(){
   }
   el.style.display='block';
   var rows=SUGGESTED.map(function(s){
-    var title=s.title||s.products.join(', ');
+    var title=(s.itemName||s.title||'').substring(0,40);
+    var id=s.itemId||s.model_id||'';
+    var qty=s.total_qty||s.orders||0;
+    var daily=s.daily||0;
     return '<tr>'+
-      '<td><span class="sug-title">'+title+'</span><br><span class="sug-mid">'+s.model_id+'</span></td>'+
-      '<td><span class="sug-prod">'+s.products.join(', ')+'</span></td>'+
-      '<td style="text-align:center"><span class="sug-qty">'+s.orders+'件</span></td>'+
+      '<td><span class="sug-title">'+title+'</span><br><span class="sug-mid">#'+id+'</span></td>'+
+      '<td style="text-align:center">'+qty+'件</td>'+
+      '<td style="text-align:center">'+daily.toFixed(1)+'/天</td>'+
     '</tr>';
   }).join('');
-  content.innerHTML='<table class="suggest-table"><thead><tr><th>商品</th><th>产品编号</th><th style="text-align:center">订单数</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  content.innerHTML='<table class="suggest-table"><thead><tr><th>商品</th><th style="text-align:center">订单数</th><th style="text-align:center">日均</th></tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
 function refreshAll(){
