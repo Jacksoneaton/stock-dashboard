@@ -1774,6 +1774,65 @@ function renderTrendsTab(){
 }
 
 function renderMarketTrends(){
+  // 优先用友鹰数据（精确搜索量），没有的话用 Google Trends
+  var useYouying = YOUYING && YOUYING.keywords && Object.keys(YOUYING.keywords).length > 0;
+  var source = useYouying ? YOUYING : (TRENDS || {keywords:{}});
+  var kw = source.keywords || {};
+  var isYouying = useYouying;
+  
+  var entries = [];
+  Object.keys(kw).forEach(function(k){
+    var v = kw[k];
+    if (isYouying) {
+      entries.push([k, {
+        avg: v.search_volume || 0, 
+        current: v.search_volume || 0, 
+        max: v.search_volume || 0,
+        trend: 'up',
+        price: v.recommend_price,
+        items: v.total_count,
+        avgSold: v.avg_sold,
+      }]);
+    } else {
+      entries.push([k, v]);
+    }
+  });
+  entries.sort(function(a,b){ return b[1].avg - a[1].avg; });
+  
+  var srcLabel = isYouying ? '友鹰数据' : 'Google Trends';
+  var upCount = entries.filter(function(e){ return e[1].trend==='up'; }).length;
+  document.getElementById('trendsStats').innerHTML=
+    '<div class="stat"><div class="num" style="color:#7c3aed">'+entries.length+'</div><div class="lbl">关键词</div></div>'+
+    '<div class="stat"><div class="num" style="color:#059669">'+upCount+'</div><div class="lbl">活跃中</div></div>'+
+    (isYouying ? '<div class="stat"><div class="num" style="color:#dc2626">'+(YOUYING.total||entries.length)+'</div><div class="lbl">总关键词</div></div>' : '<div class="stat"><div class="num" style="color:#dc2626">'+(entries.length-upCount)+'</div><div class="lbl">下降中</div></div>')+
+    '<div class="stat"><div class="num" style="color:#0891b2;font-size:11px">'+srcLabel+'</div><div class="lbl">数据源</div></div>';
+  
+  var maxVal = entries.length>0 ? entries[0][1].avg : 1;
+  var bars='';
+  entries.slice(0,10).forEach(function(e){
+    var name=e[0], info=e[1];
+    var pct = Math.round(info.avg/maxVal*100);
+    var label = isYouying ? Number(info.avg).toLocaleString() : info.avg;
+    bars+='<div class="bar-row">'+
+      '<span class="bar-label" style="width:90px">'+name+'</span>'+
+      '<span class="bar-val" style="width:80px;text-align:right;font-size:10px">'+label+'</span>'+
+      '<div class="bar-track"><div class="bar-fill bar-fill sales" style="width:'+pct+'%"></div></div>'+
+      '</div>';
+  });
+  document.getElementById('trendsBars').innerHTML=bars||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+  
+  var top3=entries.slice(0,3).map(function(e){return e[0]}).join('、');
+  document.getElementById('trendsLine').innerHTML=
+    '<div style="margin-bottom:8px">🔺 <b>搜索量最高</b>: '+top3+'</div>'+
+    (isYouying ? '<div style="margin-bottom:8px">💰 <b>广告出价参考</b>: NT$'+(entries[0]?entries[0][1].price:'-')+'/点击</div>' : '')+
+    '<div style="font-size:10px;opacity:.6">数据源: '+srcLabel+' | 每日自动更新</div>';
+  
+  document.getElementById('trendsFilter').innerHTML=
+    '<span class="filter-tag active" onclick="filterTrends(\'all\')">全部</span>'+
+    '<span class="filter-tag" onclick="filterTrends(\'top\')">热门</span>';
+  
+  renderTrendsGrid('all');
+}
 
 function renderStoreTrends(){
   var items = STORE_TRENDS.keywords || [];
