@@ -1489,7 +1489,7 @@ function renderDatavizTab(){
   var restock=items.filter(function(s){return s.daily>0&&s.stock>0;}).map(function(s){return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10,img:skuImg2[s.sku]||'',spec:skuSpec2[s.sku]||''};}).sort(function(a,b){return a.days-b.days;}).slice(0,10);
   var restockHtml=restock.map(function(s,i){
     var cls=s.days<1?'e34d59':s.days<3?'ed7b2f':s.days<7?'0052d9':'1a1a2e';
-    return '<div class="rc"><span class="rc-rank">'+(i+1)+'</span>'+(s.img?'<img class="rc-img" src="'+s.img+'" onerror="this.style.display=\'none\\'">':'<span class="rc-img" style="display:flex;align-items:center;justify-content:center;font-size:16px">📦</span>')+'<div class="rc-info"><div class="rc-code">'+s.sku+'</div><div class="rc-spec">'+s.spec+'</div><div class="rc-amt" style="color:#'+cls+'">仅剩 '+s.days+' 天</div></div></div>';
+    return '<div class="rc"><span class="rc-rank">'+(i+1)+'</span>'+(s.img?'<img class="rc-img" src="'+s.img+'" onerror="this.style.display=\'none\'">':'<span class="rc-img" style="display:flex;align-items:center;justify-content:center;font-size:16px">📦</span>')+'<div class="rc-info"><div class="rc-code">'+s.sku+'</div><div class="rc-spec">'+s.spec+'</div><div class="rc-amt" style="color:#'+cls+'">仅剩 '+s.days+' 天</div></div></div>';
   }).join('')||'<span style="color:rgba(0,0,0,.4);font-size:12px">暂无有销量数据</span>';
   document.getElementById('dvRestock').innerHTML=restockHtml;
 
