@@ -2100,7 +2100,7 @@ function renderGapTrends(){
 
 function filterTrends(filter){
   var btns=document.querySelectorAll('#trendsFilter .filter-tag');
-  btns.forEach(function(b){b.classList.toggle('active',b.textContent.includes(filter==='all'?'全部':'热门'));});
+  btns.forEach(function(b){b.classList.toggle('active',b.textContent.includes(filter==='all'?'全部':'蓝海'));});
   renderTrendsGrid(filter);
 }
 
