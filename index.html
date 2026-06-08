@@ -98,7 +98,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .chart-card h3{font-size:11px;color:var(--cyan);margin-bottom:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
 .bar-list{display:flex;flex-direction:column;gap:5px}
 .bar-row{display:flex;align-items:center;gap:6px;font-size:10px}
-.bar-label{width:62px;text-align:right;color:var(--muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;font-size:9px}
+.bar-img{width:32px;height:32px;border-radius:4px;object-fit:cover;flex-shrink:0;background:#e8e8e8}
+.bar-info{display:flex;flex-direction:column;min-width:0;width:80px;flex-shrink:0}
+.bar-label{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;font-size:9px}
+.bar-spec{color:rgba(0,0,0,.35);font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bar-track{flex:1;height:10px;background:#f1f3f5;border-radius:5px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
 .bar-fill{height:100%;border-radius:5px;transition:width .6s ease}
 .bar-fill.danger{background:linear-gradient(90deg,rgba(220,38,38,.5),var(--red))}
@@ -324,8 +327,10 @@ footer a{color:var(--dim);text-decoration:none}
 #page-dataviz .rc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
 #page-dataviz .rc{display:flex;align-items:center;gap:10px;padding:10px;background:#fafafa;border-radius:6px}
 #page-dataviz .rc-rank{font-size:11px;font-weight:700;color:#2ba471;min-width:22px}
-#page-dataviz .rc-info{flex:1}
+#page-dataviz .rc-img{width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#e8e8e8}
+#page-dataviz .rc-info{flex:1;min-width:0}
 #page-dataviz .rc-code{font-size:11px;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+#page-dataviz .rc-spec{font-size:10px;color:rgba(0,0,0,.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
 #page-dataviz .rc-amt{font-size:12px;font-weight:700;color:#2ba471}
 #page-dataviz .ft{text-align:center;padding:16px;font-size:10px;color:rgba(0,0,0,.4)}
 @media(max-width:768px){#page-dataviz .kpi{grid-template-columns:repeat(2,1fr)}#page-dataviz .row{grid-template-columns:1fr}#page-dataviz .pc-grid,#page-dataviz .rc-grid{grid-template-columns:repeat(2,1fr)}}
@@ -746,19 +751,22 @@ function renderDashboard(groups){
 }
 
 function renderCharts(){
+  // 图片映射
+  var skuImg={},skuSpec={};
+  DATA.forEach(function(d){if(d.img)skuImg[d.sku]=d.img;if(d.spec)skuSpec[d.sku]=d.spec;});
   var items=DATA.map(function(d){
     var rep=REPLENISH[d.sku]||{};
-    return {sku:d.sku,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest||0};
+    return {sku:d.sku,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest||0,img:skuImg[d.sku]||'',spec:skuSpec[d.sku]||''};
   });
   var restock=items.filter(function(s){return s.daily>0;}).map(function(s){
-    return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10,suggest:s.suggest};
+    return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10,suggest:s.suggest,img:s.img,spec:s.spec};
   }).sort(function(a,b){return a.days-b.days;}).slice(0,10);
   var maxDays=Math.max.apply(null,restock.map(function(s){return s.days;}).concat([1]));
   var restockHtml='';
   restock.forEach(function(s){
     var pct=Math.max(3,(s.days/maxDays)*100);
     var cls=s.days<1?'danger':s.days<3?'warn':'ok';
-    restockHtml+='<div class="bar-row"><span class="bar-label">'+s.sku+'</span><div class="bar-track"><div class="bar-fill '+cls+'" style="width:'+pct+'%"></div></div><span class="bar-val">'+s.days+'天</span></div>';
+    restockHtml+='<div class="bar-row">'+(s.img?'<img class="bar-img" src="'+s.img+'" onerror="this.style.display=\'none\'">':'<span class="bar-img">📦</span>')+'<div class="bar-info"><span class="bar-label">'+s.sku+'</span><span class="bar-spec">'+s.spec+'</span></div><div class="bar-track"><div class="bar-fill '+cls+'" style="width:'+pct+'%"></div></div><span class="bar-val">'+s.days+'天</span></div>';
   });
   document.getElementById('restockBars').innerHTML=restockHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
   var sales=items.filter(function(s){return s.daily>0;}).sort(function(a,b){return b.daily-a.daily;}).slice(0,10);
@@ -1476,10 +1484,12 @@ function renderDatavizTab(){
   document.getElementById('dvDonut').outerHTML='<div id="dvDonut" style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">'+donutHtml+'<div style="display:flex;flex-direction:column;gap:6px">'+legendHtml+'</div></div>';
 
   // 急补货排行
-  var restock=items.filter(function(s){return s.daily>0&&s.stock>0;}).map(function(s){return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10};}).sort(function(a,b){return a.days-b.days;}).slice(0,10);
+  var skuImg2={},skuSpec2={};
+  DATA.forEach(function(d){if(d.img)skuImg2[d.sku]=d.img;if(d.spec)skuSpec2[d.sku]=d.spec;});
+  var restock=items.filter(function(s){return s.daily>0&&s.stock>0;}).map(function(s){return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10,img:skuImg2[s.sku]||'',spec:skuSpec2[s.sku]||''};}).sort(function(a,b){return a.days-b.days;}).slice(0,10);
   var restockHtml=restock.map(function(s,i){
     var cls=s.days<1?'e34d59':s.days<3?'ed7b2f':s.days<7?'0052d9':'1a1a2e';
-    return '<div class="rc"><span class="rc-rank">'+(i+1)+'</span><div class="rc-info"><div class="rc-code">'+s.sku+'</div><div class="rc-amt" style="color:#'+cls+'">仅剩 '+s.days+' 天</div></div></div>';
+    return '<div class="rc"><span class="rc-rank">'+(i+1)+'</span>'+(s.img?'<img class="rc-img" src="'+s.img+'" onerror="this.style.display=\\'none\\'">':'<span class="rc-img" style="display:flex;align-items:center;justify-content:center;font-size:16px">📦</span>')+'<div class="rc-info"><div class="rc-code">'+s.sku+'</div><div class="rc-spec">'+s.spec+'</div><div class="rc-amt" style="color:#'+cls+'">仅剩 '+s.days+' 天</div></div></div>';
   }).join('')||'<span style="color:rgba(0,0,0,.4);font-size:12px">暂无有销量数据</span>';
   document.getElementById('dvRestock').innerHTML=restockHtml;
 
