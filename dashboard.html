@@ -1520,7 +1520,22 @@ function sparkSVG(keyword, color){
     Object.keys(YOUYING_HISTORY[keyword]).sort().forEach(function(d){ points.push(YOUYING_HISTORY[keyword][d]); });
   }
   
-  if (points.length < 2) return '<div class="pc-spark" style="text-align:center;font-size:10px;opacity:.3">暂无走势</div>';
+  if (points.length < 2) {
+    // 月度数据也能用——画水平参考线
+    var yyInfo = YOUYING && YOUYING.keywords && YOUYING.keywords[keyword];
+    var monthlyVol = yyInfo ? (yyInfo.search_volume || 0) : 0;
+    if (monthlyVol > 0) {
+      var volStr = monthlyVol >= 1000 ? (monthlyVol/1000).toFixed(1)+'k' : monthlyVol;
+      return '<div class="pc-spark">'+
+        '<svg width="100%" height="32" viewBox="0 0 200 32" style="display:block">'+
+          '<line x1="2" y1="16" x2="198" y2="16" stroke="'+color+'" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.35"/>'+
+          '<text x="100" y="11" text-anchor="middle" fill="var(--muted)" font-size="8" opacity="0.6">月搜索 '+volStr+'</text>'+
+        '</svg>'+
+        '<div style="text-align:center;font-size:9px;color:var(--muted);font-weight:600">📊 月度快照 (友鹰)</div>'+
+      '</div>';
+    }
+    return '<div class="pc-spark" style="text-align:center;font-size:10px;opacity:.3">暂无走势</div>';
+  }
   
   // Take last 40 points
   points = points.slice(-40);
