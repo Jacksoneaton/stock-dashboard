@@ -232,6 +232,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .rep-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
 .rep-table th{text-align:left;padding:7px 10px;color:var(--cyan);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
 .rep-table td{padding:8px 10px;border-bottom:1px solid rgba(0,0,0,.04)}
+.rep-img{width:28px;height:28px;border-radius:4px;object-fit:cover;flex-shrink:0;background:#e8e8e8}
 .rep-table tr:hover{background:rgba(8,145,178,.02)}
 .rep-table .tier-badge{display:inline-block;width:18px;height:18px;border-radius:4px;text-align:center;line-height:18px;font-size:9px;font-weight:700;font-family:monospace}
 .rep-table .tier-badge.a{background:rgba(220,38,38,.08);color:var(--red)}
@@ -1334,11 +1335,15 @@ var _replenItems=[];
 function renderReplenTab(){
   _replenItems=[];
   var items=_replenItems;
+  // 图片映射（SKU级别 + invCode兜底）
+  var skuImg={},invImg={};
+  DATA.forEach(function(d){
+    if(d.img){skuImg[d.sku]=d.img;if(!invImg[d.invCode])invImg[d.invCode]=d.img;}
+  });
   DATA.forEach(function(d){
     var rep=REPLENISH[d.sku]||{};
-    // 日均 < 0.1 的不补（月销<3件不值得占资金）
     if(rep.suggest&&rep.suggest>0){
-      items.push({sku:d.sku,title:d.title,spec:d.spec,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest});
+      items.push({sku:d.sku,title:d.title,spec:d.spec,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest,img:skuImg[d.sku]||invImg[d.invCode]||''});
     }
   });
   var a=[],b=[],c=[];
@@ -1378,7 +1383,7 @@ function renderReplenTable(items){
     return '<tr>'+
       '<td><span class="tier-badge '+(i.tier==='A'?'a':i.tier==='B'?'b':'c')+'">'+i.tier+'</span></td>'+
       '<td style="font-family:monospace;font-size:10px;color:var(--cyan)">'+i.sku+'</td>'+
-      '<td style="color:#4b5563;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+i.title+'</td>'+
+      '<td style="color:#4b5563;max-width:200px;display:flex;align-items:center;gap:6px">'+(i.img?'<img class="rep-img" src="'+i.img+'" onerror="this.style.display=\'none\'">':'<span class="rep-img" style="display:flex;align-items:center;justify-content:center;font-size:12px;background:#f0f4ff">📦</span>')+'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">'+i.title+'</span></td>'+
       '<td style="color:var(--muted)">'+i.spec+'</td>'+
       '<td style="text-align:center;font-family:monospace;font-weight:700;color:'+(i.stock===0?'var(--red)':'var(--text)')+'">'+i.stock+'</td>'+
       '<td style="text-align:center;font-family:monospace">'+i.daily+'</td>'+
