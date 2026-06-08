@@ -555,11 +555,17 @@ footer a{color:var(--dim);text-decoration:none}
       <div class="sales-top" id="salesTop"></div>
     </div>
     <div class="sales-card">
-      <h3>📈 近7天销售趋势</h3>
-      <div class="sales-trend" id="salesTrend"></div>
-      <div class="sales-wow" id="salesWow"></div>
+      <h3>📊 今天 vs 昨天</h3>
+      <div class="sales-wow" id="salesDod"></div>
     </div>
   </div>
+  <div class="sales-row">
+    <div class="sales-card" style="flex:1">
+      <h3>📈 近7天销售趋势</h3>
+      <div class="sales-trend" id="salesTrend"></div>
+    </div>
+  </div>
+  <div class="sales-wow" id="salesWow"></div>
   <div class="sales-card">
     <h3>📋 最近订单</h3>
     <div class="sales-orders" id="salesOrders"></div>
@@ -1572,6 +1578,21 @@ function renderSalesTab(){
     '<div class="sk r"><div class="kl">营业额</div><div class="kv">'+p.revenue.toLocaleString()+'</div><div class="ks">NT$</div></div>'+
     '<div class="sk i"><div class="kl">售出件数</div><div class="kv">'+p.items+'</div><div class="ks">件商品</div></div>'+
     '<div class="sk a"><div class="kl">客单价</div><div class="kv">'+avg.toLocaleString()+'</div><div class="ks">NT$ / 单</div></div>';
+
+  // 今天 vs 昨天
+  var dod=SALES.periods.today||{orders:0,revenue:0,items:0};
+  var yst=SALES.periods.yesterday||{orders:0,revenue:0,items:0};
+  function dd(a,b){return b?((a-b)/b*100):null;}
+  function df(v){if(v===null)return'--';var s=v>=0?'+':'';return s+v.toFixed(1)+'%';}
+  function dc(v){return v===null?'wow-delta':v>=0?'wow-delta up':'wow-delta down';}
+  function di(v){return v===null?'➖':v>=0?'🟢':'🔴';}
+  var dr=dd(dod.revenue,yst.revenue),do2=dd(dod.orders,yst.orders),dit=dd(dod.items,yst.items);
+  var ta=dod.orders?dod.revenue/dod.orders:0,ya=yst.orders?yst.revenue/yst.orders:0,da=ya?((ta-ya)/ya*100):null;
+  document.getElementById('salesDod').innerHTML=
+    '<div class="wow-item"><div class="wow-label">今天营业额</div><div class="wow-val">NT$'+dod.revenue.toLocaleString()+'</div><div class="'+dc(dr)+'">'+di(dr)+' '+df(dr)+' vs 昨天</div></div>'+
+    '<div class="wow-item"><div class="wow-label">今天订单</div><div class="wow-val">'+dod.orders+' 单</div><div class="'+dc(do2)+'">'+di(do2)+' '+df(do2)+' vs 昨天</div></div>'+
+    '<div class="wow-item"><div class="wow-label">今天件数</div><div class="wow-val">'+dod.items+' 件</div><div class="'+dc(dit)+'">'+di(dit)+' '+df(dit)+' vs 昨天</div></div>'+
+    '<div class="wow-item"><div class="wow-label">客单价</div><div class="wow-val">NT$'+Math.round(ta)+'</div><div class="'+dc(da)+'">'+di(da)+' '+df(da)+' vs 昨天</div></div>';
 
   // Top products with revenue bars
   var maxRev=(p.topProducts||[]).reduce(function(m,x){return Math.max(m,x.revenue);},1);
