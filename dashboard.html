@@ -593,6 +593,7 @@ function switchTab(page){
 document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click',function(){switchTab(t.dataset.page);});
 });
+var _salesPeriod=(SALES.periods.today&&SALES.periods.today.orders>0)?'today':'yesterday';
 // Restore saved tab
 var saved=localStorage.getItem(_tabKey)||'dash';
 switchTab(saved);
@@ -1551,7 +1552,6 @@ function renderDatavizTab(){
 }
 
 // ====== 销售数据 Tab ======
-var _salesPeriod=(SALES.periods.today&&SALES.periods.today.orders>0)?'today':'yesterday';
 function renderSalesTab(){
   var now=new Date();
   // Period buttons
