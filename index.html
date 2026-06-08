@@ -1548,7 +1548,7 @@ function renderDatavizTab(){
 }
 
 // ====== 销售数据 Tab ======
-var _salesPeriod='today';
+var _salesPeriod=(SALES.periods.today&&SALES.periods.today.orders>0)?'today':'yesterday';
 function renderSalesTab(){
   var now=new Date();
   // Period buttons
