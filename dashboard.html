@@ -232,7 +232,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .rep-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
 .rep-table th{text-align:left;padding:7px 10px;color:var(--cyan);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
 .rep-table td{padding:8px 10px;border-bottom:1px solid rgba(0,0,0,.04)}
-.rep-img{width:28px;height:28px;border-radius:4px;object-fit:cover;flex-shrink:0;background:#e8e8e8}
+.rep-img{width:32px;height:32px;border-radius:4px;object-fit:cover;flex-shrink:0;background:#e8e8e8}
 .rep-table tr:hover{background:rgba(8,145,178,.02)}
 .rep-table .tier-badge{display:inline-block;width:18px;height:18px;border-radius:4px;text-align:center;line-height:18px;font-size:9px;font-weight:700;font-family:monospace}
 .rep-table .tier-badge.a{background:rgba(220,38,38,.08);color:var(--red)}
@@ -1383,7 +1383,7 @@ function renderReplenTable(items){
     return '<tr>'+
       '<td><span class="tier-badge '+(i.tier==='A'?'a':i.tier==='B'?'b':'c')+'">'+i.tier+'</span></td>'+
       '<td style="font-family:monospace;font-size:10px;color:var(--cyan)">'+i.sku+'</td>'+
-      '<td style="color:#4b5563;max-width:200px;display:flex;align-items:center;gap:6px">'+(i.img?'<img class="rep-img" src="'+i.img+'" onerror="this.style.display=\'none\'">':'<span class="rep-img" style="display:flex;align-items:center;justify-content:center;font-size:12px;background:#f0f4ff">📦</span>')+'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">'+i.title+'</span></td>'+
+      '<td style="text-align:center">'+(i.img?'<img class="rep-img" src="'+i.img+'" onerror="this.style.display=\'none\'">':'<span class="rep-img" style="display:inline-flex;align-items:center;justify-content:center;font-size:14px;background:#f0f4ff;height:32px">📦</span>')+'</td>'+
       '<td style="color:var(--muted)">'+i.spec+'</td>'+
       '<td style="text-align:center;font-family:monospace;font-weight:700;color:'+(i.stock===0?'var(--red)':'var(--text)')+'">'+i.stock+'</td>'+
       '<td style="text-align:center;font-family:monospace">'+i.daily+'</td>'+
