@@ -2119,11 +2119,11 @@ function renderTrendsGrid(filter){
     }] : [k, v]);
   });
   entries.sort(function(a,b){ return b[1].avg - a[1].avg });
-  // 热门 = 只显示蓝海+关注 (ratio≥20)，红海不展示
+  // 蓝海 = 只显示 ratio≥50 的优质关键词
   if (filter==='top') entries=entries.filter(function(e){
     if (!isYouying) return true;
     var sv = e[1].avg||0, tc = e[1].items||0;
-    return sv/tc >= 20;
+    return sv/tc >= 50;
   });
   
   var html='';
