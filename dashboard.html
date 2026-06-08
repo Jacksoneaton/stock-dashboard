@@ -565,7 +565,7 @@ footer a{color:var(--dim);text-decoration:none}
     <div class="card"><h3>📊 库存分布</h3><div style="height:220px;position:relative"><svg id="dvDonut" viewBox="0 0 200 200" style="width:100%;height:100%"></svg></div></div>
   </div>
   <div class="row">
-    <div class="card"><h3>🔥 销售 Top 10</h3><div class="pc-grid" id="dvSales"></div></div>
+    <div class="card"><div class="pc-grid" id="dvSales"></div></div>
     <div class="card"><h3>🏷️ ABC 分类</h3><div style="display:flex;flex-direction:column;gap:10px" id="dvAbc"></div></div>
   </div>
   <div class="ft" id="dvFooter"></div>
@@ -1497,12 +1497,14 @@ function renderSuggested(){
   }
   el.style.display='block';
   var rows=SUGGESTED.map(function(s){
-    var title=(s.itemName||s.title||'').substring(0,40);
+    var title=(s.itemName||s.title||'').substring(0,30);
     var id=s.itemId||s.model_id||'';
     var qty=s.total_qty||s.orders||0;
     var daily=s.daily||0;
+    var pic=s.itemPic||'';
+    var picHtml=pic ? '<img src="'+pic+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;margin-right:10px;flex-shrink:0" onerror="this.style.display=\'none\'">' : '';
     return '<tr>'+
-      '<td><span class="sug-title">'+title+'</span><br><span class="sug-mid">#'+id+'</span></td>'+
+      '<td style="display:flex;align-items:center">'+picHtml+'<div><span class="sug-title">'+title+'</span><br><span class="sug-mid">#'+id+'</span></div></td>'+
       '<td style="text-align:center">'+qty+'件</td>'+
       '<td style="text-align:center">'+daily.toFixed(1)+'/天</td>'+
     '</tr>';
@@ -1921,22 +1923,26 @@ function renderStoreTrends(){
   // Grid cards
   var grid='';
   items.forEach(function(it){
-    var yy = it.youying_volume ? (it.youying_volume/1000).toFixed(0)+'K' : '—';
-    var comp = it.youying_items ? Number(it.youying_items).toLocaleString() : '—';
-    var bid = it.youying_price || '—';
-    var barPct = it.youying_volume ? Math.min(Math.round(it.youying_volume/500000*100), 100) : 0;
+    var sv = it.youying_volume || 0;
+    var svStr = sv > 999 ? (sv/1000).toFixed(0)+'K' : (sv || '—');
+    var tc = it.youying_items || 0;
+    var ratio = tc > 0 ? (sv/tc).toFixed(1) : 0;
+    var barPct = Math.min(Math.round(sv/500000*100), 100);
+    var barColor = ratio > 50 ? 'var(--green)' : (ratio > 20 ? 'var(--yellow)' : 'var(--dim)');
     grid+='<div class="trend-card">'+
       '<div class="tc-header">'+
         '<span class="tc-name">'+it.keyword+'</span>'+
-        '<span class="tc-badge green">销 '+it.store_sales+'</span>'+
+        '<div style="display:flex;gap:4px">'+
+          '<span class="tc-badge green">销'+it.store_sales+'</span>'+
+          (ratio > 0 ? '<span class="tc-badge '+(ratio>50?'green':(ratio>20?'amber':'gray'))+'">'+ratio+'×</span>' : '')+
+        '</div>'+
       '</div>'+
-      '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">'+it.sku_count+' SKU</div>'+
-      '<div class="tc-bar"><div class="tc-bar-fill" style="width:'+barPct+'%;background:var(--cyan)"></div></div>'+
-      '<div class="tc-meta">'+
-        '<span>🔍 '+yy+' 月搜</span>'+
-        '<span>📦 '+comp+' 竞品</span>'+
-        '<span>💰 NT$'+bid+'</span>'+
+      '<div style="display:flex;gap:16px;align-items:center;margin:8px 0">'+
+        '<div style="text-align:center"><div style="font-size:15px;font-weight:600;color:var(--text)">'+svStr+'</div><div style="font-size:9px;color:var(--muted)">月搜索</div></div>'+
+        '<div style="text-align:center"><div style="font-size:13px;font-weight:500;color:var(--muted)">'+Number(tc).toLocaleString()+'</div><div style="font-size:9px;color:var(--muted)">竞品</div></div>'+
+        '<div style="text-align:center"><div style="font-size:13px;font-weight:500;color:var(--muted)">'+it.sku_count+'</div><div style="font-size:9px;color:var(--muted)">SKU</div></div>'+
       '</div>'+
+      '<div class="tc-bar"><div class="tc-bar-fill" style="width:'+barPct+'%;background:'+barColor+'"></div></div>'+
     '</div>';
   });
   document.getElementById('storeGrid').innerHTML=grid||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
@@ -2040,19 +2046,24 @@ function renderTrendsGrid(filter){
   entries.forEach(function(e){
     var name=e[0], info=e[1];
     if (isYouying) {
-      var vol = Number(info.avg).toLocaleString();
-      var miniBar = Array(Math.min(Math.round(info.avg/10000), 30)).fill('▌').join('');
-      html+='<div class="card" style="padding:14px">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'+
-          '<span style="font-weight:600;font-size:13px">'+name+'</span>'+
-          '<span style="color:#7c3aed;font-weight:700;font-size:18px">'+vol+'</span>'+
+      var sv = info.avg || 0;
+      var svStr = sv > 999 ? (sv/1000).toFixed(0)+'K' : sv;
+      var tc = info.items || 0;
+      var ratio = tc > 0 ? (sv/tc).toFixed(1) : 0;
+      var barPct = Math.min(Math.round(sv/500000*100), 100);
+      var barColor = ratio > 50 ? 'var(--green)' : (ratio > 20 ? 'var(--yellow)' : 'var(--dim)');
+      html+='<div class="trend-card">'+
+        '<div class="tc-header">'+
+          '<span class="tc-name">'+name+'</span>'+
+          (ratio > 0 ? '<span class="tc-badge '+(ratio>50?'green':(ratio>20?'amber':'gray'))+'">'+ratio+'×</span>' : '')+
         '</div>'+
-        '<div style="font-family:monospace;font-size:10px;color:#7c3aed">'+miniBar+'</div>'+
-        '<div style="display:flex;gap:10px;margin-top:4px;font-size:10px;color:var(--muted)">'+
-          '<span>📦 '+Number(info.items||0).toLocaleString()+' 商品</span>'+
-          '<span>💰 NT$'+info.price+'/点击</span>'+
-          (info.avgSold ? '<span>📈 均销 '+info.avgSold+'</span>' : '')+
+        '<div style="display:flex;gap:16px;align-items:center;margin:8px 0">'+
+          '<div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--text)">'+svStr+'</div><div style="font-size:9px;color:var(--muted)">月搜索</div></div>'+
+          '<div style="text-align:center"><div style="font-size:14px;font-weight:600;color:var(--muted)">'+Number(tc).toLocaleString()+'</div><div style="font-size:9px;color:var(--muted)">竞品</div></div>'+
+          (info.price ? '<div style="text-align:center"><div style="font-size:14px;font-weight:600;color:var(--cyan)">NT$'+info.price+'</div><div style="font-size:9px;color:var(--muted)">出价</div></div>' : '')+
+          (info.avgSold ? '<div style="text-align:center"><div style="font-size:14px;font-weight:600;color:var(--green)">'+info.avgSold+'</div><div style="font-size:9px;color:var(--muted)">均销</div></div>' : '')+
         '</div>'+
+        '<div class="tc-bar"><div class="tc-bar-fill" style="width:'+barPct+'%;background:'+barColor+'"></div></div>'+
       '</div>';
     } else {
       var icon=info.trend==='up'?'📈':'📉';
