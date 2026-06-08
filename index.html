@@ -46,6 +46,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 
 /* Stats */
 .stats-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+@media(min-width:700px){.stats-row{max-width:1000px}}
 .stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 18px;text-align:center;flex:1;min-width:70px;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:all .3s}
 .stat:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
 .stat .num{font-size:24px;font-weight:700;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;letter-spacing:-1px}
@@ -343,14 +344,14 @@ footer a{color:var(--dim);text-decoration:none}
 .sales-periods .sp-btn{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:11px;cursor:pointer;transition:all .2s;color:var(--muted);font-family:inherit}
 .sales-periods .sp-btn:hover{border-color:var(--cyan);color:var(--cyan)}
 .sales-periods .sp-btn.active{background:var(--cyan);color:#fff;border-color:var(--cyan);font-weight:600}
-.sales-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.sales-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;max-width:960px;margin-left:auto;margin-right:auto}
 .sales-kpi .sk{background:#fff;border-radius:10px;padding:16px;border:1px solid var(--border);position:relative;overflow:hidden}
 .sales-kpi .sk::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
 .sales-kpi .sk.o::after{background:var(--cyan)}.sales-kpi .sk.r::after{background:var(--green)}.sales-kpi .sk.i::after{background:var(--yellow)}.sales-kpi .sk.a::after{background:var(--purple, #7b4cfa)}
 .sales-kpi .sk .kl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .sales-kpi .sk .kv{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace;margin:4px 0;line-height:1.1}
 .sales-kpi .sk .ks{font-size:10px;color:var(--dim)}
-.sales-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.sales-row{display:grid;grid-template-columns:minmax(0,520px) minmax(0,400px);gap:12px;margin-bottom:12px;justify-content:center}
 .sales-card{background:#fff;border-radius:10px;padding:16px;border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.03)}
 .sales-card h3{font-size:13px;margin:0 0 12px;color:var(--text);display:flex;align-items:center;gap:6px}
 .sales-card h3::before{content:'';width:3px;height:14px;background:var(--cyan);border-radius:2px}
@@ -617,7 +618,7 @@ footer a{color:var(--dim);text-decoration:none}
       <div class="chart-card"><h3>📈 数据概览</h3><div id="trendsLine" style="font-size:11px;color:var(--muted)"></div></div>
     </div>
     <div class="filter-bar" id="trendsFilter"></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px" id="trendsGrid"></div>
+    <div class="trends-grid" id="trendsGrid"></div>
   </div>
   <!-- 本店品类 -->
   <div class="sub-page" id="sub-store">
@@ -626,7 +627,7 @@ footer a{color:var(--dim);text-decoration:none}
       <div class="chart-card"><h3>🏪 本店销量 vs 市场热度</h3><div class="bar-list" id="storeBars"></div></div>
       <div class="chart-card"><h3>💡 选品洞察</h3><div id="storeInsight" style="font-size:11px;color:var(--muted)"></div></div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px" id="storeGrid"></div>
+    <div class="trends-grid" id="storeGrid"></div>
   </div>
   <!-- 选品机会 -->
   <div class="sub-page" id="sub-gap">
@@ -635,7 +636,7 @@ footer a{color:var(--dim);text-decoration:none}
       <div class="chart-card"><h3>🔍 未覆盖高搜索品类 Top 10</h3><div class="bar-list" id="gapBars"></div></div>
       <div class="chart-card"><h3>💡 选品建议</h3><div id="gapInsight" style="font-size:11px;color:var(--muted)"></div></div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px" id="gapGrid"></div>
+    <div class="trends-grid" id="gapGrid"></div>
   </div>
 </div>
 
