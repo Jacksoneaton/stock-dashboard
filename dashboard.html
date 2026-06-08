@@ -46,7 +46,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 
 /* Stats */
 .stats-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-@media(min-width:700px){.stats-row{max-width:1000px}}
+@media(min-width:700px){.stats-row{max-width:1000px;margin-left:auto;margin-right:auto}}
 .stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 18px;text-align:center;flex:1;min-width:70px;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:all .3s}
 .stat:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
 .stat .num{font-size:24px;font-weight:700;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;letter-spacing:-1px}
@@ -340,7 +340,7 @@ footer a{color:var(--dim);text-decoration:none}
 #page-dataviz .ft{text-align:center;padding:16px;font-size:10px;color:rgba(0,0,0,.4)}
 @media(max-width:768px){#page-dataviz .kpi{grid-template-columns:repeat(2,1fr)}#page-dataviz .row{grid-template-columns:1fr}#page-dataviz .pc-grid,#page-dataviz .rc-grid{grid-template-columns:repeat(2,1fr)}}
 /* ═══ 销售数据 ═══ */
-.sales-periods{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.sales-periods{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;justify-content:center}
 .sales-periods .sp-btn{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:11px;cursor:pointer;transition:all .2s;color:var(--muted);font-family:inherit}
 .sales-periods .sp-btn:hover{border-color:var(--cyan);color:var(--cyan)}
 .sales-periods .sp-btn.active{background:var(--cyan);color:#fff;border-color:var(--cyan);font-weight:600}
@@ -401,7 +401,7 @@ footer a{color:var(--dim);text-decoration:none}
 .sub-page.active{display:block;animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 /* Trend cards */
-.trends-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-width:1100px}
+.trends-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-width:1100px;margin:0 auto}
 @media(min-width:900px){.trends-grid{grid-template-columns:repeat(4,1fr)}}
 .trend-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;transition:all .2s}
 .trend-card:hover{border-color:rgba(8,145,178,.2);box-shadow:0 4px 16px rgba(0,0,0,.06)}
@@ -615,7 +615,7 @@ footer a{color:var(--dim);text-decoration:none}
   <!-- 市场热搜 -->
   <div class="sub-page active" id="sub-market">
     <div class="stats-row" id="trendsStats"></div>
-    <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+    <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto 14px;max-width:1000px">
       <div class="chart-card"><h3>🔥 搜索量 Top 10</h3><div class="bar-list" id="trendsBars"></div></div>
       <div class="chart-card"><h3>📈 数据概览</h3><div id="trendsLine" style="font-size:11px;color:var(--muted)"></div></div>
     </div>
@@ -625,7 +625,7 @@ footer a{color:var(--dim);text-decoration:none}
   <!-- 本店品类 -->
   <div class="sub-page" id="sub-store">
     <div class="stats-row" id="storeStats"></div>
-    <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+    <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto 14px;max-width:1000px">
       <div class="chart-card"><h3>🏪 本店销量 vs 市场热度</h3><div class="bar-list" id="storeBars"></div></div>
       <div class="chart-card"><h3>💡 选品洞察</h3><div id="storeInsight" style="font-size:11px;color:var(--muted)"></div></div>
     </div>
@@ -634,7 +634,7 @@ footer a{color:var(--dim);text-decoration:none}
   <!-- 选品机会 -->
   <div class="sub-page" id="sub-gap">
     <div class="stats-row" id="gapStats"></div>
-    <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+    <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto 14px;max-width:1000px">
       <div class="chart-card"><h3>🔍 未覆盖高搜索品类 Top 10</h3><div class="bar-list" id="gapBars"></div></div>
       <div class="chart-card"><h3>💡 选品建议</h3><div id="gapInsight" style="font-size:11px;color:var(--muted)"></div></div>
     </div>
