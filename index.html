@@ -53,7 +53,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .stat .lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
 
 /* Filter */
-.filter-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.filter-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;justify-content:center}
 .filter-tag{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:500;background:#fff;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .2s;user-select:none}
 .filter-tag.active,.filter-tag:hover{background:rgba(8,145,178,.06);border-color:rgba(8,145,178,.2);color:var(--cyan)}
 .search-box{flex:1;min-width:140px}
@@ -367,6 +367,7 @@ footer a{color:var(--dim);text-decoration:none}
 .sales-top .sr .sbar-fill{height:100%;background:var(--cyan);border-radius:2px;transition:width .4s ease}
 .sales-top .sr .sa{font-size:13px;font-weight:600;text-align:right;font-family:'JetBrains Mono',monospace;min-width:70px;flex-shrink:0}
 .sales-orders{max-height:520px;overflow-y:auto;border-radius:8px}
+.sales-orders-wrap{max-width:960px;margin:0 auto}
 .sales-orders table{width:100%;font-size:11px;border-collapse:collapse}
 .sales-orders th{text-align:left;padding:8px 10px;color:var(--muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid #f0f0f0;position:sticky;top:0;background:#fff;z-index:1}
 .sales-orders td{padding:8px 10px;border-bottom:1px solid #f8f8f8;vertical-align:middle}
@@ -393,7 +394,7 @@ footer a{color:var(--dim);text-decoration:none}
 
 
 /* Sub-tabs */
-.sub-tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border-radius:10px;padding:4px;border:1px solid var(--border)}
+.sub-tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border-radius:10px;padding:4px;border:1px solid var(--border);justify-content:center;width:fit-content;margin-left:auto;margin-right:auto}
 .sub-tab{padding:8px 18px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-radius:8px;transition:all .2s;border:none;background:transparent}
 .sub-tab:hover{color:var(--cyan);background:rgba(8,145,178,.04)}
 .sub-tab.active{color:#fff;background:var(--cyan);font-weight:600}
@@ -598,9 +599,11 @@ footer a{color:var(--dim);text-decoration:none}
     </div>
   </div>
   <div class="sales-wow" id="salesWow"></div>
+  <div class="sales-orders-wrap">
   <div class="sales-card">
     <h3>📋 最近订单</h3>
     <div class="sales-orders" id="salesOrders"></div>
+  </div>
   </div>
 </div>
 
