@@ -1865,9 +1865,8 @@ function renderTrendsTab(){
   });
   
   var savedSub = localStorage.getItem('hermes_trends_sub') || 'market';
-  if (!hasStore || savedSub === 'market') {
-    renderMarketTrends();
-  }
+  // Always render market trends — the sub-tab visibility handles display
+  renderMarketTrends();
   if (hasStore) {
     renderStoreTrends();
     renderGapTrends();
