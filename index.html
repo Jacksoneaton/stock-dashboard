@@ -130,6 +130,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .health-summary.ok{color:#059669}
 .health-summary.warn{color:#d97706}
 .health-summary.crit{color:#dc2626}
+/* Update banner */
+.update-banner{display:none;padding:10px 16px;border-radius:8px;margin-bottom:8px;font-size:13px;font-weight:600;text-align:center;cursor:pointer;background:#dbeafe;border:1px solid #93c5fd;color:#1e40af;animation:pulse-banner 1.5s infinite}
+@keyframes pulse-banner{0%,100%{opacity:1}50%{opacity:.7}}
 .bar-val{width:36px;font-size:9px;color:var(--muted);text-align:right;flex-shrink:0;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 .donut-list{display:flex;flex-direction:column;gap:7px}
 .donut-row{display:flex;align-items:center;gap:10px;font-size:11px}
@@ -485,7 +488,10 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">9b364cc</span>
   </div>
+  <!-- 新版检测横幅 -->
+  <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
   <!-- Tabs -->
   <div class="tabs" id="tabs">
     <div class="tab" data-page="dash">📦 库存看板</div>
@@ -2300,6 +2306,25 @@ function setHealth(dotId,cls,labelId,text){
   if(l){l.textContent=text;}
 }
 updateTimestamps();
+// 版本检测：每30s检查是否有新版看板
+(function(){
+  var VER='9b364cc';
+  var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
+  if(badge)badge.textContent=VER;
+  setInterval(function(){
+    var x=new XMLHttpRequest();
+    x.open('GET','https://jacksoneaton.github.io/stock-dashboard/version.json?'+Date.now(),true);
+    x.timeout=5000;
+    x.onload=function(){
+      if(x.status===200)try{
+        var v=JSON.parse(x.responseText);
+        if(v.sha&&v.sha!==VER){if(banner)banner.style.display='block';}
+        else{if(banner)banner.style.display='none';}
+      }catch(e){}
+    };
+    x.send();
+  },30000);
+})();
 </script>
 </body>
 </html>
