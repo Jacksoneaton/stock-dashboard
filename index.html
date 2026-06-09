@@ -112,6 +112,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .bar-fill.warn{background:linear-gradient(90deg,rgba(217,119,6,.5),var(--yellow))}
 .bar-fill.ok{background:linear-gradient(90deg,rgba(8,145,178,.5),var(--cyan))}
 .bar-fill.sales{background:linear-gradient(90deg,var(--purple),var(--cyan));box-shadow:0 0 8px rgba(124,58,237,.15)}
+
+/* 数据新鲜度警告横幅 */
+.stale-banner{display:none;padding:10px 16px;border-radius:8px;margin-bottom:12px;font-size:13px;font-weight:500;line-height:1.5}
+.stale-banner.critical{display:block;background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.stale-banner.warn{display:block;background:#fffbeb;border:1px solid #fde68a;color:#92400e}
 .bar-val{width:36px;font-size:9px;color:var(--muted);text-align:right;flex-shrink:0;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 .donut-list{display:flex;flex-direction:column;gap:7px}
 .donut-row{display:flex;align-items:center;gap:10px;font-size:11px}
@@ -458,6 +463,8 @@ footer a{color:var(--dim);text-decoration:none}
 <div class="container">
   <!-- Sync status -->
   <div class="sync-bar" id="syncBar"><span class="sync-dot"></span><span id="syncMsg">加载中...</span></div>
+  <!-- 数据新鲜度警告 -->
+  <div id="staleBanner" class="stale-banner" style="display:none"></div>
   <!-- Tabs -->
   <div class="tabs" id="tabs">
     <div class="tab" data-page="dash">📦 库存看板</div>
@@ -2195,7 +2202,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-08 09:06:33", "友鹰热搜": "2026-06-09 09:06:11", "销售数据": "2026-06-09 19:01:30"};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-08 09:06:33", "友鹰热搜": "2026-06-09 09:06:11", "销售数据": "2026-06-09 20:04:09"};
 function updateTimestamps(){
   var t=SALES&&SALES.generated?SALES.generated:'未知';
   var els=[document.getElementById('utDash'),document.getElementById('utDataviz'),document.getElementById('utSales'),document.getElementById('utTrends')];
