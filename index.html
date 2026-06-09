@@ -382,6 +382,11 @@ footer a{color:var(--dim);text-decoration:none}
 @media(max-width:768px){.sales-kpi{grid-template-columns:repeat(2,1fr)}.sales-row{grid-template-columns:1fr}.sales-orders .so-name{max-width:100px}}
 
 </style>
+<style>
+.stale-banner{display:none;text-align:center;padding:8px 16px;font-size:13px;font-weight:600;margin:0;border-bottom:2px solid;}
+.stale-banner.critical{background:#fef2f2;color:#991b1b;border-color:#dc2626}
+.stale-banner.warn{background:#fffbeb;color:#92400e;border-color:#f59e0b}
+</style>
 </head>
 <body>
 
@@ -395,6 +400,9 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
 </div>
 <script>var PWD_HASH='fe349d646d284a13600edbefafb159c1529c175806e302f0a2382e256ad838b2',PWD_KEY='hermes_pwd_ok';if(localStorage.getItem(PWD_KEY)==='1')document.getElementById('pwdOverlay').classList.add('hidden');async function checkPwd(){var h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(document.getElementById('pwdInput').value));h=Array.from(new Uint8Array(h)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');if(h===PWD_HASH){localStorage.setItem(PWD_KEY,'1');document.getElementById('pwdOverlay').classList.add('hidden')}else{document.getElementById('pwdErr').textContent='密码错误';var b=document.querySelector('.pwd-box');b.classList.remove('pwd-shake');void b.offsetWidth;b.classList.add('pwd-shake');document.getElementById('pwdInput').value=''}}</script>
+
+<!-- 数据新鲜度告警 -->
+<div class="stale-banner" id="staleBanner" style="display:none"></div>
 
 <div class="container">
   <!-- Sync status -->
@@ -1644,6 +1652,397 @@ function renderSalesTab(){
 function updateTimestamps(){
   var t=SALES&&SALES.generated?SALES.generated:'未知';
   var els=[document.getElementById('utDash'),document.getElementById('utDataviz'),document.getElementById('utSales')];
+  els.forEach(function(el){if(el)el.textContent='🕐 数据更新于 '+t;});
+  
+  // 数据新鲜度检查
+  var banner=document.getElementById('staleBanner');
+  if(!banner||!t||t==='未知') return;
+  try{
+    var dt=new Date(t.replace(' ','T')+':00'); // 假设CST
+    var now=new Date();
+    var hours=(now-dt)/3600000;
+    if(hours>24){
+      banner.style.display='block';
+      banner.className='stale-banner critical';
+      banner.innerHTML='⚠️ 数据超过 24 小时未更新！当前显示 '+t+' 的数据，库存/销量可能不准';
+    }else if(hours>6){
+      banner.style.display='block';
+      banner.className='stale-banner warn';
+      banner.innerHTML='⏳ 数据已 '+Math.floor(hours)+' 小时未更新 ('+t+')，建议同步';
+    }else{
+      banner.style.display='none';
+    }
+  }catch(e){}
+}
+// Also check trends data freshness
+function checkTrendsAge(){
+  var yd=YOUYING&&YOUYING.date?YOUYING.date:'';
+  if(!yd) return;
+  var dt=new Date(yd+'T12:00:00');
+  var now=new Date();
+  var days=(now-dt)/86400000;
+  if(days>1){
+    var b=document.getElementById('staleBanner');
+    if(b&&b.style.display==='none'){
+      b.style.display='block';
+      b.className='stale-banner warn';
+      b.innerHTML='⏳ 热搜数据 '+Math.floor(days)+' 天未更新 ('+yd+')，友鹰 token 可能过期';
+    }
+  }
+}
+updateTimestamps();
+// ====== 市场趋势 Tab ======
+function renderTrendsTab(){
+  // 显示子页签
+  var hasStore = STORE_TRENDS && STORE_TRENDS.keywords && STORE_TRENDS.keywords.length > 0;
+  document.getElementById('trendsSubTabs').style.display = hasStore ? 'flex' : 'none';
+  
+  // 子页签点击
+  document.querySelectorAll('#trendsSubTabs .sub-tab').forEach(function(t){
+    t.onclick = function(){
+      var sub = t.dataset.sub;
+      document.querySelectorAll('#trendsSubTabs .sub-tab').forEach(function(x){x.classList.remove('active')});
+      t.classList.add('active');
+      document.querySelectorAll('#page-trends .sub-page').forEach(function(x){x.classList.remove('active')});
+      document.getElementById('sub-'+sub).classList.add('active');
+      localStorage.setItem('hermes_trends_sub', sub);
+    };
+  });
+  
+  var savedSub = localStorage.getItem('hermes_trends_sub') || 'market';
+  // Always render
+  renderMarketTrends();
+  checkTrendsAge();  // 检查热搜数据新鲜度
+  if (hasStore) {
+    renderStoreTrends();
+    renderGapTrends();
+    if (savedSub === 'store') {
+      document.querySelector('#trendsSubTabs .sub-tab[data-sub="store"]').click();
+    }
+    if (savedSub === 'gap') {
+      document.querySelector('#trendsSubTabs .sub-tab[data-sub="gap"]').click();
+    }
+  }
+  
+  // 更新时间
+  var ut=document.getElementById('utTrends');
+  var d = YOUYING.date || (TRENDS&&TRENDS.date);
+  if(ut&&d) ut.textContent='🕐 数据更新于 '+d;
+}
+
+function renderMarketTrends(){
+  // 优先用友鹰数据（精确搜索量），没有的话用 Google Trends
+  var useYouying = YOUYING && YOUYING.keywords && Object.keys(YOUYING.keywords).length > 0;
+  var source = useYouying ? YOUYING : (TRENDS || {keywords:{}});
+  var kw = source.keywords || {};
+  var isYouying = useYouying;
+  
+  var entries = [];
+  Object.keys(kw).forEach(function(k){
+    var v = kw[k];
+    if (isYouying) {
+      entries.push([k, {
+        avg: v.search_volume || 0, 
+        current: v.search_volume || 0, 
+        max: v.search_volume || 0,
+        trend: 'up',
+        price: v.recommend_price,
+        items: v.total_count,
+        avgSold: v.avg_sold,
+      }]);
+    } else {
+      entries.push([k, v]);
+    }
+  });
+  entries.sort(function(a,b){ return b[1].avg - a[1].avg; });
+  
+  var srcLabel = isYouying ? '友鹰数据' : 'Google Trends';
+  var upCount = entries.filter(function(e){ return e[1].trend==='up'; }).length;
+  document.getElementById('trendsStats').innerHTML=
+    '<div class="stat"><div class="num" style="color:#7c3aed">'+entries.length+'</div><div class="lbl">关键词</div></div>'+
+    '<div class="stat"><div class="num" style="color:#059669">'+upCount+'</div><div class="lbl">活跃中</div></div>'+
+    (isYouying ? '<div class="stat"><div class="num" style="color:#dc2626">'+(YOUYING.total||entries.length)+'</div><div class="lbl">总关键词</div></div>' : '<div class="stat"><div class="num" style="color:#dc2626">'+(entries.length-upCount)+'</div><div class="lbl">下降中</div></div>')+
+    '<div class="stat"><div class="num" style="color:#0891b2;font-size:11px">'+srcLabel+'</div><div class="lbl">数据源</div></div>';
+  
+  var maxVal = entries.length>0 ? entries[0][1].avg : 1;
+  var bars='';
+  entries.slice(0,10).forEach(function(e){
+    var name=e[0], info=e[1];
+    var pct = Math.round(info.avg/maxVal*100);
+    var label = isYouying ? Number(info.avg).toLocaleString() : info.avg;
+    bars+='<div class="bar-row">'+
+      '<span class="bar-label" style="width:90px">'+name+'</span>'+
+      '<span class="bar-val" style="width:80px;text-align:right;font-size:10px">'+label+'</span>'+
+      '<div class="bar-track"><div class="bar-fill bar-fill sales" style="width:'+pct+'%"></div></div>'+
+      '</div>';
+  });
+  document.getElementById('trendsBars').innerHTML=bars||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+  
+  var top3=entries.slice(0,3).map(function(e){return e[0]}).join('、');
+  document.getElementById('trendsLine').innerHTML=
+    '<div style="margin-bottom:8px">🔺 <b>搜索量最高</b>: '+top3+'</div>'+
+    (isYouying ? '<div style="margin-bottom:8px">💰 <b>广告出价参考</b>: NT$'+(entries[0]?entries[0][1].price:'-')+'/点击</div>' : '')+
+    '<div style="font-size:10px;opacity:.6">数据源: '+srcLabel+' | 每日自动更新</div>';
+  
+  document.getElementById('trendsFilter').innerHTML=
+    '<span class="filter-tag active" onclick="filterTrends(\'all\')">全部</span>'+
+    '<span class="filter-tag" onclick="filterTrends(\'top\')">蓝海</span>';
+  
+  renderTrendsGrid('all');
+}
+
+function renderStoreTrends(){
+  var items = STORE_TRENDS.keywords || [];
+  var totalSales = 0, totalSkus = 0;
+  items.forEach(function(it){ totalSales += it.store_sales; totalSkus += it.sku_count; });
+  
+  // Stats
+  document.getElementById('storeStats').innerHTML =
+    '<div class="stat"><div class="num" style="color:#7c3aed">'+items.length+'</div><div class="lbl">本店品类</div></div>'+
+    '<div class="stat"><div class="num" style="color:#059669">'+totalSkus+'</div><div class="lbl">关联 SKU</div></div>'+
+    '<div class="stat"><div class="num" style="color:#d97706">'+totalSales.toLocaleString()+'</div><div class="lbl">总销量</div></div>'+
+    '<div class="stat"><div class="num" style="color:#0891b2;font-size:11px">友鹰+订单</div><div class="lbl">数据源</div></div>';
+  
+  // Bars: 本店销量 vs 市场搜索量
+  var maxStore = items[0] ? items[0].store_sales : 1;
+  var bars='';
+  items.slice(0,10).forEach(function(it){
+    var spct = Math.round(it.store_sales/maxStore*100);
+    var yypct = it.youying_volume ? Math.min(100, it.youying_volume/10000*10) : 0;
+    bars+='<div class="bar-row">'+
+      '<span class="bar-label" style="width:70px;font-size:10px">'+it.keyword+'</span>'+
+      '<span class="bar-val" style="width:60px;text-align:right;font-size:9px;color:#059669">'+it.store_sales+'</span>'+
+      '<div class="bar-track"><div class="bar-fill bar-fill sales" style="width:'+spct+'%"></div></div>'+
+      '</div>';
+  });
+  document.getElementById('storeBars').innerHTML=bars||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+  
+  // Insight
+  var matched = items.filter(function(it){ return it.youying_volume; });
+  var insight = '';
+  if (matched.length > 0) {
+    // Find high opportunity: high market volume, low competition
+    var sorted = matched.slice().sort(function(a,b){
+      var ra = a.youying_volume / Math.max(1, a.youying_items||1);
+      var rb = b.youying_volume / Math.max(1, b.youying_items||1);
+      return rb - ra;
+    });
+    insight += '<div style="margin-bottom:6px">🎯 <b>机会品类</b>（高搜索/低竞争）:</div>';
+    sorted.slice(0,3).forEach(function(it){
+      var ratio = (it.youying_volume / Math.max(1, it.youying_items||1)).toFixed(0);
+      insight += '<div style="font-size:11px;margin:2px 0">• '+it.keyword+' — 月搜 '+Number(it.youying_volume).toLocaleString()+' / '+it.youying_items+' 竞品 (比 '+ratio+')</div>';
+    });
+    // Low competition alert
+    var lowComp = matched.filter(function(it){ return it.youying_items && it.youying_items < 1000; });
+    if (lowComp.length>0) {
+      insight += '<div style="margin-top:8px;margin-bottom:4px">🟢 <b>低竞争品类</b> (&lt;1000竞品):</div>';
+      lowComp.slice(0,3).forEach(function(it){
+        insight += '<div style="font-size:10px;margin:1px 0">• '+it.keyword+' — '+it.youying_items+' 竞品, 月搜 '+Number(it.youying_volume).toLocaleString()+'</div>';
+      });
+    }
+  } else {
+    insight += '<div style="margin-top:20px">⚠️ 尚未获取友鹰市场数据</div>';
+    insight += '<div style="font-size:10px;margin-top:6px;opacity:.6">请登录 youyingshuju.com 运行 Tampermonkey 脚本自动抓取</div>';
+  }
+  document.getElementById('storeInsight').innerHTML = insight;
+  
+  // Grid cards
+  var grid='';
+  items.forEach(function(it){
+    var sv = it.youying_volume || 0;
+    var tc = it.youying_items || 0;
+    var ratio = tc > 0 ? (sv/tc).toFixed(1) : 0;
+    var barPct = Math.min(Math.round(sv/500000*100), 100);
+    var badgeClass = ratio > 50 ? 'green' : (ratio > 20 ? 'amber' : 'gray');
+    grid+='<div class="premium-card">'+
+      '<div class="pc-head">'+
+        '<span class="pc-kw">[ '+it.keyword+' ]</span>'+
+        '<div style="display:flex;gap:4px">'+
+          '<span class="pc-badge green">本店销 '+it.store_sales+'</span>'+
+          (ratio > 0 ? '<span class="pc-badge '+badgeClass+'">'+ratio+'×</span>' : '')+
+        '</div>'+
+      '</div>'+
+      '<div class="pc-divider"></div>'+
+      (sv ? '<div class="pc-row"><span class="pc-label">市场搜索</span><span class="pc-value">'+sv.toLocaleString()+' <span style="font-weight:400;font-size:10px;color:var(--muted)">(月)</span></span></div>' : '')+
+      (tc ? '<div class="pc-row"><span class="pc-label">竞品数量</span><span class="pc-value">'+Number(tc).toLocaleString()+'</span></div>' : '')+
+      '<div class="pc-row"><span class="pc-label">关联 SKU</span><span class="pc-value">'+it.sku_count+'</span></div>'+
+      '<div class="pc-bar-wrap"><div class="pc-bar-fill" style="background:var(--cyan);width:'+barPct+'%"></div></div>'+
+      sparkSVG(it.keyword, ratio>50?'var(--green)':(ratio>20?'var(--yellow)':'var(--dim)'))+
+    '</div>';
+  });
+  document.getElementById('storeGrid').innerHTML=grid||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+}
+
+function renderGapTrends(){
+  var items = GAP_TRENDS.keywords || [];
+  
+  // Stats
+  var totalSv = 0, totalComp = 0;
+  items.forEach(function(it){ totalSv += it.search_volume||0; totalComp += it.competitors||0; });
+  var avgRatio = items.length > 0 ? Math.round(totalSv / Math.max(1, totalComp)) : 0;
+  
+  document.getElementById('gapStats').innerHTML =
+    '<div class="stat"><div class="num" style="color:#dc2626">'+items.length+'</div><div class="lbl">未覆盖品类</div></div>'+
+    '<div class="stat"><div class="num" style="color:#7c3aed">'+(totalSv/1000).toFixed(0)+'K</div><div class="lbl">月搜索总量</div></div>'+
+    '<div class="stat"><div class="num" style="color:#059669">'+avgRatio+'</div><div class="lbl">平均搜索/竞品比</div></div>'+
+    '<div class="stat"><div class="num" style="color:#d97706;font-size:11px">友鹰数据</div><div class="lbl">数据源</div></div>';
+  
+  // Top 10 bars: search volume
+  var maxSv = items[0] ? items[0].search_volume : 1;
+  var bars='';
+  items.slice(0,10).forEach(function(it){
+    var pct = Math.round(it.search_volume/maxSv*100);
+    var sv = Number(it.search_volume).toLocaleString();
+    bars+='<div class="bar-row">'+
+      '<span class="bar-label" style="width:70px;font-size:10px">'+it.keyword+'</span>'+
+      '<span class="bar-val" style="width:70px;text-align:right;font-size:9px;color:#7c3aed">'+sv+'</span>'+
+      '<div class="bar-track"><div class="bar-fill bar-fill sales" style="width:'+pct+'%"></div></div>'+
+      '</div>';
+  });
+  document.getElementById('gapBars').innerHTML=bars||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+  
+  // Insight: 选品建议
+  var sorted = items.slice().sort(function(a,b){ return b.ratio - a.ratio; });
+  var insight = '<div style="margin-bottom:6px">🏆 <b>最佳选品机会</b>（高搜索低竞争）:</div>';
+  sorted.slice(0,5).forEach(function(it){
+    var priceHint = it.avg_price ? '均价 NT$'+(it.avg_price|0) : '';
+    insight += '<div style="font-size:11px;margin:3px 0">• <b>'+it.keyword+'</b> — 月搜 '+Number(it.search_volume).toLocaleString()+', '+it.competitors+' 竞品 (比 '+it.ratio+') '+priceHint+'</div>';
+  });
+  
+  // Fast movers (high avg_sold)
+  var fast = items.slice().filter(function(it){ return it.avg_sold > 100; }).sort(function(a,b){ return b.avg_sold - a.avg_sold; });
+  if (fast.length > 0) {
+    insight += '<div style="margin-top:10px;margin-bottom:4px">⚡ <b>高周转品类</b>（均销&gt;100件/月）:</div>';
+    fast.slice(0,3).forEach(function(it){
+      insight += '<div style="font-size:10px;margin:1px 0">• '+it.keyword+' — 均销 '+it.avg_sold+' 件, 月搜 '+Number(it.search_volume).toLocaleString()+'</div>';
+    });
+  }
+  document.getElementById('gapInsight').innerHTML = insight;
+  
+  // Grid cards — sorted by ratio (best opportunity first)
+  var grid='';
+  sorted.forEach(function(it){
+    var sv = it.search_volume ? (it.search_volume/1000).toFixed(0)+'K' : '-';
+    var tc = it.competitors ? Number(it.competitors).toLocaleString() : '-';
+    var ratioGrade = it.ratio > 50 ? 'green' : (it.ratio > 20 ? 'amber' : 'gray');
+    var barPct = Math.min(Math.round(it.search_volume/500000*100), 100);
+    var barColor = it.ratio > 50 ? 'var(--green)' : (it.ratio > 20 ? 'var(--yellow)' : 'var(--dim)');
+    grid+='<div class="trend-card">'+
+      '<div class="tc-header">'+
+        '<span class="tc-name">'+it.keyword+'</span>'+
+        '<span class="tc-badge '+ratioGrade+'">'+it.ratio+'×</span>'+
+      '</div>'+
+      '<div class="tc-bar"><div class="tc-bar-fill" style="width:'+barPct+'%;background:'+barColor+'"></div></div>'+
+      '<div class="tc-meta">'+
+        '<span>🔍 '+sv+' 月搜</span>'+
+        '<span>📦 '+tc+' 竞品</span>'+
+        (it.avg_price ? '<span>💰 NT$'+(it.avg_price|0)+'</span>' : '')+
+        (it.avg_sold ? '<span>📈 '+it.avg_sold+'件/月</span>' : '')+
+      '</div>'+
+    '</div>';
+  });
+  document.getElementById('gapGrid').innerHTML=grid||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+}
+
+function filterTrends(filter){
+  var btns=document.querySelectorAll('#trendsFilter .filter-tag');
+  btns.forEach(function(b){b.classList.toggle('active',b.textContent.includes(filter==='all'?'全部':'蓝海'));});
+  renderTrendsGrid(filter);
+}
+
+function renderTrendsGrid(filter){
+  // 蓝海模式：直接用翻页捞取的蓝海词
+  if (filter==='top' && YOUYING_BLUE && YOUYING_BLUE.keywords && YOUYING_BLUE.keywords.length > 0) {
+    var blueKw = YOUYING_BLUE.keywords;
+    var entries = blueKw.map(function(v){
+      return [v.keyword, {
+        avg: v.search_volume||0, current: v.search_volume||0, max: v.search_volume||0,
+        trend: 'up', price: v.recommend_price, items: v.total_count, avgSold: v.avg_sold
+      }];
+    });
+    entries.sort(function(a,b){ return b[1].avg - a[1].avg });
+    // 只渲染前100个，避免页面爆炸
+    if (entries.length > 100) {
+      document.getElementById('trendsStats').innerHTML +=
+        ' <span style=\"font-size:10px;color:var(--muted)\">(显示前100/'+entries.length+'个)</span>';
+      entries = entries.slice(0, 100);
+    }
+    renderBlueGrid(entries, true);
+    return;
+  }
+  
+  var useYouying = YOUYING && YOUYING.keywords && Object.keys(YOUYING.keywords).length > 0;
+  var source = useYouying ? YOUYING : (TRENDS || {keywords:{}});
+  var kw = source.keywords || {};
+  var isYouying = useYouying;
+  
+  var entries = [];
+  Object.keys(kw).forEach(function(k){
+    var v = kw[k];
+    entries.push(isYouying ? [k, {
+      avg: v.search_volume||0, current: v.search_volume||0, max: v.search_volume||0,
+      trend: 'up', price: v.recommend_price, items: v.total_count, avgSold: v.avg_sold
+    }] : [k, v]);
+  });
+  entries.sort(function(a,b){ return b[1].avg - a[1].avg });
+  // 蓝海回退：无YOUYING_BLUE时过滤ratio≥50
+  if (filter==='top') entries=entries.filter(function(e){
+    if (!isYouying) return true;
+    var sv = e[1].avg||0, tc = e[1].items||0;
+    return sv/tc >= 50;
+  });
+  
+  renderBlueGrid(entries, isYouying);
+}
+
+function renderBlueGrid(entries, isYouying){
+  var html='';
+  entries.forEach(function(e){
+    var name=e[0], info=e[1];
+    if (isYouying) {
+      var sv = info.avg || 0;
+      var svStr = sv > 999 ? (sv/1000).toFixed(0)+'K' : sv;
+      var tc = info.items || 0;
+      var ratio = tc > 0 ? (sv/tc).toFixed(1) : 0;
+      var barPct = Math.min(Math.round(sv/500000*100), 100);
+      var badgeClass = ratio > 50 ? 'green' : (ratio > 20 ? 'amber' : 'gray');
+      var barColor = ratio > 50 ? 'var(--green)' : (ratio > 20 ? 'var(--yellow)' : 'var(--dim)');
+      html+='<div class="premium-card">'+
+        '<div class="pc-head">'+
+          '<span class="pc-kw">[ '+name+' ]</span>'+
+          (ratio > 0 ? '<span class="pc-badge '+badgeClass+'">▲ '+ratio+'×</span>' : '')+
+        '</div>'+
+        '<div class="pc-divider"></div>'+
+        '<div class="pc-row"><span class="pc-label">搜索人气</span><span class="pc-value">'+sv.toLocaleString()+' <span style="font-weight:400;font-size:10px;color:var(--muted)">(月)</span></span></div>'+
+        '<div class="pc-bar-wrap"><div class="pc-bar-fill" style="width:'+barPct+'%;background:'+barColor+'"></div></div>'+
+        '<div class="pc-row"><span class="pc-label">竞品数量</span><span class="pc-value">'+Number(tc).toLocaleString()+'</span></div>'+
+        (info.price ? '<div class="pc-row"><span class="pc-label">推荐出价</span><span class="pc-value">NT$'+info.price+'</span></div>' : '')+
+        (info.avgSold ? '<div class="pc-row"><span class="pc-label">均销量</span><span class="pc-value up">'+info.avgSold+' 件/月</span></div>' : '')+
+        '<div class="pc-divider"></div>'+
+        sparkSVG(name, ratio>50?'var(--green)':(ratio>20?'var(--yellow)':'var(--dim)'))+
+      '</div>';
+    } else {
+      var icon=info.trend==='up'?'📈':'📉';
+      var color=info.trend==='up'?'#059669':'#dc2626';
+      html+='<div class="card" style="padding:14px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+          '<span style="font-weight:600;font-size:13px">'+name+'</span>'+
+          '<span style="color:'+color+';font-weight:700;font-size:20px">'+icon+'</span>'+
+        '</div>'+
+        '<div style="font-family:monospace;font-size:11px;color:'+color+'">'+Array(Math.min(Math.round(info.avg/5),40)).fill('▌').join('')+'</div>'+
+        '<div style="display:flex;gap:12px;margin-top:6px;font-size:10px;color:var(--muted)">'+
+          '<span>均值 '+info.avg+'</span><span>峰值 '+info.max+'</span><span>当前 '+info.current+'</span>'+
+        '</div>'+
+      '</div>';
+    }
+  });
+  document.getElementById('trendsGrid').innerHTML=html||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+}
+
+// ====== 更新时间戳 ======
+function updateTimestamps(){
+  var t=SALES&&SALES.generated?SALES.generated:'未知';
+  var els=[document.getElementById('utDash'),document.getElementById('utDataviz'),document.getElementById('utSales'),document.getElementById('utTrends')];
   els.forEach(function(el){if(el)el.textContent='🕐 数据更新于 '+t;});
 }
 updateTimestamps();
