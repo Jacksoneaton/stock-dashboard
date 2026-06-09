@@ -760,7 +760,15 @@ function loadTransit(cb){
   }catch(e){}
   var localCopy=_transitData.slice();  // 备份一下，后续比较用
   
-  // 异步从 GitHub 拉取（仅做参考，不覆盖更多数据的本地版本）
+  // 如果推送锁还在（30s内），说明刚有本地修改正在推GitHub，跳过拉取防止覆盖
+  var lock=localStorage.getItem('hermes_push_lock');
+  if(lock && Date.now()-parseInt(lock)<30000){
+    setSyncStatus('synced','已同步 · 本地');
+    cb();return;
+  }
+  if(lock) try{localStorage.removeItem('hermes_push_lock');}catch(e){}  // 清理过期锁
+  
+  // 异步从 GitHub 拉取（内容不一致则覆盖本地，GitHub是共享数据源）
   var x=new XMLHttpRequest();
   x.open('GET',TRANSIT_RAW+'?t='+Date.now());x.timeout=8000;
   x.onload=function(){
@@ -834,8 +842,10 @@ function totalTransit(){
 function saveTransitToGitHub(data,cb){
   // 先存localStorage，保证刷新不丢
   try{localStorage.setItem('hermes_transit',JSON.stringify(data));}catch(e){}
+  // 加推送锁：防止刷新时GitHub拉取覆盖未完成的推送
+  try{localStorage.setItem('hermes_push_lock',Date.now());}catch(e){}
   
-  if(!_ghToken){setSyncStatus('local','未配置Token');if(cb)cb(false);return}
+  if(!_ghToken){setSyncStatus('local','未配置Token');try{localStorage.removeItem('hermes_push_lock');}catch(e){}if(cb)cb(false);return}
   setSyncStatus('syncing','同步中...');
   var c=JSON.stringify({packages:data});
   var p={message:'Update in_transit.json',content:btoa(unescape(encodeURIComponent(c))),branch:'gh-pages'};
@@ -846,15 +856,16 @@ function saveTransitToGitHub(data,cb){
   x.setRequestHeader('Accept','application/vnd.github.v3+json');
   x.setRequestHeader('Content-Type','application/json');
   x.onload=function(){
+    try{localStorage.removeItem('hermes_push_lock');}catch(e){}
     if(x.status===200||x.status===201){
       var r=JSON.parse(x.responseText);_transitSha=r.content.sha;
       setSyncStatus('synced','已同步 · GitHub');
       if(cb) cb(true);
     }else if(x.status===422){fetchShaAndRetry(data,cb)}
-    else{setSyncStatus('error','同步失败 · 仅本地保存');if(cb)cb(false)}
+    else{try{localStorage.removeItem('hermes_push_lock');}catch(e){}setSyncStatus('error','同步失败 · 仅本地保存');if(cb)cb(false)}
   };
-  x.onerror=function(){setSyncStatus('error','网络异常 · 仅本地保存');if(cb)cb(false)};
-  x.ontimeout=function(){setSyncStatus('error','同步超时 · 仅本地保存');if(cb)cb(false)};
+  x.onerror=function(){try{localStorage.removeItem('hermes_push_lock');}catch(e){}setSyncStatus('error','网络异常 · 仅本地保存');if(cb)cb(false)};
+  x.ontimeout=function(){try{localStorage.removeItem('hermes_push_lock');}catch(e){}setSyncStatus('error','同步超时 · 仅本地保存');if(cb)cb(false)};
   x.send(JSON.stringify(p));
 }
 function fetchShaAndRetry(data,cb){
@@ -862,8 +873,8 @@ function fetchShaAndRetry(data,cb){
   x.open('GET',TRANSIT_API+'?ref=gh-pages');x.timeout=8000;
   x.setRequestHeader('Authorization','token '+_ghToken);
   x.setRequestHeader('Accept','application/vnd.github.v3+json');
-  x.onload=function(){if(x.status===200){_transitSha=JSON.parse(x.responseText).sha;saveTransitToGitHub(data,cb)}else{if(cb) cb(false)}};
-  x.onerror=function(){if(cb) cb(false)};
+  x.onload=function(){if(x.status===200){_transitSha=JSON.parse(x.responseText).sha;saveTransitToGitHub(data,cb)}else{try{localStorage.removeItem('hermes_push_lock');}catch(e){}if(cb) cb(false)}};
+  x.onerror=function(){try{localStorage.removeItem('hermes_push_lock');}catch(e){}if(cb) cb(false)};
   x.send();
 }
 
