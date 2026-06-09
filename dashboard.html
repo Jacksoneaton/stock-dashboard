@@ -1095,7 +1095,9 @@ function renderTransitTab(){
       '<div class="pkg-body">'+
         '<table class="pkg-table"><thead><tr><th style="width:26px"><input type="checkbox" class="pkg-check-all" onclick="toggleSelectAll(this,\''+p.id+'\')"></th><th>SKU</th><th>商品</th><th>规格</th><th style="text-align:center">库存</th><th style="text-align:center">在途</th><th style="text-align:center;width:50px"></th></tr></thead><tbody>';
 
-    for(var sku in p.items){
+    var skus=Object.keys(p.items).sort();
+    for(var i=0;i<skus.length;i++){
+      var sku=skus[i];
       var info=skuInfo[sku]||{title:'-',spec:'-',stock:0};
       html+='<tr>'+
         '<td><input type="checkbox" class="pkg-check" data-pkg="'+p.id+'" data-sku="'+sku+'" onchange="onBatchCheck()"></td>'+
