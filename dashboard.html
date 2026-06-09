@@ -2215,7 +2215,7 @@ function updateTimestamps(){
     var now=new Date();
     var msgs=[];
     for(var k in DATA_SOURCES){
-      var dt=new Date(DATA_SOURCES[k].replace(' ','T')+':00');
+      var dt=new Date(DATA_SOURCES[k].replace(' ','T'));
       if(isNaN(dt.getTime())){msgs.push(k+' 数据缺失');continue;}
       var hours=(now-dt)/3600000;
       if(hours>24) msgs.push(k+' 超过24h未更新 ('+DATA_SOURCES[k]+')');
