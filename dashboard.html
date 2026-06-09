@@ -117,6 +117,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .stale-banner{display:none;padding:10px 16px;border-radius:8px;margin-bottom:12px;font-size:13px;font-weight:500;line-height:1.5}
 .stale-banner.critical{display:block;background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
 .stale-banner.warn{display:block;background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+/* Health status bar — always visible */
+.health-bar{display:flex;align-items:center;gap:14px;padding:8px 14px;border-radius:8px;margin-bottom:8px;font-size:11px;background:rgba(5,150,105,.04);border:1px solid rgba(5,150,105,.12);font-weight:500;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;flex-wrap:wrap}
+.health-bar.warn{background:rgba(217,119,6,.04);border-color:rgba(217,119,6,.15)}
+.health-bar.critical{background:rgba(220,38,38,.04);border-color:rgba(220,38,38,.18)}
+.health-item{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:10px}
+.health-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.health-dot.ok{background:#059669;box-shadow:0 0 6px rgba(5,150,105,.3)}
+.health-dot.warn{background:#d97706;box-shadow:0 0 6px rgba(217,119,6,.3)}
+.health-dot.crit{background:#dc2626;box-shadow:0 0 8px rgba(220,38,38,.4);animation:pulse-dot 1.5s infinite}
+.health-summary{font-size:11px;margin-left:auto;font-weight:600}
+.health-summary.ok{color:#059669}
+.health-summary.warn{color:#d97706}
+.health-summary.crit{color:#dc2626}
 .bar-val{width:36px;font-size:9px;color:var(--muted);text-align:right;flex-shrink:0;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 .donut-list{display:flex;flex-direction:column;gap:7px}
 .donut-row{display:flex;align-items:center;gap:10px;font-size:11px}
@@ -465,6 +478,14 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="sync-bar" id="syncBar"><span class="sync-dot"></span><span id="syncMsg">加载中...</span></div>
   <!-- 数据新鲜度警告 -->
   <div id="staleBanner" class="stale-banner" style="display:none"></div>
+  <!-- 系统健康状态 — 常驻显示 -->
+  <div class="health-bar" id="healthBar">
+    <span class="health-item"><span class="health-dot" id="hdStock"></span><span id="htStock">顺运宝</span></span>
+    <span class="health-item"><span class="health-dot" id="hdTrends"></span><span id="htTrends">友鹰</span></span>
+    <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span></span>
+    <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span></span>
+    <span class="health-summary" id="healthSum">检查中...</span>
+  </div>
   <!-- Tabs -->
   <div class="tabs" id="tabs">
     <div class="tab" data-page="dash">📦 库存看板</div>
@@ -2203,33 +2224,80 @@ function renderBlueGrid(entries, isYouying){
 
 // ====== 更新时间戳 ======
 var DATA_SOURCES = {"顺运宝库存": "2026-06-09 22:09:33", "友鹰热搜": "2026-06-09 20:59:39", "销售数据": "2026-06-09 23:02:07"};
+// 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
+var HEALTH_MAP = {
+  '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
+  '友鹰热搜':   ['hdTrends','htTrends', 28, 36], // 1次/日，正常间隔≤24h
+  '销售数据':   ['hdSales','htSales', 4, 12],      // 每小时，正常间隔≤2h
+  '看板部署':   ['hdDeploy','htDeploy', 4, 12]     // 每小时，正常间隔≤2h
+};
 function updateTimestamps(){
   var t=SALES&&SALES.generated?SALES.generated:'未知';
   var els=[document.getElementById('utDash'),document.getElementById('utDataviz'),document.getElementById('utSales'),document.getElementById('utTrends')];
   els.forEach(function(el){if(el)el.textContent='🕐 数据更新于 '+t;});
   
-  // 数据新鲜度检查（基于 last_success.json，即真实成功抓取时间）
+  // 数据新鲜度检查 + 健康状态栏
   var banner=document.getElementById('staleBanner');
-  if(!banner||!DATA_SOURCES) return;
+  var bar=document.getElementById('healthBar');
+  if(!DATA_SOURCES) return;
   try{
     var now=new Date();
-    var msgs=[];
+    var msgs=[], totalWarn=0, totalCrit=0, totalOk=0;
     for(var k in DATA_SOURCES){
       var dt=new Date(DATA_SOURCES[k].replace(' ','T'));
-      if(isNaN(dt.getTime())){msgs.push(k+' 数据缺失');continue;}
+      var map=HEALTH_MAP[k];
+      if(isNaN(dt.getTime())){
+        msgs.push(k+' 数据缺失');
+        if(map){setHealth(map[0],'crit',map[1],k+' 缺');}
+        totalCrit++;
+        continue;
+      }
       var hours=(now-dt)/3600000;
-      if(hours>24) msgs.push(k+' 超过24h未更新 ('+DATA_SOURCES[k]+')');
-      else if(hours>6) msgs.push(k+' '+Math.floor(hours)+'h未更新');
+      var warnH=map?map[2]:24, critH=map?map[3]:48;
+      if(hours>critH){
+        msgs.push(k+' 超过'+critH+'h未更新 ('+DATA_SOURCES[k]+')');
+        if(map){setHealth(map[0],'crit',map[1],k+' 🔴');}
+        totalCrit++;
+      }else if(hours>warnH){
+        msgs.push(k+' '+Math.floor(hours)+'h未更新');
+        if(map){setHealth(map[0],'warn',map[1],k+' ⚠️');}
+        totalWarn++;
+      }else{
+        if(map){setHealth(map[0],'ok',map[1],'✅ '+k);}
+        totalOk++;
+      }
     }
-    if(msgs.length>0){
-      var critical=msgs.some(function(m){return m.indexOf('24h')>-1||m.indexOf('缺失')>-1});
-      banner.style.display='block';
-      banner.className='stale-banner '+(critical?'critical':'warn');
-      banner.innerHTML=(critical?'⚠️ 数据过期：':'⏳ 数据延迟：')+msgs.join('；');
-    }else{
-      banner.style.display='none';
+    // 更新健康状态栏样式
+    if(bar){
+      var sum=document.getElementById('healthSum');
+      if(totalCrit>0){
+        bar.className='health-bar critical';
+        if(sum){sum.className='health-summary crit';sum.textContent='🔴 '+totalCrit+'项异常';}
+      }else if(totalWarn>0){
+        bar.className='health-bar warn';
+        if(sum){sum.className='health-summary warn';sum.textContent='⚠️ '+totalWarn+'项延迟';}
+      }else{
+        bar.className='health-bar';
+        if(sum){sum.className='health-summary ok';sum.textContent='✅ 全部正常';}
+      }
+    }
+    // 过期横幅
+    if(banner){
+      if(msgs.length>0){
+        var critical=msgs.some(function(m){return m.indexOf('24h')>-1||m.indexOf('缺失')>-1});
+        banner.style.display='block';
+        banner.className='stale-banner '+(critical?'critical':'warn');
+        banner.innerHTML=(critical?'⚠️ 数据过期：':'⏳ 数据延迟：')+msgs.join('；');
+      }else{
+        banner.style.display='none';
+      }
     }
   }catch(e){}
+}
+function setHealth(dotId,cls,labelId,text){
+  var d=document.getElementById(dotId),l=document.getElementById(labelId);
+  if(d){d.className='health-dot '+cls;}
+  if(l){l.textContent=text;}
 }
 updateTimestamps();
 </script>
