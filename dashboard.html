@@ -803,6 +803,10 @@ function loadTransit(cb){
 // 每60秒自动轮询GitHub，实现跨设备实时同步
 setInterval(function(){
   if(!_transitReady) return;
+  // 推送进行中，跳过轮询避免覆盖未完成的推送
+  var lock=localStorage.getItem('hermes_push_lock');
+  if(lock && Date.now()-parseInt(lock)<30000) return;
+  if(lock) try{localStorage.removeItem('hermes_push_lock');}catch(e){}
   var x=new XMLHttpRequest();
   x.open('GET',TRANSIT_RAW+'?t='+Date.now());x.timeout=8000;
   x.onload=function(){
