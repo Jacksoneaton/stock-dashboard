@@ -704,7 +704,7 @@ switchTab(saved);
 
 // ====== 在途管理 (GitHub + 包裹分组) ======
 var TRANSIT_API = atob('aHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9yZXBvcy9KYWNrc29uZWF0b24vc3RvY2stZGFzaGJvYXJkL2NvbnRlbnRzL2luX3RyYW5zaXQuanNvbg==');
-var TRANSIT_RAW  = atob('aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0phY2tzb25lYXRvbi9zdG9jay1kYXNoYm9hcmQvZ2gtcGFnZXMvaW5fdHJhbnNpdC5qc29u');
+var TRANSIT_RAW  = atob('aHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L2doL0phY2tzb25lYXRvbi9zdG9jay1kYXNoYm9hcmRAZ2gtcGFnZXMvaW5fdHJhbnNpdC5qc29u');
 var TOKEN_KEY='***';
 var _transitSha=null;
 var _transitReady=false;
@@ -1865,9 +1865,8 @@ function renderTrendsTab(){
   });
   
   var savedSub = localStorage.getItem('hermes_trends_sub') || 'market';
-  if (!hasStore || savedSub === 'market') {
-    renderMarketTrends();
-  }
+  // Always render
+  renderMarketTrends();
   if (hasStore) {
     renderStoreTrends();
     renderGapTrends();
