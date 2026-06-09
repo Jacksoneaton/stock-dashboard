@@ -769,19 +769,13 @@ function loadTransit(cb){
         var raw=JSON.parse(x.responseText)||{};
         if(raw.packages && Array.isArray(raw.packages)){
           var remote=raw.packages;
-          var localCount=localCopy.reduce(function(s,p){for(var k in p.items)s+=p.items[k];return s},0);
-          var remoteCount=remote.reduce(function(s,p){for(var k in p.items)s+=p.items[k];return s},0);
-          // 只有 GitHub 数据更多时才更新本地（说明其他设备有新增）
-          if(remoteCount>localCount||localCopy.length===0){
+          // 内容不一致就用 GitHub 覆盖本地（GitHub 是共享数据源）
+          var remoteJson=JSON.stringify(remote);
+          var localJson=JSON.stringify(localCopy);
+          if(remoteJson!==localJson){
             _transitData=remote;
             localStorage.setItem('hermes_transit',JSON.stringify(remote));
             setSyncStatus('synced','已同步 · GitHub');
-            refreshAll();
-          }else if(localCount>remoteCount){
-            // 本地有未上传的数据 → 自动推送到 GitHub
-            _transitData=localCopy;
-            saveTransitToGitHub(localCopy);
-            setSyncStatus('synced','恢复同步 · 已上传');
             refreshAll();
           }else{
             setSyncStatus('synced','已同步 · 一致');
@@ -808,15 +802,13 @@ setInterval(function(){
       var raw=JSON.parse(x.responseText)||{};
       if(!raw.packages) return;
       var remote=raw.packages;
-      var localCount=_transitData.reduce(function(s,p){for(var k in p.items)s+=p.items[k];return s},0);
-      var remoteCount=remote.reduce(function(s,p){for(var k in p.items)s+=p.items[k];return s},0);
-      if(remoteCount>localCount){
+      var remoteJson=JSON.stringify(remote);
+      var localJson=JSON.stringify(_transitData);
+      if(remoteJson!==localJson){
         _transitData=remote;
         try{localStorage.setItem('hermes_transit',JSON.stringify(remote));}catch(e){}
         setSyncStatus('synced','已同步 · GitHub');
         refreshAll();
-      }else if(localCount>remoteCount){
-        saveTransitToGitHub(_transitData);
       }
     }catch(e){}
   };
