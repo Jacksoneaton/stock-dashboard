@@ -2223,11 +2223,11 @@ function renderBlueGrid(entries, isYouying){
 
 // ====== 更新时间戳 ======
 var DATA_SOURCES = {"顺运宝库存": "2026-06-09 22:09:33", "友鹰热搜": "2026-06-09 20:59:39", "销售数据": "2026-06-09 23:02:07"};
-// 健康状态映射: DATA_SOURCES key → [element id prefix, label]
+// 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
-  '顺运宝库存': ['hdStock','htStock'],
-  '友鹰热搜':   ['hdTrends','htTrends'],
-  '销售数据':   ['hdSales','htSales']
+  '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
+  '友鹰热搜':   ['hdTrends','htTrends', 28, 36], // 1次/日，正常间隔≤24h
+  '销售数据':   ['hdSales','htSales', 4, 12]      // 每小时，正常间隔≤2h
 };
 function updateTimestamps(){
   var t=SALES&&SALES.generated?SALES.generated:'未知';
@@ -2251,11 +2251,12 @@ function updateTimestamps(){
         continue;
       }
       var hours=(now-dt)/3600000;
-      if(hours>24){
-        msgs.push(k+' 超过24h未更新 ('+DATA_SOURCES[k]+')');
+      var warnH=map?map[2]:24, critH=map?map[3]:48;
+      if(hours>critH){
+        msgs.push(k+' 超过'+critH+'h未更新 ('+DATA_SOURCES[k]+')');
         if(map){setHealth(map[0],'crit',map[1],k+' 🔴');}
         totalCrit++;
-      }else if(hours>6){
+      }else if(hours>warnH){
         msgs.push(k+' '+Math.floor(hours)+'h未更新');
         if(map){setHealth(map[0],'warn',map[1],k+' ⚠️');}
         totalWarn++;
