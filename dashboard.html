@@ -2281,9 +2281,20 @@ var HEALTH_MAP = {
   '看板部署':   ['hdDeploy','htDeploy', 4, 12]     // 每小时，正常间隔≤2h
 };
 function updateTimestamps(){
-  var t=SALES&&SALES.generated?SALES.generated:'未知';
-  var els=[document.getElementById('utDash'),document.getElementById('utDataviz'),document.getElementById('utSales'),document.getElementById('utTrends')];
-  els.forEach(function(el){if(el)el.textContent='🕐 数据更新于 '+t;});
+  // 每个子页面显示自己数据源的更新时间
+  var srcMap={
+    'utDash':    '顺运宝库存',
+    'utDataviz': '友鹰热搜',
+    'utSales':   '销售数据',
+    'utTrends':  '友鹰热搜'
+  };
+  for(var id in srcMap){
+    var el=document.getElementById(id);
+    if(!el) continue;
+    var src=srcMap[id];
+    var t=DATA_SOURCES&&DATA_SOURCES[src]?DATA_SOURCES[src]:'未知';
+    el.textContent='🕐 数据更新于 '+t;
+  }
   
   // 数据新鲜度检查 + 健康状态栏
   var banner=document.getElementById('staleBanner');
