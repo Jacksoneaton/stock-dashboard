@@ -483,6 +483,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdStock"></span><span id="htStock">顺运宝</span></span>
     <span class="health-item"><span class="health-dot" id="hdTrends"></span><span id="htTrends">友鹰</span></span>
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span></span>
+    <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
   </div>
   <!-- Tabs -->
@@ -2227,7 +2228,8 @@ var DATA_SOURCES = {"顺运宝库存": "2026-06-09 22:09:33", "友鹰热搜": "2
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
   '友鹰热搜':   ['hdTrends','htTrends', 28, 36], // 1次/日，正常间隔≤24h
-  '销售数据':   ['hdSales','htSales', 4, 12]      // 每小时，正常间隔≤2h
+  '销售数据':   ['hdSales','htSales', 4, 12],      // 每小时，正常间隔≤2h
+  '看板部署':   ['hdDeploy','htDeploy', 4, 12]     // 每小时，正常间隔≤2h
 };
 function updateTimestamps(){
   var t=SALES&&SALES.generated?SALES.generated:'未知';
