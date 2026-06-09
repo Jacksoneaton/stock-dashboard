@@ -2195,10 +2195,34 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
+var DATA_SOURCES = {"顺运宝库存": "2026-06-08 09:06:33", "友鹰热搜": "2026-06-09 09:06:11", "销售数据": "2026-06-09 19:01:30"};
 function updateTimestamps(){
   var t=SALES&&SALES.generated?SALES.generated:'未知';
   var els=[document.getElementById('utDash'),document.getElementById('utDataviz'),document.getElementById('utSales'),document.getElementById('utTrends')];
   els.forEach(function(el){if(el)el.textContent='🕐 数据更新于 '+t;});
+  
+  // 数据新鲜度检查（基于 last_success.json，即真实成功抓取时间）
+  var banner=document.getElementById('staleBanner');
+  if(!banner||!DATA_SOURCES) return;
+  try{
+    var now=new Date();
+    var msgs=[];
+    for(var k in DATA_SOURCES){
+      var dt=new Date(DATA_SOURCES[k].replace(' ','T')+':00');
+      if(isNaN(dt.getTime())){msgs.push(k+' 数据缺失');continue;}
+      var hours=(now-dt)/3600000;
+      if(hours>24) msgs.push(k+' 超过24h未更新 ('+DATA_SOURCES[k]+')');
+      else if(hours>6) msgs.push(k+' '+Math.floor(hours)+'h未更新');
+    }
+    if(msgs.length>0){
+      var critical=msgs.some(function(m){return m.indexOf('24h')>-1||m.indexOf('缺失')>-1});
+      banner.style.display='block';
+      banner.className='stale-banner '+(critical?'critical':'warn');
+      banner.innerHTML=(critical?'⚠️ 数据过期：':'⏳ 数据延迟：')+msgs.join('；');
+    }else{
+      banner.style.display='none';
+    }
+  }catch(e){}
 }
 updateTimestamps();
 </script>
