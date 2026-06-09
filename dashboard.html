@@ -2246,21 +2246,21 @@ function updateTimestamps(){
       var map=HEALTH_MAP[k];
       if(isNaN(dt.getTime())){
         msgs.push(k+' 数据缺失');
-        if(map){setHealth(map[0],'crit',map[1],k+' 缺失');}
+        if(map){setHealth(map[0],'crit',map[1],k+' 缺');}
         totalCrit++;
         continue;
       }
       var hours=(now-dt)/3600000;
       if(hours>24){
         msgs.push(k+' 超过24h未更新 ('+DATA_SOURCES[k]+')');
-        if(map){setHealth(map[0],'crit',map[1],k+' '+Math.floor(hours)+'h前');}
+        if(map){setHealth(map[0],'crit',map[1],k+' 🔴');}
         totalCrit++;
       }else if(hours>6){
         msgs.push(k+' '+Math.floor(hours)+'h未更新');
-        if(map){setHealth(map[0],'warn',map[1],k+' '+Math.floor(hours)+'h前');}
+        if(map){setHealth(map[0],'warn',map[1],k+' ⚠️');}
         totalWarn++;
       }else{
-        if(map){setHealth(map[0],'ok',map[1],k+' '+Math.floor(hours)+'h前');}
+        if(map){setHealth(map[0],'ok',map[1],'✅ '+k);}
         totalOk++;
       }
     }
