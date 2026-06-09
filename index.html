@@ -797,6 +797,31 @@ function loadTransit(cb){
   x.ontimeout=function(){setSyncStatus('local','离线模式 · 本地数据');cb()};
   x.send();
 }
+// 每60秒自动轮询GitHub，实现跨设备实时同步
+setInterval(function(){
+  if(!_transitReady) return;
+  var x=new XMLHttpRequest();
+  x.open('GET',TRANSIT_RAW+'?t='+Date.now());x.timeout=8000;
+  x.onload=function(){
+    if(x.status!==200) return;
+    try{
+      var raw=JSON.parse(x.responseText)||{};
+      if(!raw.packages) return;
+      var remote=raw.packages;
+      var localCount=_transitData.reduce(function(s,p){for(var k in p.items)s+=p.items[k];return s},0);
+      var remoteCount=remote.reduce(function(s,p){for(var k in p.items)s+=p.items[k];return s},0);
+      if(remoteCount>localCount){
+        _transitData=remote;
+        try{localStorage.setItem('hermes_transit',JSON.stringify(remote));}catch(e){}
+        setSyncStatus('synced','已同步 · GitHub');
+        refreshAll();
+      }else if(localCount>remoteCount){
+        saveTransitToGitHub(_transitData);
+      }
+    }catch(e){}
+  };
+  x.send();
+},60000);
 
 // 按 SKU 汇总所有包裹的在途数量（给看板卡片用）
 function getTransit(sku){
