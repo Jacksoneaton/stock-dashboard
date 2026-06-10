@@ -1563,6 +1563,16 @@ function renderReplenTab(){
   _replenItems=[];
   var items=_replenItems;
   // 🔧 构建在途扣减表（前端实时扣，不等后端重算）
+  // 如果 _transitData 为空，尝试从 localStorage 兜底
+  if(!_transitData||!_transitData.length){
+    try{
+      var raw=localStorage.getItem('hermes_transit_data');
+      if(raw){
+        var parsed=JSON.parse(raw);
+        if(parsed&&parsed.length) _transitData=parsed;
+      }
+    }catch(e){}
+  }
   var transitBySku={};
   if(_transitData&&_transitData.length){
     _transitData.forEach(function(pkg){
@@ -1640,7 +1650,7 @@ function renderReplenTable(items){
   document.getElementById('replenTotal').innerHTML=
     '<span>共 <b style="color:var(--cyan)">'+items.length+'</b> 个SKU需补货</span>'+
     '<span class="big">'+totalSuggest+' 件</span>'+
-    '<span>A:'+a.length+' · B:'+b.length+' · C:'+c.length+'</span>';
+    '<span>A:'+a+' · B:'+b+' · C:'+c+'</span>';
 }
 
 
