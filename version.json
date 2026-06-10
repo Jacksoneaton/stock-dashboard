@@ -1562,6 +1562,16 @@ var _replenItems=[];
 function renderReplenTab(){
   _replenItems=[];
   var items=_replenItems;
+  // 🔧 构建在途扣减表（前端实时扣，不等后端重算）
+  var transitBySku={};
+  if(_transitData&&_transitData.length){
+    _transitData.forEach(function(pkg){
+      if(!pkg||!pkg.items)return;
+      Object.keys(pkg.items).forEach(function(sku){
+        transitBySku[sku]=(transitBySku[sku]||0)+(pkg.items[sku]||0);
+      });
+    });
+  }
   // 图片映射（SKU级别 + invCode兜底）
   var skuImg={},invImg={};
   DATA.forEach(function(d){
@@ -1569,8 +1579,13 @@ function renderReplenTab(){
   });
   DATA.forEach(function(d){
     var rep=REPLENISH[d.sku]||{};
-    if(rep.suggest&&rep.suggest>0){
-      items.push({sku:d.sku,title:d.title,spec:d.spec,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest,img:skuImg[d.sku]||invImg[d.invCode]||''});
+    var suggest=rep.suggest||0;
+    // ⬇️ 扣减在途
+    if(suggest>0&&transitBySku[d.sku]){
+      suggest=Math.max(0,suggest-transitBySku[d.sku]);
+    }
+    if(suggest>0){
+      items.push({sku:d.sku,title:d.title,spec:d.spec,stock:d.stock,daily:rep.daily||0,suggest:suggest,img:skuImg[d.sku]||invImg[d.invCode]||''});
     }
   });
   var a=[],b=[],c=[];
