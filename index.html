@@ -351,14 +351,14 @@ footer a{color:var(--dim);text-decoration:none}
 #page-dataviz .pc-code{font-size:11px;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 #page-dataviz .pc-spec{font-size:10px;color:rgba(0,0,0,.6);margin-top:2px}
 #page-dataviz .pc-qty{font-size:12px;font-weight:700;color:#0052d9;margin-top:2px}
-#page-dataviz .rc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-#page-dataviz .rc{display:flex;align-items:center;gap:10px;padding:10px;background:#fafafa;border-radius:6px}
-#page-dataviz .rc-rank{font-size:11px;font-weight:700;color:#2ba471;min-width:22px}
-#page-dataviz .rc-img{width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#e8e8e8}
-#page-dataviz .rc-info{flex:1;min-width:0}
-#page-dataviz .rc-code{font-size:11px;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
-#page-dataviz .rc-spec{font-size:10px;color:rgba(0,0,0,.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
-#page-dataviz .rc-amt{font-size:12px;font-weight:700;color:#2ba471}
+#page-dash .rc-grid, #page-dataviz .rc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+#page-dash .rc, #page-dataviz .rc{display:flex;align-items:center;gap:10px;padding:10px;background:#fafafa;border-radius:6px}
+#page-dash .rc-rank, #page-dataviz .rc-rank{font-size:11px;font-weight:700;color:#2ba471;min-width:22px}
+#page-dash .rc-img, #page-dataviz .rc-img{width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#e8e8e8}
+#page-dash .rc-info, #page-dataviz .rc-info{flex:1;min-width:0}
+#page-dash .rc-code, #page-dataviz .rc-code{font-size:11px;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+#page-dash .rc-spec, #page-dataviz .rc-spec{font-size:10px;color:rgba(0,0,0,.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+#page-dash .rc-amt, #page-dataviz .rc-amt{font-size:12px;font-weight:700;color:#2ba471}
 #page-dataviz .ft{text-align:center;padding:16px;font-size:10px;color:rgba(0,0,0,.4)}
 @media(max-width:768px){#page-dataviz .kpi{grid-template-columns:repeat(2,1fr)}#page-dataviz .row{grid-template-columns:1fr}#page-dataviz .pc-grid,#page-dataviz .rc-grid{grid-template-columns:repeat(2,1fr)}}
 /* ═══ 销售数据 ═══ */
@@ -514,7 +514,7 @@ footer a{color:var(--dim);text-decoration:none}
     <div class="sub-page active" id="dash-sub-inventory">
       <div class="stats-row" id="statsRow"></div>
       <div class="chart-row" id="chartRow">
-        <div class="chart-card"><h3>🚨 急补货 Top 10</h3><div class="bar-list" id="restockBars"></div></div>
+        <div class="chart-card"><h3>🚨 急补货排行</h3><div class="rc-grid" id="restockBars"></div></div>
         <div class="chart-card"><h3>🔥 销售 Top 10</h3><div class="bar-list" id="salesBars"></div></div>
         <div class="chart-card"><h3>📊 库存分布</h3><div class="donut-list" id="statusDonut"></div></div>
       </div>
@@ -632,7 +632,6 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="update-time"><span class="ut-dot"></span><span class="ut-text" id="utDataviz">加载中...</span></div>
   <div class="kpi" id="dvKpi"></div>
   <div class="row">
-    <div class="card"><h3>🚨 急补货排行</h3><div class="rc-grid" id="dvRestock"></div></div>
     <div class="card"><h3>📊 库存分布</h3><div style="height:220px;position:relative"><svg id="dvDonut" viewBox="0 0 200 200" style="width:100%;height:100%"></svg></div></div>
   </div>
   <div class="row">
@@ -979,17 +978,14 @@ function renderCharts(){
     var rep=REPLENISH[d.sku]||{};
     return {sku:d.sku,stock:d.stock,daily:rep.daily||0,suggest:rep.suggest||0,img:skuImg[d.sku]||invImg[d.invCode]||'',spec:skuSpec[d.sku]||''};
   });
-  var restock=items.filter(function(s){return s.daily>0;}).map(function(s){
-    return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10,suggest:s.suggest,img:s.img,spec:s.spec};
+  var restock=items.filter(function(s){return s.daily>0&&s.stock>0;}).map(function(s){
+    return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10,img:s.img,spec:s.spec};
   }).sort(function(a,b){return a.days-b.days;}).slice(0,10);
-  var maxDays=Math.max.apply(null,restock.map(function(s){return s.days;}).concat([1]));
-  var restockHtml='';
-  restock.forEach(function(s){
-    var pct=Math.max(3,(s.days/maxDays)*100);
-    var cls=s.days<1?'danger':s.days<3?'warn':'ok';
-    restockHtml+='<div class="bar-row">'+(s.img?'<img class="bar-img" src="'+s.img+'" onerror="this.style.display=\'none\'">':'<span class="bar-img">📦</span>')+'<div class="bar-info"><span class="bar-label">'+s.sku+'</span><span class="bar-spec">'+s.spec+'</span></div><div class="bar-track"><div class="bar-fill '+cls+'" style="width:'+pct+'%"></div></div><span class="bar-val">'+s.days+'天</span></div>';
-  });
-  document.getElementById('restockBars').innerHTML=restockHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+  var restockHtml=restock.map(function(s,i){
+    var cls=s.days<1?'e34d59':s.days<3?'ed7b2f':s.days<7?'0052d9':'1a1a2e';
+    return '<div class="rc"><span class="rc-rank">'+(i+1)+'</span>'+(s.img?'<img class="rc-img" src="'+s.img+'" onerror="this.style.display=\\'none\\'">':'<span class="rc-img" style="display:flex;align-items:center;justify-content:center;font-size:16px">📦</span>')+'<div class="rc-info"><div class="rc-code">'+s.sku+'</div><div class="rc-spec">'+s.spec+'</div><div class="rc-amt" style="color:#'+cls+'">仅剩 '+s.days+' 天</div></div></div>';
+  }).join('')||'<span style="color:rgba(0,0,0,.4);font-size:12px">暂无数据</span>';
+  document.getElementById('restockBars').innerHTML=restockHtml;
   var sales=items.filter(function(s){return s.daily>0;}).sort(function(a,b){return b.daily-a.daily;}).slice(0,10);
   var maxDaily=Math.max.apply(null,sales.map(function(s){return s.daily;}).concat([1]));
   var salesHtml='';
@@ -1832,19 +1828,6 @@ function renderDatavizTab(){
   var legendHtml=segs.map(function(s){return '<div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:2px;background:'+s.color+'"></div><span style="font-size:11px">'+s.label+'</span></div>';}).join('');
   document.getElementById('dvDonut').outerHTML='<div id="dvDonut" style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">'+donutHtml+'<div style="display:flex;flex-direction:column;gap:6px">'+legendHtml+'</div></div>';
 
-  // 急补货排行
-  var skuImg2={},skuSpec2={},invImg2={},skuInv={};
-  DATA.forEach(function(d){
-    if(d.img){skuImg2[d.sku]=d.img;if(!invImg2[d.invCode])invImg2[d.invCode]=d.img;}
-    if(d.spec)skuSpec2[d.sku]=d.spec;
-    if(!skuInv[d.sku])skuInv[d.sku]=d.invCode;
-  });
-  var restock=items.filter(function(s){return s.daily>0&&s.stock>0;}).map(function(s){return {sku:s.sku,days:Math.round(s.stock/s.daily*10)/10,img:skuImg2[s.sku]||invImg2[skuInv[s.sku]]||'',spec:skuSpec2[s.sku]||''};}).sort(function(a,b){return a.days-b.days;}).slice(0,10);
-  var restockHtml=restock.map(function(s,i){
-    var cls=s.days<1?'e34d59':s.days<3?'ed7b2f':s.days<7?'0052d9':'1a1a2e';
-    return '<div class="rc"><span class="rc-rank">'+(i+1)+'</span>'+(s.img?'<img class="rc-img" src="'+s.img+'" onerror="this.style.display=\'none\'">':'<span class="rc-img" style="display:flex;align-items:center;justify-content:center;font-size:16px">📦</span>')+'<div class="rc-info"><div class="rc-code">'+s.sku+'</div><div class="rc-spec">'+s.spec+'</div><div class="rc-amt" style="color:#'+cls+'">仅剩 '+s.days+' 天</div></div></div>';
-  }).join('')||'<span style="color:rgba(0,0,0,.4);font-size:12px">暂无有销量数据</span>';
-  document.getElementById('dvRestock').innerHTML=restockHtml;
 
   // 销售 Top 10 (30天)
   var imgMap={};
@@ -2362,7 +2345,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-11 17:00:34", "友鹰热搜": "2026-06-11 10:04:32", "销售数据": "2026-06-11 18:02:19", "看板部署": "2026-06-11 17:07:42"};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-11 17:00:34", "友鹰热搜": "2026-06-11 10:04:32", "销售数据": "2026-06-11 18:02:19", "看板部署": "2026-06-11 18:06:44"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
