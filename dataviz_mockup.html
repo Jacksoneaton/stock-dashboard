@@ -3,225 +3,260 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>数据看板 · 视觉稿</title>
+<title>数据看板 · 视觉稿 v2</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 :root{
-  --bg:#f5f6f8; --card-bg:#fff; --border:rgba(0,0,0,.06);
-  --text:#1a1a2e; --muted:#8b919e; --dim:#d1d5db;
-  --cyan:#0891b2; --green:#059669; --amber:#d97706; --red:#dc2626; --purple:#7c3aed;
-  --blue:#3b82f6;
+  --bg:#0f1119; --surface:#161822; --card:#1c1f2e; --card-hover:#222636;
+  --border:rgba(255,255,255,.06); --divider:rgba(255,255,255,.04);
+  --text:#e8eaed; --text2:#9aa0b0; --text3:#5f6570;
+  --accent:#6c8cff; --accent2:#a78bfa;
+  --green:#34d399; --amber:#fbbf24; --red:#f87171; --cyan:#22d3ee;
+  --radius:12px; --radius-sm:8px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);padding:32px;min-height:100vh}
-.wrap{max-width:1100px;margin:0 auto}
-h2{font-size:18px;font-weight:700;margin-bottom:20px;letter-spacing:-.3px}
+body{font-family:'Inter',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+h2{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+h3{font-size:13px;font-weight:600;color:var(--text2)}
 
-/* ── KPI 药丸行 ── */
-.kpi-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.kpi-pill{display:flex;align-items:center;gap:8px;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:10px 18px;min-width:140px;transition:box-shadow .2s}
-.kpi-pill:hover{box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.kpi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.kpi-body{display:flex;flex-direction:column}
-.kpi-val{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
-.kpi-label{font-size:11px;color:var(--muted);margin-top:2px}
-.kpi-dot.red{background:var(--red)}
-.kpi-dot.amber{background:var(--amber)}
-.kpi-dot.green{background:var(--green)}
-.kpi-dot.blue{background:var(--blue)}
-.kpi-dot.purple{background:var(--purple)}
-.kpi-dot.cyan{background:var(--cyan)}
+/* ── Sidebar ── */
+.sidebar{width:64px;background:var(--surface);border-right:1px solid var(--divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:4px;flex-shrink:0}
+.side-icon{width:40px;height:40px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text3);cursor:pointer;transition:all .15s}
+.side-icon:hover,.side-icon.active{background:var(--card);color:var(--accent)}
+.side-spacer{flex:1}
 
-/* ── 主内容 2 列 ── */
-.main-row{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start}
-@media(max-width:768px){.main-row{grid-template-columns:1fr}}
+/* ── Main ── */
+.main{flex:1;padding:28px 32px;overflow-y:auto;max-width:1200px}
+.topbar{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+.topbar h2{flex:1}
+.version{font-size:11px;color:var(--text3);background:var(--card);padding:4px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace}
 
-/* ── 卡片 ── */
-.card{background:var(--card-bg);border-radius:14px;border:1px solid var(--border);padding:20px}
-.card-hd{display:flex;align-items:center;gap:8px;margin-bottom:16px}
-.card-hd h3{font-size:14px;font-weight:600}
-.card-hd .chip{font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(8,145,178,.08);color:var(--cyan)}
+/* ── KPI Row ── */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;border:1px solid var(--border);position:relative;overflow:hidden;transition:all .2s}
+.kpi-card:hover{background:var(--card-hover);border-color:rgba(255,255,255,.1)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px}
+.kpi-card.cyan::before{background:var(--cyan)}
+.kpi-card.red::before{background:var(--red)}
+.kpi-card.amber::before{background:var(--amber)}
+.kpi-card.green::before{background:var(--green)}
+.kpi-card.blue::before{background:var(--accent)}
+.kpi-card.purple::before{background:var(--accent2)}
+.kpi-val{font-size:26px;font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:6px}
+.kpi-card.cyan .kpi-val{color:var(--cyan)}
+.kpi-card.red .kpi-val{color:var(--red)}
+.kpi-card.amber .kpi-val{color:var(--amber)}
+.kpi-card.green .kpi-val{color:var(--green)}
+.kpi-card.blue .kpi-val{color:var(--accent)}
+.kpi-card.purple .kpi-val{color:var(--accent2)}
+.kpi-label{font-size:11px;color:var(--text2);font-weight:500}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:2px}
 
-/* ── 环形图 ── */
-.donut-section{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
-.donut-legend{display:flex;flex-direction:column;gap:8px}
-.donut-legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
-.donut-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-.donut-legend-val{font-weight:600;margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px}
+/* ── Grid layout ── */
+.content-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start}
+@media(max-width:900px){.content-grid{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(3,1fr)}}
 
-/* ── ABC 条 ── */
-.abc-section{margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
-.abc-row{display:flex;gap:12px;flex-wrap:wrap}
-.abc-item{flex:1;min-width:160px;display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,.015);border-radius:10px}
-.abc-letter{font-size:22px;font-weight:800;width:34px;text-align:center}
-.abc-info{flex:1;min-width:0}
-.abc-name{font-size:12px;font-weight:600}
-.abc-count{font-size:11px;color:var(--muted)}
-.abc-bar{width:60px;height:4px;border-radius:2px;background:var(--dim);overflow:hidden;flex-shrink:0}
-.abc-bar-fill{height:100%;border-radius:2px}
+/* ── Panel ── */
+.panel{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.panel-hd{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--divider)}
+.panel-hd h3{margin:0;flex:1}
+.panel-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(108,140,255,.1);color:var(--accent);font-weight:500}
+.panel-body{padding:20px}
 
-/* ── 销售 Top ── */
-.sales-list{display:flex;flex-direction:column;gap:6px}
-.sales-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;transition:background .15s}
-.sales-item:hover{background:rgba(0,0,0,.02)}
-.sales-rank{font-size:11px;font-weight:700;color:var(--cyan);min-width:20px;text-align:center}
-.sales-img{width:40px;height:40px;border-radius:6px;object-fit:cover;background:rgba(0,0,0,.04);flex-shrink:0}
+/* ── Tabs ── */
+.segmented{display:inline-flex;background:rgba(255,255,255,.03);border-radius:8px;padding:3px;gap:2px}
+.seg-btn{padding:5px 14px;border-radius:6px;font-size:11px;cursor:pointer;color:var(--text2);border:none;background:none;font-family:inherit;transition:all .15s;font-weight:500}
+.seg-btn.active{background:var(--accent);color:#fff}
+
+/* ── Donut ── */
+.donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center}
+.legend{display:flex;flex-direction:column;gap:8px}
+.legend-item{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.legend-val{font-weight:600;color:var(--text);margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px}
+.legend-bar-bg{width:60px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.legend-bar{height:100%;border-radius:2px}
+
+/* ── ABC ── */
+.abc-divider{border-top:1px solid var(--divider);margin-top:20px;padding-top:20px}
+.abc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.abc-item{padding:14px;background:rgba(255,255,255,.02);border-radius:var(--radius-sm);border:1px solid var(--divider)}
+.abc-letter{font-size:28px;font-weight:800;margin-bottom:8px}
+.abc-item.a .abc-letter{color:var(--red)}
+.abc-item.b .abc-letter{color:var(--amber)}
+.abc-item.c .abc-letter{color:var(--green)}
+.abc-name{font-size:11px;color:var(--text2);font-weight:500}
+.abc-count{font-size:14px;font-weight:700;margin-top:2px;font-family:'JetBrains Mono',monospace}
+.abc-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:10px;overflow:hidden}
+.abc-fill{height:100%;border-radius:2px}
+.abc-item.a .abc-fill{background:var(--red)}
+.abc-item.b .abc-fill{background:var(--amber)}
+.abc-item.c .abc-fill{background:var(--green)}
+
+/* ── Top Sales ── */
+.sales-list{display:flex;flex-direction:column}
+.sales-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--divider)}
+.sales-item:last-child{border-bottom:none}
+.sales-rank{font-size:12px;font-weight:700;color:var(--text3);width:24px;text-align:center;flex-shrink:0}
+.sales-item:nth-child(1) .sales-rank{color:var(--amber)}
+.sales-item:nth-child(2) .sales-rank{color:var(--accent)}
+.sales-item:nth-child(3) .sales-rank{color:var(--accent2)}
+.sales-img{width:36px;height:36px;border-radius:6px;object-fit:cover;background:rgba(255,255,255,.03);flex-shrink:0}
 .sales-info{flex:1;min-width:0}
 .sales-title{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sales-spec{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sales-num{font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--green);white-space:nowrap}
+.sales-spec{font-size:10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.sales-bar-wrap{width:80px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;flex-shrink:0}
+.sales-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px}
+.sales-num{font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--accent);width:70px;text-align:right;flex-shrink:0}
 
 /* ── Footer ── */
-.ft{text-align:center;padding:20px;font-size:11px;color:var(--muted)}
-
-/* ── 切换开关 ── */
-.toggle-row{display:flex;gap:4px;margin-bottom:16px;background:rgba(0,0,0,.03);border-radius:10px;padding:3px;width:fit-content}
-.toggle-btn{padding:5px 14px;border-radius:8px;font-size:11px;cursor:pointer;color:var(--muted);border:none;background:none;transition:all .15s;font-family:inherit}
-.toggle-btn.active{background:var(--card-bg);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.footer{text-align:center;padding:24px;font-size:11px;color:var(--text3);border-top:1px solid var(--divider);margin-top:24px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h2>📊 数据看板 <span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:8px">视觉稿</span></h2>
 
-  <!-- KPI 药丸 -->
-  <div class="kpi-row">
-    <div class="kpi-pill"><span class="kpi-dot cyan"></span><div class="kpi-body"><div class="kpi-val">109</div><div class="kpi-label">SKU 总数</div></div></div>
-    <div class="kpi-pill"><span class="kpi-dot red"></span><div class="kpi-body"><div class="kpi-val">5</div><div class="kpi-label">缺货</div></div></div>
-    <div class="kpi-pill"><span class="kpi-dot amber"></span><div class="kpi-body"><div class="kpi-val">12</div><div class="kpi-label">低库存</div></div></div>
-    <div class="kpi-pill"><span class="kpi-dot green"></span><div class="kpi-body"><div class="kpi-val">92</div><div class="kpi-label">正常</div></div></div>
-    <div class="kpi-pill"><span class="kpi-dot blue"></span><div class="kpi-body"><div class="kpi-val">269</div><div class="kpi-label">在途</div></div></div>
-    <div class="kpi-pill"><span class="kpi-dot purple"></span><div class="kpi-body"><div class="kpi-val">8.3</div><div class="kpi-label">日均销量</div></div></div>
-  </div>
-
-  <!-- 主内容 -->
-  <div class="main-row">
-
-    <!-- 左：库存健康 -->
-    <div class="card">
-      <div class="card-hd">
-        <h3>📦 库存健康</h3>
-        <span class="chip">21 款商品</span>
-      </div>
-
-      <!-- 切换：环形图 / ABC -->
-      <div class="toggle-row">
-        <button class="toggle-btn active">库存天数分布</button>
-        <button class="toggle-btn">ABC 分类</button>
-      </div>
-
-      <!-- 环形图 + 图例 -->
-      <div class="donut-section">
-        <svg viewBox="0 0 160 160" style="width:160px;height:160px;flex-shrink:0">
-          <circle cx="80" cy="80" r="65" fill="none" stroke="var(--red)" stroke-width="24" stroke-dasharray="50 310" stroke-dashoffset="0" opacity=".85"/>
-          <circle cx="80" cy="80" r="65" fill="none" stroke="var(--amber)" stroke-width="24" stroke-dasharray="80 310" stroke-dashoffset="-55" opacity=".85"/>
-          <circle cx="80" cy="80" r="65" fill="none" stroke="var(--blue)" stroke-width="24" stroke-dasharray="90 310" stroke-dashoffset="-140" opacity=".85"/>
-          <circle cx="80" cy="80" r="65" fill="none" stroke="var(--green)" stroke-width="24" stroke-dasharray="70 310" stroke-dashoffset="-235" opacity=".85"/>
-          <circle cx="80" cy="80" r="65" fill="none" stroke="var(--cyan)" stroke-width="24" stroke-dasharray="20 310" stroke-dashoffset="-305" opacity=".85"/>
-          <circle cx="80" cy="80" r="52" fill="var(--card-bg)"/>
-          <text x="80" y="76" text-anchor="middle" font-size="22" font-weight="700" fill="var(--text)" font-family="JetBrains Mono,monospace">57</text>
-          <text x="80" y="94" text-anchor="middle" font-size="10" fill="var(--muted)">有销量 SKU</text>
-        </svg>
-        <div class="donut-legend">
-          <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--red)"></span> &lt;3 天<span class="donut-legend-val">8</span></div>
-          <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--amber)"></span> 3~7 天<span class="donut-legend-val">13</span></div>
-          <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--blue)"></span> 7~14 天<span class="donut-legend-val">15</span></div>
-          <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--green)"></span> 14~30 天<span class="donut-legend-val">12</span></div>
-          <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--cyan)"></span> &gt;30 天<span class="donut-legend-val">9</span></div>
-        </div>
-      </div>
-
-      <!-- ABC 分类 (默认隐藏，切换显示) -->
-      <div class="abc-section">
-        <div class="abc-row">
-          <div class="abc-item">
-            <div class="abc-letter" style="color:var(--red)">A</div>
-            <div class="abc-info"><div class="abc-name">高销量 · 重点备货</div><div class="abc-count">28 SKU (26%)</div></div>
-            <div class="abc-bar"><div class="abc-bar-fill" style="width:26%;background:var(--red)"></div></div>
-          </div>
-          <div class="abc-item">
-            <div class="abc-letter" style="color:var(--amber)">B</div>
-            <div class="abc-info"><div class="abc-name">中等销量</div><div class="abc-count">31 SKU (28%)</div></div>
-            <div class="abc-bar"><div class="abc-bar-fill" style="width:28%;background:var(--amber)"></div></div>
-          </div>
-          <div class="abc-item">
-            <div class="abc-letter" style="color:var(--green)">C</div>
-            <div class="abc-info"><div class="abc-name">低销量 · 少备货</div><div class="abc-count">50 SKU (46%)</div></div>
-            <div class="abc-bar"><div class="abc-bar-fill" style="width:46%;background:var(--green)"></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 右：销售 Top 10 -->
-    <div class="card">
-      <div class="card-hd"><h3>🔥 热销 Top 10</h3><span class="chip">30 天</span></div>
-      <div class="sales-list">
-        <div class="sales-item">
-          <span class="sales-rank">1</span>
-          <img class="sales-img" src="" onerror="this.style.display='none'" style="display:none">
-          <div class="sales-info"><div class="sales-title">QTW00123-05</div><div class="sales-spec">韓版短袖T恤 白色,M</div></div>
-          <span class="sales-num">3.2 件/天</span>
-        </div>
-        <div class="sales-item">
-          <span class="sales-rank">2</span>
-          <div class="sales-info"><div class="sales-title">QTW00261-06</div><div class="sales-spec">彎刀褲 卡其色,3XL</div></div>
-          <span class="sales-num">2.8 件/天</span>
-        </div>
-        <div class="sales-item">
-          <span class="sales-rank">3</span>
-          <div class="sales-info"><div class="sales-title">QTW00273-03</div><div class="sales-spec">星星印花短袖 黑色,L</div></div>
-          <span class="sales-num">2.5 件/天</span>
-        </div>
-        <div class="sales-item">
-          <span class="sales-rank">4</span>
-          <div class="sales-info"><div class="sales-title">QTW00267-05</div><div class="sales-spec">波點上衣 米白色,M</div></div>
-          <span class="sales-num">2.1 件/天</span>
-        </div>
-        <div class="sales-item">
-          <span class="sales-rank">5</span>
-          <div class="sales-info"><div class="sales-title">QTW00278-06</div><div class="sales-spec">塗鴉字母T恤 黑色,L</div></div>
-          <span class="sales-num">1.9 件/天</span>
-        </div>
-        <div class="sales-item">
-          <span class="sales-rank">6</span>
-          <div class="sales-info"><div class="sales-title">QTW00269-05</div><div class="sales-spec">彎刀傘兵褲 黑色,2XL</div></div>
-          <span class="sales-num">1.7 件/天</span>
-        </div>
-        <div class="sales-item">
-          <span class="sales-rank">7</span>
-          <div class="sales-info"><div class="sales-title">QTW00279-06</div><div class="sales-spec">十字架蕾絲短袖 黑色,L</div></div>
-          <span class="sales-num">1.5 件/天</span>
-        </div>
-        <div class="sales-item">
-          <span class="sales-rank">8</span>
-          <div class="sales-info"><div class="sales-title">QTW00264-03</div><div class="sales-spec">卡其色彎刀褲 軍綠色,3XL</div></div>
-          <span class="sales-num">1.3 件/天</span>
-        </div>
-        <div class="sales-item">
-          <span class="sales-rank">9</span>
-          <div class="sales-info"><div class="sales-title">QTW00272-11</div><div class="sales-spec">字母條紋彎刀褲 黑色,XL</div></div>
-          <span class="sales-num">1.1 件/天</span>
-        </div>
-        <div class="sales-item">
-          <span class="sales-rank">10</span>
-          <div class="sales-info"><div class="sales-title">QTW00275-02</div><div class="sales-spec">大尺碼棉褲 杏色,L</div></div>
-          <span class="sales-num">0.9 件/天</span>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="ft">共 109 SKU · 21 款商品 · 数据自动同步</div>
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="side-icon active">📊</div>
+  <div class="side-icon">📦</div>
+  <div class="side-icon">💰</div>
+  <div class="side-icon">🔥</div>
+  <div class="side-space"></div>
+  <div class="side-icon">⚙</div>
 </div>
 
-<script>
-document.querySelectorAll('.toggle-btn').forEach(function(b){
-  b.onclick=function(){
-    document.querySelectorAll('.toggle-btn').forEach(function(x){x.classList.remove('active')});
-    b.classList.add('active');
-  };
-});
-</script>
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <h2>数据看板</h2>
+    <span class="version">v3.1</span>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi-card cyan">
+      <div class="kpi-val">109</div>
+      <div class="kpi-label">SKU 总数</div>
+      <div class="kpi-sub">21 款商品</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-val">5</div>
+      <div class="kpi-label">缺货</div>
+      <div class="kpi-sub">库存为 0</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-val">12</div>
+      <div class="kpi-label">低库存</div>
+      <div class="kpi-sub">≤ 3 件</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-val">92</div>
+      <div class="kpi-label">正常</div>
+      <div class="kpi-sub">84% 健康</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-val">269</div>
+      <div class="kpi-label">在途</div>
+      <div class="kpi-sub">采购中</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-val">8.3</div>
+      <div class="kpi-label">日均销量</div>
+      <div class="kpi-sub">57 SKU 有数据</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-grid">
+
+    <!-- 左：库存分析 -->
+    <div class="panel">
+      <div class="panel-hd">
+        <h3>📦 库存分析</h3>
+        <span class="panel-badge">21 款</span>
+        <div class="segmented">
+          <button class="seg-btn active">天数分布</button>
+          <button class="seg-btn">ABC 分类</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <!-- 环形图 -->
+        <div class="donut-wrap">
+          <svg viewBox="0 0 180 180" width="170" height="170">
+            <defs>
+              <filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <circle cx="90" cy="90" r="72" fill="none" stroke="#f87171" stroke-width="22" stroke-dasharray="45 340" opacity=".9" filter="url(#glow)"/>
+            <circle cx="90" cy="90" r="72" fill="none" stroke="#fbbf24" stroke-width="22" stroke-dasharray="74 340" stroke-dashoffset="-50" opacity=".9"/>
+            <circle cx="90" cy="90" r="72" fill="none" stroke="#6c8cff" stroke-width="22" stroke-dasharray="85 340" stroke-dashoffset="-129" opacity=".9"/>
+            <circle cx="90" cy="90" r="72" fill="none" stroke="#34d399" stroke-width="22" stroke-dasharray="68 340" stroke-dashoffset="-219" opacity=".9"/>
+            <circle cx="90" cy="90" r="72" fill="none" stroke="#22d3ee" stroke-width="22" stroke-dasharray="51 340" stroke-dashoffset="-290" opacity=".9"/>
+            <circle cx="90" cy="90" r="60" fill="#1c1f2e"/>
+            <text x="90" y="85" text-anchor="middle" font-size="24" font-weight="800" fill="#e8eaed" font-family="JetBrains Mono">57</text>
+            <text x="90" y="103" text-anchor="middle" font-size="10" fill="#9aa0b0">有销量 SKU</text>
+          </svg>
+          <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#f87171"></span> &lt;3 天 <div class="legend-bar-bg"><div class="legend-bar" style="width:100%;background:#f87171"></div></div><span class="legend-val">8</span></div>
+            <div class="legend-item"><span class="legend-dot" style="background:#fbbf24"></span> 3~7 天 <div class="legend-bar-bg"><div class="legend-bar" style="width:100%;background:#fbbf24"></div></div><span class="legend-val">13</span></div>
+            <div class="legend-item"><span class="legend-dot" style="background:#6c8cff"></span> 7~14 天 <div class="legend-bar-bg"><div class="legend-bar" style="width:62%;background:#6c8cff"></div></div><span class="legend-val">15</span></div>
+            <div class="legend-item"><span class="legend-dot" style="background:#34d399"></span> 14~30 天 <div class="legend-bar-bg"><div class="legend-bar" style="width:47%;background:#34d399"></div></div><span class="legend-val">12</span></div>
+            <div class="legend-item"><span class="legend-dot" style="background:#22d3ee"></span> &gt;30 天 <div class="legend-bar-bg"><div class="legend-bar" style="width:35%;background:#22d3ee"></div></div><span class="legend-val">9</span></div>
+          </div>
+        </div>
+
+        <!-- ABC -->
+        <div class="abc-divider">
+          <div class="abc-grid">
+            <div class="abc-item a">
+              <div class="abc-letter">A</div>
+              <div class="abc-name">高销量 · 重点备货</div>
+              <div class="abc-count">28 SKU</div>
+              <div class="abc-bar"><div class="abc-fill" style="width:26%"></div></div>
+            </div>
+            <div class="abc-item b">
+              <div class="abc-letter">B</div>
+              <div class="abc-name">中等销量</div>
+              <div class="abc-count">31 SKU</div>
+              <div class="abc-bar"><div class="abc-fill" style="width:28%"></div></div>
+            </div>
+            <div class="abc-item c">
+              <div class="abc-letter">C</div>
+              <div class="abc-name">低销量 · 少备货</div>
+              <div class="abc-count">50 SKU</div>
+              <div class="abc-bar"><div class="abc-fill" style="width:46%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：热销 Top 10 -->
+    <div class="panel">
+      <div class="panel-hd">
+        <h3>🔥 热销 Top 10</h3>
+        <span class="panel-badge">30 天</span>
+      </div>
+      <div class="panel-body" style="padding:12px 20px 16px">
+        <div class="sales-list">
+          <div class="sales-item"><span class="sales-rank">1</span><div class="sales-info"><div class="sales-title">彎刀褲 · 卡其色,3XL</div><div class="sales-spec">QTW00261-06</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:100%"></div></div><span class="sales-num">3.2 件/天</span></div>
+          <div class="sales-item"><span class="sales-rank">2</span><div class="sales-info"><div class="sales-title">星星印花短袖 · 黑色,L</div><div class="sales-spec">QTW00273-03</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:87%"></div></div><span class="sales-num">2.8 件/天</span></div>
+          <div class="sales-item"><span class="sales-rank">3</span><div class="sales-info"><div class="sales-title">波點上衣 · 米白色,M</div><div class="sales-spec">QTW00267-05</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:78%"></div></div><span class="sales-num">2.5 件/天</span></div>
+          <div class="sales-item"><span class="sales-rank">4</span><div class="sales-info"><div class="sales-title">塗鴉字母T恤 · 黑色,L</div><div class="sales-spec">QTW00278-06</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:65%"></div></div><span class="sales-num">2.1 件/天</span></div>
+          <div class="sales-item"><span class="sales-rank">5</span><div class="sales-info"><div class="sales-title">彎刀傘兵褲 · 黑色,2XL</div><div class="sales-spec">QTW00269-05</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:59%"></div></div><span class="sales-num">1.9 件/天</span></div>
+          <div class="sales-item"><span class="sales-rank">6</span><div class="sales-info"><div class="sales-title">十字架蕾絲短袖 · 黑色,L</div><div class="sales-spec">QTW00279-06</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:53%"></div></div><span class="sales-num">1.7 件/天</span></div>
+          <div class="sales-item"><span class="sales-rank">7</span><div class="sales-info"><div class="sales-title">卡其色彎刀褲 · 軍綠色,3XL</div><div class="sales-spec">QTW00264-03</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:47%"></div></div><span class="sales-num">1.5 件/天</span></div>
+          <div class="sales-item"><span class="sales-rank">8</span><div class="sales-info"><div class="sales-title">字母條紋彎刀褲 · 黑色,XL</div><div class="sales-spec">QTW00272-11</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:41%"></div></div><span class="sales-num">1.3 件/天</span></div>
+          <div class="sales-item"><span class="sales-rank">9</span><div class="sales-info"><div class="sales-title">大尺碼棉褲 · 杏色,L</div><div class="sales-spec">QTW00275-02</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:34%"></div></div><span class="sales-num">1.1 件/天</span></div>
+          <div class="sales-item"><span class="sales-rank">10</span><div class="sales-info"><div class="sales-title">韓版短袖T恤 · 白色,M</div><div class="sales-spec">QTW00123-05</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:28%"></div></div><span class="sales-num">0.9 件/天</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">共 109 SKU · 21 款商品 · 数据自动同步 · 上次更新 2026-06-13 03:35</div>
+</div>
+
 </body>
 </html>
