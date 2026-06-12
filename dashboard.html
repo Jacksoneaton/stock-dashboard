@@ -473,6 +473,37 @@ footer a{color:var(--dim);text-decoration:none}
 .insight-box .insight-item{font-size:11px;padding:3px 0;color:var(--muted)}
 .insight-box .insight-item b{color:var(--text)}
 .insight-box .insight-hint{font-size:10px;color:var(--cyan);margin-top:6px;padding-top:6px;border-top:1px solid rgba(8,145,178,.1)}
+
+/* ── 退件提醒卡片 ── */
+.refund-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:14px;margin-top:12px}
+.refund-card{background:var(--card-bg);border-radius:12px;border:1px solid var(--border);overflow:hidden;transition:box-shadow .2s}
+.refund-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.refund-card-top{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.01)}
+.refund-card-badge{padding:2px 10px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.refund-card-badge.exact{background:#059669;color:#fff}
+.refund-card-badge.title_only{background:#d97706;color:#fff}
+.refund-card-badge.fuzzy{background:#7c3aed;color:#fff}
+.refund-card-score{font-size:10px;color:var(--muted);margin-left:auto}
+.refund-card-body{display:grid;grid-template-columns:1fr 28px 1fr;padding:12px 14px;gap:0;align-items:start}
+.refund-card-col{display:flex;flex-direction:column;gap:6px}
+.refund-card-divider{width:1px;background:var(--border);margin:0 12px;align-self:stretch}
+.refund-card-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:-2px}
+.refund-card-title{cursor:pointer;font-size:12px;font-weight:600;color:var(--text);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:all .2s}
+.refund-card-title:hover{color:var(--cyan)}
+.refund-card-title.expanded{-webkit-line-clamp:unset;display:block}
+.refund-card-spec{font-size:11px;color:var(--muted);line-height:1.3}
+.refund-card-code{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);background:rgba(8,145,178,.06);padding:1px 6px;border-radius:4px;display:inline-block;max-width:fit-content}
+.refund-card-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.refund-card-meta-item{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:3px}
+.refund-card-meta-item .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.refund-card-meta-item .dot.green{background:var(--green)}
+.refund-card-meta-item .dot.red{background:var(--red)}
+.refund-card-arrow{display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:18px}
+.refund-card-foot{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);background:rgba(0,0,0,.01)}
+.refund-card-foot .order-sn{font-family:'JetBrains Mono',monospace;color:var(--text);font-size:11px}
+.refund-card-foot .qty-badge{background:rgba(8,145,178,.08);color:var(--cyan);border-radius:6px;padding:1px 8px;font-size:10px;font-weight:600}
+
+@media(max-width:600px){.refund-grid{grid-template-columns:1fr}.refund-card-body{grid-template-columns:1fr;gap:8px}.refund-card-divider{display:none}.refund-card-arrow{display:none}}
 </style>
 </head>
 <body>
@@ -731,7 +762,7 @@ footer a{color:var(--dim);text-decoration:none}
 <div class="page" id="page-refund">
   <div class="update-time"><span class="ut-dot"></span><span class="ut-text" id="utRefund">加载中...</span></div>
   <div id="refundStats"></div>
-  <div id="refundTable"></div>
+  <div class="refund-grid" id="refundGrid"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2020,50 +2051,62 @@ function renderSalesTab(){
 // ====== 退件提醒 Tab ======
 function renderRefundTab(){
   var stats=document.getElementById('refundStats');
-  var table=document.getElementById('refundTable');
-  if(!stats||!table) return;
-  var d=REFUND||{matches:[],unmatched:[],summary:{}};
+  var grid=document.getElementById('refundGrid');
+  if(!stats||!grid) return;
+  var d=REFUND||{matched:[],unmatched:[],summary:{}};
   var s=d.summary||{};
   stats.innerHTML=
-    '<div class="stats-row" style="margin-bottom:12px">'+
+    '<div class="stats-row" style="margin-bottom:14px">'+
       '<div class="stat-card"><div class="stat-value">'+(s.total_refund||0)+'</div><div class="stat-label">退件总数</div></div>'+
-      '<div class="stat-card" style="border-left:3px solid var(--green)"><div class="stat-value">'+(s.matched||0)+'</div><div class="stat-label">已匹配</div></div>'+
+      '<div class="stat-card" style="border-left:3px solid var(--green)"><div class="stat-value">'+(s.matched||0)+'</div><div class="stat-label">已匹配订单</div></div>'+
       '<div class="stat-card" style="border-left:3px solid var(--red)"><div class="stat-value">'+(s.unmatched||0)+'</div><div class="stat-label">未匹配</div></div>'+
-      '<div class="stat-card"><div class="stat-value">'+(s.exact||0)+'</div><div class="stat-label">精确</div></div>'+
-      '<div class="stat-card"><div class="stat-value">'+(s.title_only||0)+'</div><div class="stat-label">标题</div></div>'+
-      '<div class="stat-card"><div class="stat-value">'+(s.fuzzy||0)+'</div><div class="stat-label">模糊</div></div>'+
+      '<div class="stat-card"><div class="stat-value">'+(s.exact||0)+'</div><div class="stat-label">🎯 精确</div></div>'+
+      '<div class="stat-card"><div class="stat-value">'+(s.title_only||0)+'</div><div class="stat-label">📌 标题</div></div>'+
+      '<div class="stat-card"><div class="stat-value">'+(s.fuzzy||0)+'</div><div class="stat-label">🔍 模糊</div></div>'+
     '</div>';
   var matches=d.matched||[];
-  var rows='';
-  matches.forEach(function(m){
+  var cards='';
+  matches.forEach(function(m,idx){
     var r=m.refund||{}, o=m.order||{}, mt=m.match_type||'';
-    var badge=mt==='exact'?'<span style="background:#059669;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px">精确</span>':
-              mt==='title_only'?'<span style="background:#d97706;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px">标题</span>':
-              '<span style="background:#7c3aed;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px">模糊</span>';
-    rows+=
-      '<tr>'+
-        '<td>'+badge+'</td>'+
-        '<td><div style="font-weight:600;font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r.title||'')+'</div>'+
-            '<div style="font-size:10px;color:var(--muted)">'+(r.spec||'')+'</div></td>'+
-        '<td style="font-size:10px">'+(r.subCode||'')+'</td>'+
-        '<td>'+r.qty+'</td>'+
-        '<td>'+r.warehouse+'</td>'+
-        '<td style="'+(r.status===10?'color:var(--green)':'color:var(--red)')+'">'+(r.statusLabel||'')+'</td>'+
-        '<td style="font-size:10px">'+r.inTime+'</td>'+
-        '<td><div style="font-weight:600;font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(o.itemName||'')+'</div>'+
-            '<div style="font-size:10px;color:var(--muted)">'+(o.modelName||'')+'</div></td>'+
-        '<td style="font-size:10px">'+(o.modelSku||'')+'</td>'+
-        '<td>'+o.quantity+'</td>'+
-        '<td style="font-size:10px">'+(o.orderSn||'')+'</td>'+
-      '</tr>';
+    var badgeClass=mt==='exact'?'exact':mt==='title_only'?'title_only':'fuzzy';
+    var badgeText=mt==='exact'?'🎯 精确':mt==='title_only'?'📌 标题':'🔍 模糊';
+    var scoreText=m.score?('相似度 '+(m.score*100).toFixed(0)+'%'):'';
+    var statusDot=r.status===10?'green':'red';
+    var id='rc'+idx;
+    cards+=
+      '<div class="refund-card">'+
+        '<div class="refund-card-top">'+
+          '<span class="refund-card-badge '+badgeClass+'">'+badgeText+'</span>'+
+          (scoreText?'<span class="refund-card-score">'+scoreText+'</span>':'')+
+        '</div>'+
+        '<div class="refund-card-body">'+
+          '<div class="refund-card-col">'+
+            '<span class="refund-card-label">📦 退件</span>'+
+            '<div class="refund-card-title" id="'+id+'_rt" onclick="var el=document.getElementById(\\\''+id+'_rt\\\');el.classList.toggle(\\\'expanded\\\')">'+(r.title||'')+'</div>'+
+            '<div class="refund-card-spec">'+(r.spec||'')+'</div>'+
+            '<span class="refund-card-code">'+(r.subCode||'')+'</span>'+
+            '<div class="refund-card-meta">'+
+              '<span class="refund-card-meta-item"><span class="dot '+statusDot+'"></span>'+(r.statusLabel||'')+'</span>'+
+              '<span class="refund-card-meta-item">📍 '+(r.warehouse||'')+'</span>'+
+              '<span class="refund-card-meta-item">🕐 '+(r.inTime||'').substring(0,10)+'</span>'+
+            '</div>'+
+          '</div>'+
+          '<div class="refund-card-arrow">→</div>'+
+          '<div class="refund-card-col">'+
+            '<span class="refund-card-label">🛒 待发订单</span>'+
+            '<div class="refund-card-title" id="'+id+'_ot" onclick="var el=document.getElementById(\\\''+id+'_ot\\\');el.classList.toggle(\\\'expanded\\\')">'+(o.itemName||'')+'</div>'+
+            '<div class="refund-card-spec">'+(o.modelName||'')+'</div>'+
+            '<span class="refund-card-code">'+(o.modelSku||'')+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<div class="refund-card-foot">'+
+          '<span>📋</span><span class="order-sn">'+(o.orderSn||'')+'</span>'+
+          '<span style="margin-left:auto">退件 <span class="qty-badge">×'+(r.qty||0)+'</span></span>'+
+          '<span>订单 <span class="qty-badge">×'+(o.quantity||0)+'</span></span>'+
+        '</div>'+
+      '</div>';
   });
-  table.innerHTML=
-    '<table style="width:100%;font-size:12px;border-collapse:collapse">'+
-      '<thead><tr>'+
-        '<th>匹配</th><th>退件商品</th><th>库存编码</th><th>Qty</th><th>仓库</th><th>状态</th><th>入库时间</th><th>订单商品</th><th>规格编码</th><th>Qty</th><th>订单号</th>'+
-      '</tr></thead>'+
-      '<tbody>'+rows+'</tbody>'+
-    '</table>';
+  grid.innerHTML=cards||'<div style="text-align:center;padding:40px;color:var(--muted)">暂无匹配的退件数据</div>';
   var ut=document.getElementById('utRefund');
   if(ut&&d.generated_at) ut.textContent='🕐 数据更新于 '+d.generated_at;
 }
