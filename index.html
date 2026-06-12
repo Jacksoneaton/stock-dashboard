@@ -2082,7 +2082,7 @@ function renderRefundTab(){
         '<div class="refund-card-body">'+
           '<div class="refund-card-col">'+
             '<span class="refund-card-label">📦 退件</span>'+
-            '<div class="refund-card-title" id="'+id+'_rt" onclick="var el=document.getElementById(\\\''+id+'_rt\\\');el.classList.toggle(\\\'expanded\\\')">'+(r.title||'')+'</div>'+
+            '<div class="refund-card-title" data-expand="'+id+'_rt">'+(r.title||'')+'</div>'+
             '<div class="refund-card-spec">'+(r.spec||'')+'</div>'+
             '<span class="refund-card-code">'+(r.subCode||'')+'</span>'+
             '<div class="refund-card-meta">'+
@@ -2094,7 +2094,7 @@ function renderRefundTab(){
           '<div class="refund-card-arrow">→</div>'+
           '<div class="refund-card-col">'+
             '<span class="refund-card-label">🛒 待发订单</span>'+
-            '<div class="refund-card-title" id="'+id+'_ot" onclick="var el=document.getElementById(\\\''+id+'_ot\\\');el.classList.toggle(\\\'expanded\\\')">'+(o.itemName||'')+'</div>'+
+            '<div class="refund-card-title" data-expand="'+id+'_ot">'+(o.itemName||'')+'</div>'+
             '<div class="refund-card-spec">'+(o.modelName||'')+'</div>'+
             '<span class="refund-card-code">'+(o.modelSku||'')+'</span>'+
           '</div>'+
@@ -2107,6 +2107,11 @@ function renderRefundTab(){
       '</div>';
   });
   grid.innerHTML=cards||'<div style="text-align:center;padding:40px;color:var(--muted)">暂无匹配的退件数据</div>';
+  // 事件委托：点击标题展开/收起
+  grid.onclick=function(e){
+    var t=e.target.closest('[data-expand]');
+    if(t) t.classList.toggle('expanded');
+  };
   var ut=document.getElementById('utRefund');
   if(ut&&d.generated_at) ut.textContent='🕐 数据更新于 '+d.generated_at;
 }
