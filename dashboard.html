@@ -2059,7 +2059,6 @@ function renderRefundTab(){
     '<div class="stats-row" style="margin-bottom:14px">'+
       '<div class="stat-card"><div class="stat-value">'+(s.total_refund||0)+'</div><div class="stat-label">退件总数</div></div>'+
       '<div class="stat-card" style="border-left:3px solid var(--green)"><div class="stat-value">'+(s.matched||0)+'</div><div class="stat-label">已匹配订单</div></div>'+
-      '<div class="stat-card" style="border-left:3px solid var(--red)"><div class="stat-value">'+(s.unmatched||0)+'</div><div class="stat-label">未匹配</div></div>'+
       '<div class="stat-card"><div class="stat-value">'+(s.exact||0)+'</div><div class="stat-label">🎯 精确</div></div>'+
       '<div class="stat-card"><div class="stat-value">'+(s.fuzzy||0)+'</div><div class="stat-label">🔍 模糊</div></div>'+
     '</div>';
@@ -2464,7 +2463,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-13 01:36:21", "友鹰热搜": "2026-06-12 09:54:10", "销售数据": "2026-06-13 03:00:43", "看板部署": "2026-06-13 03:06:34"};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-13 01:36:21", "友鹰热搜": "2026-06-12 09:54:10", "销售数据": "2026-06-13 04:01:16", "看板部署": "2026-06-13 03:06:34"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
