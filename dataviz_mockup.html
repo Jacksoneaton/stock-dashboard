@@ -3,260 +3,342 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>数据看板 · 视觉稿 v2</title>
+<title>数据看板 · Campaigns 风格 v4</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 :root{
-  --bg:#0f1119; --surface:#161822; --card:#1c1f2e; --card-hover:#222636;
-  --border:rgba(255,255,255,.06); --divider:rgba(255,255,255,.04);
-  --text:#e8eaed; --text2:#9aa0b0; --text3:#5f6570;
-  --accent:#6c8cff; --accent2:#a78bfa;
-  --green:#34d399; --amber:#fbbf24; --red:#f87171; --cyan:#22d3ee;
-  --radius:12px; --radius-sm:8px;
+  --sidebar-bg:#12162b; --sidebar-hover:#1c2140; --sidebar-active:#252b4a;
+  --bg:#f4f5fa; --card-bg:#fff;
+  --text:#1a1c2e; --muted:#6e7191; --dim:#e4e6f0;
+  --accent:#6c5ce7; --accent-light:rgba(108,92,231,.08);
+  --green:#00b894; --green-bg:rgba(0,184,148,.08);
+  --orange:#fdcb6e; --orange-bg:rgba(253,203,110,.12);
+  --red:#e17055; --red-bg:rgba(225,112,85,.08);
+  --blue:#74b9ff; --blue-bg:rgba(116,185,255,.10);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.04);
+  --shadow:0 2px 8px rgba(0,0,0,.05),0 1px 3px rgba(0,0,0,.04);
+  --shadow-lg:0 4px 20px rgba(0,0,0,.06),0 1px 4px rgba(0,0,0,.04);
+  --radius:14px; --radius-sm:10px; --radius-xs:8px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
-h2{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
-h3{font-size:13px;font-weight:600;color:var(--text2)}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--bg); color:var(--text); display:flex; min-height:100vh;
+}
 
-/* ── Sidebar ── */
-.sidebar{width:64px;background:var(--surface);border-right:1px solid var(--divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:4px;flex-shrink:0}
-.side-icon{width:40px;height:40px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text3);cursor:pointer;transition:all .15s}
-.side-icon:hover,.side-icon.active{background:var(--card);color:var(--accent)}
-.side-spacer{flex:1}
+/* ══════ 侧边栏 ══════ */
+.sidebar{
+  width:220px; background:var(--sidebar-bg); color:#c4c7d4;
+  display:flex; flex-direction:column; padding:24px 0; flex-shrink:0;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.sidebar-brand{
+  font-size:17px; font-weight:800; color:#fff; padding:0 20px; margin-bottom:8px;
+  letter-spacing:-.3px;
+}
+.sidebar-brand span{color:var(--accent)}
+.sidebar-section{font-size:10px; color:#5a5f7a; padding:20px 20px 8px; text-transform:uppercase; letter-spacing:1px; font-weight:600}
+.sidebar-item{
+  display:flex; align-items:center; gap:10px; padding:9px 20px; font-size:13px;
+  cursor:pointer; transition:all .15s; border-left:3px solid transparent;
+  color:#9a9db5; text-decoration:none;
+}
+.sidebar-item:hover{background:var(--sidebar-hover); color:#d0d3e0}
+.sidebar-item.active{background:var(--sidebar-active); color:#fff; border-left-color:var(--accent); font-weight:600}
+.sidebar-item .icon{width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0}
+.sidebar-badge{margin-left:auto; font-size:10px; background:var(--accent); color:#fff; padding:2px 7px; border-radius:10px; font-weight:600}
+.sidebar-bottom{padding:20px; margin-top:auto}
+.sidebar-cta{
+  background:linear-gradient(135deg, var(--accent), #a29bfe); border-radius:var(--radius-sm);
+  padding:14px; text-align:center; color:#fff; font-size:12px;
+}
+.sidebar-cta strong{display:block; font-size:14px; margin-bottom:4px}
+.sidebar-cta button{
+  margin-top:10px; background:#fff; color:var(--accent); border:none;
+  padding:8px 16px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer;
+  transition:transform .15s;
+}
+.sidebar-cta button:hover{transform:scale(1.03)}
 
-/* ── Main ── */
-.main{flex:1;padding:28px 32px;overflow-y:auto;max-width:1200px}
-.topbar{display:flex;align-items:center;gap:16px;margin-bottom:28px}
-.topbar h2{flex:1}
-.version{font-size:11px;color:var(--text3);background:var(--card);padding:4px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace}
+/* ══════ 主内容 ══════ */
+.main{flex:1; padding:32px; min-width:0}
+.topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:28px}
+.topbar h1{font-size:22px; font-weight:800; letter-spacing:-.4px}
+.topbar-right{display:flex; gap:10px; align-items:center}
+.search-box{
+  display:flex; align-items:center; gap:8px; background:var(--card-bg);
+  border:1px solid var(--dim); border-radius:var(--radius-sm); padding:8px 14px;
+  font-size:12px; color:var(--muted); width:220px; transition:border .2s;
+}
+.search-box:focus-within{border-color:var(--accent)}
+.search-box input{border:none; outline:none; background:none; font-size:12px; width:100%; font-family:inherit}
+.filter-btn{
+  background:var(--card-bg); border:1px solid var(--dim); padding:8px 16px;
+  border-radius:var(--radius-sm); font-size:12px; cursor:pointer;
+  color:var(--text); transition:all .15s; font-family:inherit;
+}
+.filter-btn:hover{border-color:var(--accent); color:var(--accent)}
 
-/* ── KPI Row ── */
-.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
-.kpi-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;border:1px solid var(--border);position:relative;overflow:hidden;transition:all .2s}
-.kpi-card:hover{background:var(--card-hover);border-color:rgba(255,255,255,.1)}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px}
-.kpi-card.cyan::before{background:var(--cyan)}
-.kpi-card.red::before{background:var(--red)}
-.kpi-card.amber::before{background:var(--amber)}
-.kpi-card.green::before{background:var(--green)}
-.kpi-card.blue::before{background:var(--accent)}
-.kpi-card.purple::before{background:var(--accent2)}
-.kpi-val{font-size:26px;font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:6px}
-.kpi-card.cyan .kpi-val{color:var(--cyan)}
-.kpi-card.red .kpi-val{color:var(--red)}
-.kpi-card.amber .kpi-val{color:var(--amber)}
-.kpi-card.green .kpi-val{color:var(--green)}
-.kpi-card.blue .kpi-val{color:var(--accent)}
-.kpi-card.purple .kpi-val{color:var(--accent2)}
-.kpi-label{font-size:11px;color:var(--text2);font-weight:500}
-.kpi-sub{font-size:10px;color:var(--text3);margin-top:2px}
+/* ══════ KPI 卡片 ══════ */
+.kpi-row{display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr; gap:14px; margin-bottom:24px}
+@media(max-width:900px){.kpi-row{grid-template-columns:1fr 1fr}}
+.kpi-card{
+  background:var(--card-bg); border-radius:var(--radius); padding:22px;
+  box-shadow:var(--shadow-sm); transition:box-shadow .25s, transform .25s;
+  position:relative; overflow:hidden;
+}
+.kpi-card:hover{box-shadow:var(--shadow-lg); transform:translateY(-2px)}
+.kpi-card.hero{background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:#fff; box-shadow:0 8px 32px rgba(102,126,234,.25)}
+.kpi-card.hero .kpi-label{color:rgba(255,255,255,.7)}
+.kpi-card.hero .kpi-val{color:#fff}
+.kpi-label{font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:600; letter-spacing:.3px; text-transform:uppercase}
+.kpi-val{font-size:32px; font-weight:800; font-family:'JetBrains Mono',monospace; line-height:1; margin-bottom:4px}
+.kpi-change{font-size:11px; display:flex; align-items:center; gap:4px}
+.kpi-change.up{color:var(--green)}
+.kpi-change.down{color:var(--red)}
 
-/* ── Grid layout ── */
-.content-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start}
-@media(max-width:900px){.content-grid{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(3,1fr)}}
+/* ══════ 分类卡片区 ══════ */
+.section-hd{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+.section-hd h3{font-size:16px; font-weight:700; letter-spacing:-.2px}
+.section-hd .count{font-size:11px; color:var(--muted); background:var(--dim); padding:3px 10px; border-radius:10px; font-weight:600}
+.cat-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px}
+@media(max-width:768px){.cat-grid{grid-template-columns:1fr}}
 
-/* ── Panel ── */
-.panel{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
-.panel-hd{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--divider)}
-.panel-hd h3{margin:0;flex:1}
-.panel-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(108,140,255,.1);color:var(--accent);font-weight:500}
-.panel-body{padding:20px}
+.cat-card{
+  background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow-sm);
+  overflow:hidden; transition:box-shadow .25s,transform .25s;
+}
+.cat-card:hover{box-shadow:var(--shadow-lg); transform:translateY(-2px)}
+.cat-card-hd{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px; border-bottom:1px solid var(--dim);
+}
+.cat-card-hd .cat-title{font-size:13px; font-weight:700}
+.cat-card-hd .cat-badge{
+  font-size:10px; padding:3px 10px; border-radius:10px; font-weight:700;
+}
+.cat-badge.draft{background:var(--accent-light); color:var(--accent)}
+.cat-badge.active{background:var(--green-bg); color:var(--green)}
+.cat-badge.warn{background:var(--orange-bg); color:#b8860b}
+.cat-list{padding:0}
+.cat-item{
+  display:flex; align-items:center; gap:12px; padding:14px 20px;
+  border-bottom:1px solid rgba(0,0,0,.03); transition:background .15s;
+}
+.cat-item:last-child{border-bottom:none}
+.cat-item:hover{background:rgba(108,92,231,.02)}
+.cat-img{width:40px; height:40px; border-radius:var(--radius-xs); object-fit:cover; background:var(--dim); flex-shrink:0}
+.cat-info{flex:1; min-width:0}
+.cat-name{font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.cat-meta{font-size:11px; color:var(--muted); margin-top:2px}
+.cat-stat{text-align:right; flex-shrink:0}
+.cat-stat .num{font-size:15px; font-weight:800; font-family:'JetBrains Mono',monospace}
+.cat-stat .num.green{color:var(--green)}
+.cat-stat .num.accent{color:var(--accent)}
+.cat-stat .lbl{font-size:10px; color:var(--muted)}
 
-/* ── Tabs ── */
-.segmented{display:inline-flex;background:rgba(255,255,255,.03);border-radius:8px;padding:3px;gap:2px}
-.seg-btn{padding:5px 14px;border-radius:6px;font-size:11px;cursor:pointer;color:var(--text2);border:none;background:none;font-family:inherit;transition:all .15s;font-weight:500}
-.seg-btn.active{background:var(--accent);color:#fff}
+/* ══════ 底部双栏 ══════ */
+.bottom-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start}
+@media(max-width:768px){.bottom-row{grid-template-columns:1fr}}
+.info-card{
+  background:var(--card-bg); border-radius:var(--radius); padding:20px;
+  box-shadow:var(--shadow-sm);
+}
+.info-card h4{font-size:14px; font-weight:700; margin-bottom:14px}
+.stat-row{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(0,0,0,.03); font-size:12px}
+.stat-row:last-child{border-bottom:none}
+.stat-row .lbl{color:var(--muted)}
+.stat-row .val{font-weight:700; font-family:'JetBrains Mono',monospace}
+.tag-dot{width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px}
 
-/* ── Donut ── */
-.donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center}
-.legend{display:flex;flex-direction:column;gap:8px}
-.legend-item{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2)}
-.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-.legend-val{font-weight:600;color:var(--text);margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px}
-.legend-bar-bg{width:60px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
-.legend-bar{height:100%;border-radius:2px}
-
-/* ── ABC ── */
-.abc-divider{border-top:1px solid var(--divider);margin-top:20px;padding-top:20px}
-.abc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.abc-item{padding:14px;background:rgba(255,255,255,.02);border-radius:var(--radius-sm);border:1px solid var(--divider)}
-.abc-letter{font-size:28px;font-weight:800;margin-bottom:8px}
-.abc-item.a .abc-letter{color:var(--red)}
-.abc-item.b .abc-letter{color:var(--amber)}
-.abc-item.c .abc-letter{color:var(--green)}
-.abc-name{font-size:11px;color:var(--text2);font-weight:500}
-.abc-count{font-size:14px;font-weight:700;margin-top:2px;font-family:'JetBrains Mono',monospace}
-.abc-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:10px;overflow:hidden}
-.abc-fill{height:100%;border-radius:2px}
-.abc-item.a .abc-fill{background:var(--red)}
-.abc-item.b .abc-fill{background:var(--amber)}
-.abc-item.c .abc-fill{background:var(--green)}
-
-/* ── Top Sales ── */
-.sales-list{display:flex;flex-direction:column}
-.sales-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--divider)}
-.sales-item:last-child{border-bottom:none}
-.sales-rank{font-size:12px;font-weight:700;color:var(--text3);width:24px;text-align:center;flex-shrink:0}
-.sales-item:nth-child(1) .sales-rank{color:var(--amber)}
-.sales-item:nth-child(2) .sales-rank{color:var(--accent)}
-.sales-item:nth-child(3) .sales-rank{color:var(--accent2)}
-.sales-img{width:36px;height:36px;border-radius:6px;object-fit:cover;background:rgba(255,255,255,.03);flex-shrink:0}
-.sales-info{flex:1;min-width:0}
-.sales-title{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sales-spec{font-size:10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
-.sales-bar-wrap{width:80px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;flex-shrink:0}
-.sales-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px}
-.sales-num{font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--accent);width:70px;text-align:right;flex-shrink:0}
-
-/* ── Footer ── */
-.footer{text-align:center;padding:24px;font-size:11px;color:var(--text3);border-top:1px solid var(--divider);margin-top:24px}
+/* ══════ 动画 ══════ */
+@keyframes fadeUp{
+  from{opacity:0; transform:translateY(12px)}
+  to{opacity:1; transform:translateY(0)}
+}
+.kpi-card,.cat-card,.info-card{
+  animation:fadeUp .5s ease-out both;
+}
+.kpi-card:nth-child(2){animation-delay:.05s}
+.kpi-card:nth-child(3){animation-delay:.10s}
+.kpi-card:nth-child(4){animation-delay:.15s}
+.cat-card:nth-child(1){animation-delay:.05s}
+.cat-card:nth-child(2){animation-delay:.10s}
 </style>
 </head>
 <body>
 
-<!-- Sidebar -->
-<div class="sidebar">
-  <div class="side-icon active">📊</div>
-  <div class="side-icon">📦</div>
-  <div class="side-icon">💰</div>
-  <div class="side-icon">🔥</div>
-  <div class="side-space"></div>
-  <div class="side-icon">⚙</div>
-</div>
+<!-- ══════ 侧边栏 ══════ -->
+<nav class="sidebar">
+  <div class="sidebar-brand"><span>◈</span> 库存看板</div>
 
-<!-- Main -->
-<div class="main">
+  <div class="sidebar-section">收藏</div>
+  <a class="sidebar-item"><span class="icon">📊</span> 数据总览</a>
+  <a class="sidebar-item"><span class="icon">📦</span> 库存管理</a>
+  <a class="sidebar-item"><span class="icon">🔄</span> 补货计划</a>
+
+  <div class="sidebar-section">主菜单</div>
+  <a class="sidebar-item active"><span class="icon">📈</span> 数据分析 <span class="sidebar-badge">3</span></a>
+  <a class="sidebar-item"><span class="icon">📋</span> 退件提醒</a>
+  <a class="sidebar-item"><span class="icon">🚚</span> 在途管理</a>
+  <a class="sidebar-item"><span class="icon">💰</span> 销售报表</a>
+  <a class="sidebar-item"><span class="icon">🔥</span> 热搜趋势</a>
+  <a class="sidebar-item"><span class="icon">⚙️</span> 设置</a>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-cta">
+      <strong>需更新数据</strong>
+      已同步 12 分钟前
+      <button>立即同步</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════ 主内容 ══════ -->
+<main class="main">
   <div class="topbar">
-    <h2>数据看板</h2>
-    <span class="version">v3.1</span>
+    <h1>数据分析 · Analytics</h1>
+    <div class="topbar-right">
+      <div class="search-box">
+        <span>🔍</span><input type="text" placeholder="搜索 SKU 或商品...">
+      </div>
+      <button class="filter-btn">📅 最近 30 天</button>
+      <button class="filter-btn">⏬ 导出</button>
+    </div>
   </div>
 
-  <!-- KPI -->
+  <!-- KPI 行 -->
   <div class="kpi-row">
-    <div class="kpi-card cyan">
+    <div class="kpi-card hero">
+      <div class="kpi-label">SKU 总数 · 全店</div>
       <div class="kpi-val">109</div>
-      <div class="kpi-label">SKU 总数</div>
-      <div class="kpi-sub">21 款商品</div>
+      <div class="kpi-change up">▲ 3 个新品本周上架</div>
     </div>
-    <div class="kpi-card red">
-      <div class="kpi-val">5</div>
-      <div class="kpi-label">缺货</div>
-      <div class="kpi-sub">库存为 0</div>
-    </div>
-    <div class="kpi-card amber">
-      <div class="kpi-val">12</div>
-      <div class="kpi-label">低库存</div>
-      <div class="kpi-sub">≤ 3 件</div>
-    </div>
-    <div class="kpi-card green">
+    <div class="kpi-card">
+      <div class="kpi-label">正常库存</div>
       <div class="kpi-val">92</div>
-      <div class="kpi-label">正常</div>
-      <div class="kpi-sub">84% 健康</div>
+      <div class="kpi-change up">▲ +2 相比上周</div>
     </div>
-    <div class="kpi-card blue">
-      <div class="kpi-val">269</div>
-      <div class="kpi-label">在途</div>
-      <div class="kpi-sub">采购中</div>
+    <div class="kpi-card">
+      <div class="kpi-label">低库存 / 缺货</div>
+      <div class="kpi-val">17</div>
+      <div class="kpi-change down">▼ 5 个需补货</div>
     </div>
-    <div class="kpi-card purple">
-      <div class="kpi-val">8.3</div>
+    <div class="kpi-card">
       <div class="kpi-label">日均销量</div>
-      <div class="kpi-sub">57 SKU 有数据</div>
+      <div class="kpi-val">8.3</div>
+      <div class="kpi-change up">▲ +12% 相比上周</div>
     </div>
   </div>
 
-  <!-- Content -->
-  <div class="content-grid">
+  <!-- 产品分类卡片 -->
+  <div class="section-hd">
+    <h3>商品分类</h3>
+    <span class="count">21 款商品 · 109 SKU</span>
+  </div>
+  <div class="cat-grid">
 
-    <!-- 左：库存分析 -->
-    <div class="panel">
-      <div class="panel-hd">
-        <h3>📦 库存分析</h3>
-        <span class="panel-badge">21 款</span>
-        <div class="segmented">
-          <button class="seg-btn active">天数分布</button>
-          <button class="seg-btn">ABC 分类</button>
-        </div>
+    <!-- A 类 · 高销量 -->
+    <div class="cat-card">
+      <div class="cat-card-hd">
+        <span class="cat-title">🅰️ A 类 · 高销量 重点备货</span>
+        <span class="cat-badge active">28 SKU</span>
       </div>
-      <div class="panel-body">
-        <!-- 环形图 -->
-        <div class="donut-wrap">
-          <svg viewBox="0 0 180 180" width="170" height="170">
-            <defs>
-              <filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            </defs>
-            <circle cx="90" cy="90" r="72" fill="none" stroke="#f87171" stroke-width="22" stroke-dasharray="45 340" opacity=".9" filter="url(#glow)"/>
-            <circle cx="90" cy="90" r="72" fill="none" stroke="#fbbf24" stroke-width="22" stroke-dasharray="74 340" stroke-dashoffset="-50" opacity=".9"/>
-            <circle cx="90" cy="90" r="72" fill="none" stroke="#6c8cff" stroke-width="22" stroke-dasharray="85 340" stroke-dashoffset="-129" opacity=".9"/>
-            <circle cx="90" cy="90" r="72" fill="none" stroke="#34d399" stroke-width="22" stroke-dasharray="68 340" stroke-dashoffset="-219" opacity=".9"/>
-            <circle cx="90" cy="90" r="72" fill="none" stroke="#22d3ee" stroke-width="22" stroke-dasharray="51 340" stroke-dashoffset="-290" opacity=".9"/>
-            <circle cx="90" cy="90" r="60" fill="#1c1f2e"/>
-            <text x="90" y="85" text-anchor="middle" font-size="24" font-weight="800" fill="#e8eaed" font-family="JetBrains Mono">57</text>
-            <text x="90" y="103" text-anchor="middle" font-size="10" fill="#9aa0b0">有销量 SKU</text>
-          </svg>
-          <div class="legend">
-            <div class="legend-item"><span class="legend-dot" style="background:#f87171"></span> &lt;3 天 <div class="legend-bar-bg"><div class="legend-bar" style="width:100%;background:#f87171"></div></div><span class="legend-val">8</span></div>
-            <div class="legend-item"><span class="legend-dot" style="background:#fbbf24"></span> 3~7 天 <div class="legend-bar-bg"><div class="legend-bar" style="width:100%;background:#fbbf24"></div></div><span class="legend-val">13</span></div>
-            <div class="legend-item"><span class="legend-dot" style="background:#6c8cff"></span> 7~14 天 <div class="legend-bar-bg"><div class="legend-bar" style="width:62%;background:#6c8cff"></div></div><span class="legend-val">15</span></div>
-            <div class="legend-item"><span class="legend-dot" style="background:#34d399"></span> 14~30 天 <div class="legend-bar-bg"><div class="legend-bar" style="width:47%;background:#34d399"></div></div><span class="legend-val">12</span></div>
-            <div class="legend-item"><span class="legend-dot" style="background:#22d3ee"></span> &gt;30 天 <div class="legend-bar-bg"><div class="legend-bar" style="width:35%;background:#22d3ee"></div></div><span class="legend-val">9</span></div>
+      <div class="cat-list">
+        <div class="cat-item">
+          <img class="cat-img" src="" onerror="this.style.display='none'" style="display:none">
+          <div class="cat-info">
+            <div class="cat-name">韓版短袖T恤</div>
+            <div class="cat-meta">QTW00123 · 5 个规格</div>
           </div>
+          <div class="cat-stat"><div class="num accent">3.2</div><div class="lbl">件/天</div></div>
         </div>
-
-        <!-- ABC -->
-        <div class="abc-divider">
-          <div class="abc-grid">
-            <div class="abc-item a">
-              <div class="abc-letter">A</div>
-              <div class="abc-name">高销量 · 重点备货</div>
-              <div class="abc-count">28 SKU</div>
-              <div class="abc-bar"><div class="abc-fill" style="width:26%"></div></div>
-            </div>
-            <div class="abc-item b">
-              <div class="abc-letter">B</div>
-              <div class="abc-name">中等销量</div>
-              <div class="abc-count">31 SKU</div>
-              <div class="abc-bar"><div class="abc-fill" style="width:28%"></div></div>
-            </div>
-            <div class="abc-item c">
-              <div class="abc-letter">C</div>
-              <div class="abc-name">低销量 · 少备货</div>
-              <div class="abc-count">50 SKU</div>
-              <div class="abc-bar"><div class="abc-fill" style="width:46%"></div></div>
-            </div>
+        <div class="cat-item">
+          <div class="cat-info">
+            <div class="cat-name">彎刀褲 卡其色</div>
+            <div class="cat-meta">QTW00261 · 4 个规格</div>
           </div>
+          <div class="cat-stat"><div class="num accent">2.8</div><div class="lbl">件/天</div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-info">
+            <div class="cat-name">星星印花短袖</div>
+            <div class="cat-meta">QTW00273 · 3 个规格</div>
+          </div>
+          <div class="cat-stat"><div class="num accent">2.5</div><div class="lbl">件/天</div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-info">
+            <div class="cat-name">波點上衣</div>
+            <div class="cat-meta">QTW00267 · 3 个规格</div>
+          </div>
+          <div class="cat-stat"><div class="num accent">2.1</div><div class="lbl">件/天</div></div>
         </div>
       </div>
     </div>
 
-    <!-- 右：热销 Top 10 -->
-    <div class="panel">
-      <div class="panel-hd">
-        <h3>🔥 热销 Top 10</h3>
-        <span class="panel-badge">30 天</span>
+    <!-- B 类 · 中等 -->
+    <div class="cat-card">
+      <div class="cat-card-hd">
+        <span class="cat-title">🅱️ B 类 · 中等销量</span>
+        <span class="cat-badge warn">31 SKU</span>
       </div>
-      <div class="panel-body" style="padding:12px 20px 16px">
-        <div class="sales-list">
-          <div class="sales-item"><span class="sales-rank">1</span><div class="sales-info"><div class="sales-title">彎刀褲 · 卡其色,3XL</div><div class="sales-spec">QTW00261-06</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:100%"></div></div><span class="sales-num">3.2 件/天</span></div>
-          <div class="sales-item"><span class="sales-rank">2</span><div class="sales-info"><div class="sales-title">星星印花短袖 · 黑色,L</div><div class="sales-spec">QTW00273-03</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:87%"></div></div><span class="sales-num">2.8 件/天</span></div>
-          <div class="sales-item"><span class="sales-rank">3</span><div class="sales-info"><div class="sales-title">波點上衣 · 米白色,M</div><div class="sales-spec">QTW00267-05</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:78%"></div></div><span class="sales-num">2.5 件/天</span></div>
-          <div class="sales-item"><span class="sales-rank">4</span><div class="sales-info"><div class="sales-title">塗鴉字母T恤 · 黑色,L</div><div class="sales-spec">QTW00278-06</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:65%"></div></div><span class="sales-num">2.1 件/天</span></div>
-          <div class="sales-item"><span class="sales-rank">5</span><div class="sales-info"><div class="sales-title">彎刀傘兵褲 · 黑色,2XL</div><div class="sales-spec">QTW00269-05</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:59%"></div></div><span class="sales-num">1.9 件/天</span></div>
-          <div class="sales-item"><span class="sales-rank">6</span><div class="sales-info"><div class="sales-title">十字架蕾絲短袖 · 黑色,L</div><div class="sales-spec">QTW00279-06</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:53%"></div></div><span class="sales-num">1.7 件/天</span></div>
-          <div class="sales-item"><span class="sales-rank">7</span><div class="sales-info"><div class="sales-title">卡其色彎刀褲 · 軍綠色,3XL</div><div class="sales-spec">QTW00264-03</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:47%"></div></div><span class="sales-num">1.5 件/天</span></div>
-          <div class="sales-item"><span class="sales-rank">8</span><div class="sales-info"><div class="sales-title">字母條紋彎刀褲 · 黑色,XL</div><div class="sales-spec">QTW00272-11</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:41%"></div></div><span class="sales-num">1.3 件/天</span></div>
-          <div class="sales-item"><span class="sales-rank">9</span><div class="sales-info"><div class="sales-title">大尺碼棉褲 · 杏色,L</div><div class="sales-spec">QTW00275-02</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:34%"></div></div><span class="sales-num">1.1 件/天</span></div>
-          <div class="sales-item"><span class="sales-rank">10</span><div class="sales-info"><div class="sales-title">韓版短袖T恤 · 白色,M</div><div class="sales-spec">QTW00123-05</div></div><div class="sales-bar-wrap"><div class="sales-bar" style="width:28%"></div></div><span class="sales-num">0.9 件/天</span></div>
+      <div class="cat-list">
+        <div class="cat-item">
+          <div class="cat-info">
+            <div class="cat-name">塗鴉字母T恤</div>
+            <div class="cat-meta">QTW00278 · 3 个规格</div>
+          </div>
+          <div class="cat-stat"><div class="num green">1.9</div><div class="lbl">件/天</div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-info">
+            <div class="cat-name">彎刀傘兵褲</div>
+            <div class="cat-meta">QTW00269 · 4 个规格</div>
+          </div>
+          <div class="cat-stat"><div class="num green">1.7</div><div class="lbl">件/天</div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-info">
+            <div class="cat-name">十字架蕾絲短袖</div>
+            <div class="cat-meta">QTW00279 · 2 个规格</div>
+          </div>
+          <div class="cat-stat"><div class="num green">1.5</div><div class="lbl">件/天</div></div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-info">
+            <div class="cat-name">字母條紋彎刀褲</div>
+            <div class="cat-meta">QTW00272 · 4 个规格</div>
+          </div>
+          <div class="cat-stat"><div class="num green">1.1</div><div class="lbl">件/天</div></div>
         </div>
       </div>
     </div>
 
   </div>
 
-  <div class="footer">共 109 SKU · 21 款商品 · 数据自动同步 · 上次更新 2026-06-13 03:35</div>
-</div>
+  <!-- 底部双栏 -->
+  <div class="bottom-row">
+    <div class="info-card">
+      <h4>库存健康分布</h4>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:var(--red)"></span>缺货 (&lt;0 天)</span><span class="val">5</span></div>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:var(--orange)"></span>低库存 (0~3 天)</span><span class="val">8</span></div>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:#ffeaa7"></span>中等 (3~7 天)</span><span class="val">13</span></div>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:var(--blue)"></span>健康 (7~14 天)</span><span class="val">15</span></div>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:var(--green)"></span>充足 (14~30 天)</span><span class="val">12</span></div>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:#a29bfe"></span>丰富 (&gt;30 天)</span><span class="val">9</span></div>
+    </div>
+
+    <div class="info-card">
+      <h4>数据同步状态</h4>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:var(--green)"></span>顺运宝库存</span><span class="val">2 分钟前</span></div>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:var(--green)"></span>货憨憨订单</span><span class="val">5 分钟前</span></div>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:var(--orange)"></span>友鹰热搜</span><span class="val">2 小时前</span></div>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:var(--green)"></span>看板部署</span><span class="val">12 分钟前</span></div>
+      <div class="stat-row"><span class="lbl"><span class="tag-dot" style="background:var(--blue)"></span>退件匹配</span><span class="val">38 条已匹配</span></div>
+    </div>
+  </div>
+
+</main>
 
 </body>
 </html>
