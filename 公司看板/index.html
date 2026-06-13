@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🏢 公司看板</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#eef0f6;--card-bg:#fff;--border:rgba(0,0,0,.08);
+  --text:#1a1c2e;--muted:#6b7280;--dim:#d1d5db;
+  --cyan:#6366f1;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--purple:#7c3aed;
+  --radius-sm:6px;--radius:12px;--radius-lg:14px;--radius-full:20px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.04);--shadow:0 2px 8px rgba(0,0,0,.06);
+  --shadow-lg:0 4px 16px rgba(0,0,0,.08);--shadow-xl:0 8px 32px rgba(0,0,0,.1);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(180deg,#eef0f6 0%,#f5f6fa 30%);color:var(--text);display:flex;min-height:100vh}
+img,svg{max-width:100%;height:auto}
+
+/* ═══ 侧边栏（店铺列表） ═══ */
+.sidebar{width:100%;max-width:210px;background:var(--card-bg);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;box-shadow:2px 0 16px rgba(0,0,0,.06);position:relative;z-index:2;overflow-y:auto}
+.sidebar .brand{font-size:15px;font-weight:700;padding:0 20px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;color:var(--text);background:linear-gradient(135deg,rgba(99,102,241,.04),transparent)}
+.sidebar .brand span{color:var(--cyan)}
+.sidebar .section{font-size:10px;color:var(--muted);padding:12px 20px 4px;text-transform:uppercase;letter-spacing:.6px}
+.sidebar .shop-item{display:flex;align-items:center;gap:8px;padding:8px 20px;font-size:12px;color:var(--text);cursor:pointer;transition:.15s;text-decoration:none;border-left:3px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar .shop-item:hover{background:rgba(99,102,241,.04)}
+.sidebar .shop-item.active{background:rgba(99,102,241,.08);border-left-color:var(--cyan);font-weight:600;color:var(--cyan)}
+.sidebar .shop-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--dim)}
+
+/* ═══ 主内容区 ═══ */
+.main{flex:1;min-width:0;padding:20px 24px 40px;overflow-y:auto}
+.main h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.main .shop-subtitle{font-size:12px;color:var(--muted);margin-bottom:20px}
+
+/* KPI 卡片 */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.kpi-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;box-shadow:var(--shadow-sm);transition:.15s}
+.kpi-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.kpi-card .kpi-num{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-bottom:2px}
+.kpi-card .kpi-label{font-size:11px;color:var(--muted)}
+.kpi-card.blue{border-top:3px solid var(--cyan)}
+.kpi-card.blue .kpi-num{color:var(--cyan)}
+.kpi-card.red{border-top:3px solid var(--red)}
+.kpi-card.red .kpi-num{color:var(--red)}
+.kpi-card.yellow{border-top:3px solid var(--yellow)}
+.kpi-card.yellow .kpi-num{color:var(--yellow)}
+.kpi-card.green{border-top:3px solid var(--green)}
+.kpi-card.green .kpi-num{color:var(--green)}
+.kpi-card.purple{border-top:3px solid var(--purple)}
+.kpi-card.purple .kpi-num{color:var(--purple)}
+
+/* 店铺详情区 */
+.store-section{display:none}
+.store-section.active{display:block}
+.store-tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:4px;margin-bottom:20px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.store-tab{flex-shrink:0;padding:8px 16px;font-size:13px;border-radius:var(--radius);cursor:pointer;transition:.15s;white-space:nowrap;border:1px solid var(--border);background:var(--card-bg);color:var(--muted);font-weight:500}
+.store-tab:hover{background:rgba(99,102,241,.04)}
+.store-tab.active{background:var(--cyan);color:#fff;border-color:var(--cyan);font-weight:600}
+
+/* 数据占位 */
+.data-placeholder{background:var(--card-bg);border:1px dashed var(--border);border-radius:var(--radius);padding:40px 20px;text-align:center;color:var(--muted);font-size:13px}
+.data-placeholder .ph-icon{font-size:32px;margin-bottom:8px}
+
+/* 汇总卡片 */
+.summary-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;align-items:center;font-size:12px;color:var(--muted);background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 20px}
+.summary-bar strong{color:var(--text)}
+.summary-sep{width:1px;height:16px;background:var(--border);margin:0 8px}
+
+/* ═══ 手机端 ═══ */
+@media(max-width:768px){
+  body{display:block}
+  .sidebar{width:100%;max-width:none;display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch;gap:2px}
+  .sidebar::-webkit-scrollbar{height:0}
+  .sidebar .brand{display:none}
+  .sidebar .section{display:none}
+  .sidebar .shop-item{flex-shrink:0;min-width:44px;padding:6px 10px;font-size:11px;border-left:none;border-bottom:2px solid transparent;text-align:center;overflow:hidden;text-overflow:ellipsis;border-radius:var(--radius);line-height:1.3}
+  .sidebar .shop-item.active{border-left:none;border-bottom:2px solid var(--cyan);background:transparent}
+  .sidebar .shop-dot{display:none}
+  .main{padding:12px 10px}
+}
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="brand"><span>🏢</span> 公司看板</div>
+  <!-- populated by JS -->
+</nav>
+
+<main class="main" id="mainContent">
+  <h1>🏢 公司看板</h1>
+  <p class="shop-subtitle" id="activeShopName">请选择店铺</p>
+
+  <!-- 汇总 -->
+  <div class="summary-bar" id="summaryBar">加载中...</div>
+
+  <!-- KPI 区 -->
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <!-- 店铺子标签 -->
+  <div class="store-tabs" id="storeTabs">
+    <div class="store-tab active" data-sub="orders">📋 今日订单</div>
+    <div class="store-tab" data-sub="stock">📦 库存概览</div>
+    <div class="store-tab" data-sub="sales">💰 销售统计</div>
+  </div>
+
+  <!-- 内容区 -->
+  <div id="storeContent">
+    <div class="data-placeholder">
+      <div class="ph-icon">📭</div>
+      <p>请从左侧选择店铺查看详情</p>
+    </div>
+  </div>
+</main>
+
+<script>
+// ═══ 店铺数据 ═══
+var SHOPS = [
+  {id:"82884150034192194",pid:"1099244142",name:"好幫手百貨旗艦店",group:"百貨"},
+  {id:"82884150034187989",pid:"1173577782",name:"依依原創日韓包包",group:"包包"},
+  {id:"82883997562845632",pid:"1046927985",name:"初見CHUJIAN大碼女裝",group:"女裝"},
+  {id:"82883997562844841",pid:"20334164",name:"動啓萊優選小鋪",group:"女裝"},
+  {id:"80665189540370837",pid:"22089114",name:"琪屿·Vibe",group:"女裝"},
+  {id:"80664972644511936",pid:"1280716333",name:"你的喵系女友 miao",group:"女裝"},
+  {id:"79351975372152722",pid:"226614044",name:"閑逸·優選內衣庫",group:"女裝"},
+  {id:"79352179383103437",pid:"349106961",name:"Yoomi悠米童裝~",group:"童裝"},
+  {id:"79352179383102966",pid:"16303135",name:"FEI929",group:"女裝"},
+  {id:"79351975372150453",pid:"106018221",name:"3RISE服飾屋",group:"女裝"},
+  {id:"77878148754504134",pid:"412613193",name:"RoRo中大碼廠家直銷女装",group:"女裝"},
+  {id:"77878372092810430",pid:"43931660",name:"米農兒童卡通百貨店",group:"百貨"},
+  {id:"77877517394307192",pid:"9071944",name:"Chubby girl 大尺碼女裝",group:"女裝"},
+  {id:"77877515246826654",pid:"7448818",name:"胖妞不愁Emma大尺碼女裝",group:"女裝"},
+  {id:"77527859811746555",pid:"1490101767",name:"Sakura日韓美妝護膚代購",group:"美妝"}
+];
+
+var activeShopId = null;
+
+// ═══ 渲染侧边栏 ═══
+function renderSidebar(){
+  var sidebar = document.getElementById('sidebar');
+  var groups = {};
+  SHOPS.forEach(function(s){
+    if(!groups[s.group]) groups[s.group] = [];
+    groups[s.group].push(s);
+  });
+  var html = '<div class="brand"><span>🏢</span> 公司看板</div>';
+  var groupOrder = ['女裝','百貨','童裝','包包','美妝'];
+  groupOrder.forEach(function(g){
+    if(!groups[g]) return;
+    html += '<div class="section">'+g+'</div>';
+    groups[g].forEach(function(s){
+      html += '<a class="shop-item" data-pid="'+s.pid+'" data-name="'+s.name+'"><span class="shop-dot"></span>'+s.name+'</a>';
+    });
+  });
+  sidebar.innerHTML = html;
+
+  // 点击事件
+  sidebar.querySelectorAll('.shop-item').forEach(function(el){
+    el.addEventListener('click', function(){
+      sidebar.querySelectorAll('.shop-item').forEach(function(x){x.classList.remove('active')});
+      el.classList.add('active');
+      selectShop(el.dataset.pid, el.dataset.name);
+    });
+  });
+}
+
+// ═══ 选择店铺 ═══
+function selectShop(pid, name){
+  activeShopId = pid;
+  document.getElementById('activeShopName').textContent = name;
+  document.getElementById('storeContent').innerHTML = '<div class="data-placeholder"><div class="ph-icon">📋</div><p>'+name+'</p><p style="font-size:11px;margin-top:4px">数据接入中，请稍后...</p><p style="font-size:10px;margin-top:4px;color:var(--dim)">platformShopId: '+pid+'</p></div>';
+  document.getElementById('kpiRow').innerHTML = [
+    '<div class="kpi-card blue"><div class="kpi-num">-</div><div class="kpi-label">今日订单</div></div>',
+    '<div class="kpi-card red"><div class="kpi-num">-</div><div class="kpi-label">待发货</div></div>',
+    '<div class="kpi-card yellow"><div class="kpi-num">-</div><div class="kpi-label">SKU数</div></div>',
+    '<div class="kpi-card green"><div class="kpi-num">-</div><div class="kpi-label">销售额(TWD)</div></div>',
+    '<div class="kpi-card purple"><div class="kpi-num">-</div><div class="kpi-label">库存件数</div></div>'
+  ].join('');
+  updateSummary();
+}
+
+// ═══ 更新汇总 ═══
+function updateSummary(){
+  var bar = document.getElementById('summaryBar');
+  if(activeShopId){
+    var s = SHOPS.find(function(x){return x.pid === activeShopId});
+    bar.innerHTML = '<strong>当前店铺:</strong> '+(s?s.name:'')+' &nbsp;<span style="color:var(--dim)">ID: '+activeShopId+'</span>';
+  } else {
+    bar.innerHTML = '共 <strong>15</strong> 家店铺 &nbsp; <span style="color:var(--dim)">点击左侧店铺查看详情</span>';
+  }
+}
+
+// ═══ 初始化 ═══
+renderSidebar();
+updateSummary();
+
+// 子标签切换
+document.getElementById('storeTabs').addEventListener('click', function(e){
+  if(!e.target.classList.contains('store-tab') || !activeShopId) return;
+  this.querySelectorAll('.store-tab').forEach(function(t){t.classList.remove('active')});
+  e.target.classList.add('active');
+});
+</script>
+</body>
+</html>
