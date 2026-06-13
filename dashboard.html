@@ -386,14 +386,15 @@ footer a{color:var(--dim);text-decoration:none}
 #page-dataviz .pc-code{font-size:11px;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 #page-dataviz .pc-spec{font-size:10px;color:rgba(0,0,0,.6);margin-top:2px}
 #page-dataviz .pc-qty{font-size:12px;font-weight:700;color:#0052d9;margin-top:2px}
-#page-dash .rc-grid, #page-dataviz .rc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px}
-#page-dash .rc, #page-dataviz .rc{display:flex;align-items:center;gap:8px;padding:8px 9px;background:#fafafa;border-radius:6px}
-#page-dash .rc-rank, #page-dataviz .rc-rank{font-size:10px;font-weight:700;color:#2ba471;min-width:18px}
-#page-dash .rc-img, #page-dataviz .rc-img{width:30px;height:30px;border-radius:5px;object-fit:cover;flex-shrink:0;background:#e8e8e8}
+#page-dash .rc-grid, #page-dataviz .rc-grid{display:flex;flex-direction:column;gap:6px}
+#page-dash .rc, #page-dataviz .rc{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#fff;border:1px solid var(--border);border-radius:8px;transition:all .15s}
+#page-dash .rc:hover, #page-dataviz .rc:hover{border-color:rgba(99,102,241,.15);background:#fafcff}
+#page-dash .rc-rank, #page-dataviz .rc-rank{font-size:12px;font-weight:700;color:#2ba471;min-width:20px;text-align:center}
+#page-dash .rc-img, #page-dataviz .rc-img{width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#e8e8e8}
 #page-dash .rc-info, #page-dataviz .rc-info{flex:1;min-width:0}
-#page-dash .rc-code, #page-dataviz .rc-code{font-size:10px;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+#page-dash .rc-code, #page-dataviz .rc-code{font-size:11px;font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 #page-dash .rc-spec, #page-dataviz .rc-spec{font-size:9px;color:rgba(0,0,0,.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
-#page-dash .rc-amt, #page-dataviz .rc-amt{font-size:11px;font-weight:700;color:#2ba471}
+#page-dash .rc-amt, #page-dataviz .rc-amt{font-size:13px;font-weight:700;color:#2ba471;min-width:36px;text-align:right}
 #page-dataviz .ft{text-align:center;padding:16px;font-size:10px;color:rgba(0,0,0,.4)}
 @media(max-width:768px){#page-dataviz .kpi{grid-template-columns:repeat(2,1fr)}#page-dataviz .row{grid-template-columns:1fr}#page-dataviz .pc-grid,#page-dash .rc-grid,#page-dataviz .rc-grid{grid-template-columns:1fr!important}#page-dash .rc,#page-dataviz .rc{gap:10px;padding:10px 12px;border-radius:8px;background:#fff;border:1px solid var(--border)}#page-dash .rc-rank,#page-dataviz .rc-rank{font-size:14px;font-weight:700;min-width:20px;text-align:center}#page-dash .rc-img,#page-dataviz .rc-img{width:40px;height:40px;border-radius:6px}#page-dash .rc-code,#page-dataviz .rc-code{font-size:12px}#page-dash .rc-spec,#page-dataviz .rc-spec{font-size:10px;margin-top:2px}#page-dash .rc-amt,#page-dataviz .rc-amt{font-size:14px;font-weight:700;min-width:40px;text-align:right}}
 /* ═══ 销售数据 ═══ */
