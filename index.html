@@ -583,7 +583,7 @@ footer a{color:var(--dim);text-decoration:none}
 @media(max-width:768px){
   /* 整体布局：关掉桌面 flex，改用自然从上到下 */
   body{display:block}
-  .sidebar{width:100%;display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch;gap:2px;-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
+  .sidebar{width:100%;max-width:none;display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch;gap:2px;-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
   .sidebar::-webkit-scrollbar{height:0}
   .sidebar .brand{display:none}
   .sidebar .section{display:none}
@@ -754,7 +754,7 @@ footer a{color:var(--dim);text-decoration:none}
 
 /* ═══════════ 手机版 class 保底（不依赖 @media） ═══════════ */
 .mobile body{display:block!important}
-.mobile .sidebar{width:100%!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;overflow-x:auto!important;padding:0!important;border-right:none!important;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch;gap:2px;-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
+.mobile .sidebar{width:100%!important;max-width:none!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;overflow-x:auto!important;padding:0!important;border-right:none!important;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch;gap:2px;-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
 .mobile .sidebar::-webkit-scrollbar{height:0}
 .mobile .sidebar .brand{display:none!important}
 .mobile .sidebar .section{display:none!important}
