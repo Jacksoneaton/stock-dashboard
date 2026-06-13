@@ -753,8 +753,17 @@ footer a{color:var(--dim);text-decoration:none}
     <div class="sub-page active" id="dash-sub-inventory">
       <div class="stats-row" id="statsRow"></div>
       <div class="chart-row" id="chartRow">
-        <div class="chart-card"><h3>🚨 急补货排行</h3><div class="rc-grid" id="restockBars"></div></div>
-        <div class="chart-card"><h3>🔥 销售 Top 10</h3><div class="bar-list" id="salesBars"></div></div>
+        <div class="chart-card" style="grid-column:span 2">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h3 style="margin:0" id="rankingTitle">🚨 急补货排行</h3>
+            <div class="sub-tabs" id="rankingTabs" style="margin:0;width:fit-content">
+              <span class="sub-tab active" data-sub="restock">急补货</span>
+              <span class="sub-tab" data-sub="sales">销售Top10</span>
+            </div>
+          </div>
+          <div class="sub-page active" id="rank-restock"><div class="rc-grid" id="restockBars"></div></div>
+          <div class="sub-page" id="rank-sales"><div class="bar-list" id="salesBars"></div></div>
+        </div>
         <div class="chart-card"><h3>📊 库存分布</h3><div class="donut-list" id="statusDonut"></div></div>
       </div>
       <div class="filter-bar" id="filterBar"></div>
@@ -1244,6 +1253,20 @@ function renderCharts(){
     salesHtml+='<div class="sr">'+(s.img?'<img class="sr-img" src="'+s.img+'" onerror="this.style.display=\'none\'">':'<span class="sr-img" style="display:inline-flex;align-items:center;justify-content:center;font-size:12px;background:#f0f4ff">📦</span>')+'<div class="sr-body"><span class="sr-spec">'+s.spec+'</span><div class="sr-bar-wrap"><div class="sr-bar-fill" style="width:'+pct+'%"></div></div></div><span class="sr-val">'+s.daily+'<small>/天</small></span></div>';
   });
   document.getElementById('salesBars').innerHTML=salesHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
+  // 合并卡片子页签切换
+  var rankingTabs=document.getElementById('rankingTabs');
+  if(rankingTabs){
+    rankingTabs.onclick=function(e){
+      var t=e.target.closest('.sub-tab');
+      if(!t) return;
+      rankingTabs.querySelectorAll('.sub-tab').forEach(function(x){x.classList.remove('active')});
+      t.classList.add('active');
+      var sub=t.dataset.sub;
+      document.getElementById('rank-restock').classList.toggle('active',sub==='restock');
+      document.getElementById('rank-sales').classList.toggle('active',sub==='sales');
+      document.getElementById('rankingTitle').textContent=sub==='restock'?'🚨 急补货排行':'🔥 销售 Top 10';
+    };
+  }
   var withSales=items.filter(function(s){return s.daily>0;});
   var buckets=[{label:'<3天',color:'var(--red)',min:0,max:3},{label:'3~7天',color:'var(--yellow)',min:3,max:7},{label:'7~14天',color:'var(--blue)',min:7,max:14},{label:'>14天',color:'var(--green)',min:14,max:9999}];
   var donutHtml='';
