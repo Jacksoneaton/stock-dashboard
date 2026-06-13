@@ -587,10 +587,10 @@ footer a{color:var(--dim);text-decoration:none}
   .sidebar::-webkit-scrollbar{height:0}
   .sidebar .brand{display:none}
   .sidebar .section{display:none}
-  .tab{flex-shrink:0;padding:8px 10px;font-size:10px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0;line-height:1.2}
+  .tab{flex-shrink:0;padding:6px 8px;font-size:9px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0;line-height:1.3}
   .tab .dot{display:none}
-  .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent}
-  .tab .badge,.tab .badge-alert{font-size:8px;margin-left:3px;padding:1px 3px;min-width:14px;height:14px;line-height:14px}
+  .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent;font-weight:600}
+  .tab .badge,.tab .badge-alert{font-size:7px;margin-left:2px;padding:0 2px;min-width:12px;height:12px;line-height:12px}
   .main{flex:none;width:100%;padding:10px 8px}
   .container{padding-bottom:32px}
   /* 顶部同步/健康栏瘦身 */
@@ -635,6 +635,9 @@ footer a{color:var(--dim);text-decoration:none}
   .sales-top .sr .sa{font-size:12px;min-width:60px}
   .sales-wow{flex-wrap:wrap}
   .sales-wow .wow-item{flex:1 1 45%}
+  /* 商品标题：手机端两行 */
+  .sales-orders .so-name{max-width:none;white-space:normal;overflow:visible;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:10px}
+  .sales-top .sr .si .sin{white-space:normal;overflow:visible;text-overflow:clip;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px}
 
   /* 数据看板 KPI：2列 */
   #page-dataviz .kpi{grid-template-columns:repeat(2,1fr)!important}
@@ -706,13 +709,15 @@ footer a{color:var(--dim);text-decoration:none}
 .mobile .sidebar .brand{display:none!important}
 .mobile .sidebar .section{display:none!important}
 .mobile .main{flex:none!important;width:100%!important;padding:10px 8px!important}
-.mobile .tab{flex-shrink:0;padding:8px 10px;font-size:10px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0;line-height:1.2}
+.mobile .tab{flex-shrink:0;padding:6px 8px;font-size:9px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0;line-height:1.3}
 .mobile .tab .dot{display:none}
-.mobile .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent}
-.mobile .tab .badge,.mobile .tab .badge-alert{font-size:8px;margin-left:3px;padding:1px 3px;min-width:14px;height:14px;line-height:14px}
+.mobile .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent;font-weight:600}
+.mobile .tab .badge,.mobile .tab .badge-alert{font-size:7px;margin-left:2px;padding:0 2px;min-width:12px;height:12px;line-height:12px}
 .mobile .sync-bar{padding:4px 8px;font-size:10px}
 .mobile .health-bar{padding:4px 8px;font-size:9px;gap:6px}
 .mobile .health-item{font-size:9px}
+.mobile .sales-orders .so-name{max-width:none!important;white-space:normal!important;overflow:visible!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:10px}
+.mobile .sales-top .sr .si .sin{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px}
 
 /* ═══════════ 小屏手机 (<400px) ═══════════ */
 @media(max-width:400px){
