@@ -581,8 +581,8 @@ footer a{color:var(--dim);text-decoration:none}
 
 /* ═══════════ 手机端适配 (≤768px) ═══════════ */
 @media(max-width:768px){
-  /* 整体布局：侧边栏→顶部横向滚动 */
-  body{flex-direction:column}
+  /* 整体布局：关掉桌面 flex，改用自然从上到下 */
+  body{display:block}
   .sidebar{width:100%;display:flex;flex-direction:row;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch}
   .sidebar::-webkit-scrollbar{height:0}
   .sidebar .brand{display:none}
@@ -590,7 +590,7 @@ footer a{color:var(--dim);text-decoration:none}
   .tab{flex-shrink:0;padding:10px 14px;font-size:11px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0}
   .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent}
   .tab .badge,.tab .badge-alert{margin-left:6px}
-  .main{padding:12px 10px}
+  .main{flex:none;width:100%;padding:12px 10px}
   .container{padding-bottom:32px}
 
   /* 统计卡片：2列（Ant风格） */
@@ -747,7 +747,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">2a85a0c</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">0ddbee7</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -2889,7 +2889,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='2a85a0c';
+  var VER='0ddbee7';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
