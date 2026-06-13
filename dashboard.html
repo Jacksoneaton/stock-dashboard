@@ -582,8 +582,8 @@ footer a{color:var(--dim);text-decoration:none}
 /* ═══════════ 手机端适配 (≤768px) ═══════════ */
 @media(max-width:768px){
   /* 整体布局：侧边栏→顶部横向滚动 */
-  body{flex-direction:column}
-  .sidebar{width:100%;display:flex;flex-direction:row;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch}
+  body{flex-direction:column!important;flex-wrap:nowrap!important}
+  .sidebar{width:100%!important;display:flex!important;flex-direction:row!important;overflow-x:auto;padding:0!important;border-right:none!important;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch;flex-shrink:0}
   .sidebar::-webkit-scrollbar{height:0}
   .sidebar .brand{display:none}
   .sidebar .section{display:none}
