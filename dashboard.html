@@ -63,6 +63,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .stat:hover{box-shadow:var(--shadow-xl);transform:translateY(-2px)}
 .stat .num{font-size:26px;font-weight:800;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;letter-spacing:-1px}
 .stat .lbl{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.3px}
+.stat .chg{font-size:10px;margin-top:3px;color:var(--muted)}
+.stat .chg.up{color:var(--green)}
+.stat .chg.down{color:var(--red)}
 
 /* Filter */
 .filter-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;justify-content:center}
@@ -1035,11 +1038,13 @@ function renderDashboard(groups){
   var total=DATA.length,out=0,low=0,tran=totalTransit();
   DATA.forEach(function(d){if(d.stock===0)out++;else if(d.stock<=3)low++});
   document.getElementById('statsRow').innerHTML=
-    '<div class="stat"><div class="num" style="color:var(--blue)">'+total+'</div><div class="lbl">SKU</div></div>'+
-    '<div class="stat"><div class="num" style="color:var(--red)">'+out+'</div><div class="lbl">缺货</div></div>'+
-    '<div class="stat"><div class="num" style="color:var(--yellow)">'+low+'</div><div class="lbl">低库存</div></div>'+
-    '<div class="stat"><div class="num" style="color:var(--green)">'+(total-out-low)+'</div><div class="lbl">正常</div></div>'+
-    '<div class="stat"><div class="num" style="color:var(--yellow)">'+tran+'</div><div class="lbl">🚚 在途</div></div>';
+    '<div class="stat"><div class="num" data-value="'+total+'" style="color:var(--cyan)">'+total+'</div><div class="lbl">SKU 总数</div><div class="chg">'+total+' 规格在线</div></div>'+
+    '<div class="stat"><div class="num" data-value="'+out+'" style="color:var(--red)">'+out+'</div><div class="lbl">缺货 SKU</div><div class="chg down">需补货</div></div>'+
+    '<div class="stat"><div class="num" data-value="'+low+'" style="color:var(--yellow)">'+low+'</div><div class="lbl">低库存</div><div class="chg">≤3 件</div></div>'+
+    '<div class="stat"><div class="num" data-value="'+(total-out-low)+'" style="color:var(--green)">'+(total-out-low)+'</div><div class="lbl">正常库存</div><div class="chg up">'+(total-out-low>0?Math.round((total-out-low)/total*100)+'% 健康':'')+'</div></div>'+
+    '<div class="stat"><div class="num" data-value="'+tran+'" style="color:var(--purple)">'+tran+'</div><div class="lbl">🚚 在途包裹</div><div class="chg">'+(_transitData.length||0)+' 个包裹</div></div>';
+  // 数字滚入动画
+  setTimeout(function(){animateStats();},100);
   document.getElementById('filterBar').innerHTML=
     '<div class="filter-tag active" onclick="setFilter(this,\'all\')">全部 '+total+'</div>'+
     '<div class="filter-tag" onclick="setFilter(this,\'out\')">🔴 缺货 '+out+'</div>'+
@@ -2718,6 +2723,22 @@ function renderEstimateTab(){
   });
   
   grid.innerHTML=html||'<div style="text-align:center;padding:60px;color:var(--muted);font-size:13px">所有SKU预估库存无变动</div>';
+}
+// 数字滚入动画
+function animateStats(){
+  document.querySelectorAll('.stat .num[data-value]').forEach(function(el){
+    var target=parseInt(el.getAttribute('data-value'))||0;
+    if(target===0)return;
+    var dur=600,start=performance.now();
+    function step(now){
+      var p=Math.min(1,(now-start)/dur);
+      var ease=1-Math.pow(1-p,3);
+      el.textContent=Math.round(target*ease);
+      if(p<1)requestAnimationFrame(step);
+      else el.textContent=target;
+    }
+    requestAnimationFrame(step);
+  });
 }
 </script>
 </main>
