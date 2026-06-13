@@ -403,10 +403,10 @@ footer a{color:var(--dim);text-decoration:none}
 .abc-bar-wrap{width:80px;height:6px;background:#e8e8e8;border-radius:3px;overflow:hidden}
 .abc-bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
 .ft{text-align:center;padding:16px;font-size:10px;color:var(--dim);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
-/* Mobile dataviz */
 @media(max-width:768px){
   .dv-kpi-row{grid-template-columns:repeat(2,1fr);gap:8px}
   .dv-chart-row{grid-template-columns:1fr}
+  .dv-chart-row .dv-card[style*=\"span 2\"]{grid-column:span 1}
   .k{padding:14px 12px}
   .kv{font-size:22px}
   .sr-img{width:32px;height:32px}
@@ -872,11 +872,10 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="dv-kpi-row" id="dvKpi"></div>
   <div class="dv-chart-row">
     <div class="dv-card"><h3>📈 销售排行 Top 10</h3><div id="dvSales"></div></div>
-    <div class="dv-card"><h3>🚨 急补货排行</h3><div class="rc-grid" id="dvRestock"></div></div>
+    <div class="dv-card"><h3>📊 库存分布</h3><div id="dvDonut"><div style="height:220px;position:relative"><svg viewBox="0 0 200 200" style="width:100%;height:100%"></svg></div></div></div>
   </div>
   <div class="dv-chart-row">
-    <div class="dv-card"><h3>📊 库存分布</h3><div id="dvDonut"><div style="height:220px;position:relative"><svg viewBox="0 0 200 200" style="width:100%;height:100%"></svg></div></div></div>
-    <div class="dv-card"><h3>🏷️ ABC 分类</h3><div id="dvAbc"></div></div>
+    <div class="dv-card" style="grid-column:span 2"><h3>🏷️ ABC 分类</h3><div id="dvAbc"></div></div>
   </div>
   <div class="ft" id="dvFooter"></div>
 </div>
@@ -2116,20 +2115,6 @@ function renderDatavizTab(){
       '</div>';
   });
   document.getElementById('dvAbc').innerHTML=abcHtml;
-
-  // 急补货排行（取 suggest > 当前库存 的前 10）
-  var restockItems=[];
-  DATA.forEach(function(d){
-    var r=REPLENISH[d.sku]||{};
-    if(r.suggest>d.stock) restockItems.push({sku:d.sku,code:d.invCode||'',title:d.title||'',spec:d.spec||'',img:d.img||'',stock:d.stock,suggest:r.suggest,daily:r.daily||0});
-  });
-  restockItems.sort(function(a,b){return (b.suggest-b.stock)-(a.suggest-a.stock);});
-  var restockHtml=restockItems.slice(0,8).map(function(r,i){
-    var need=r.suggest-r.stock;
-    return '<div class="rc"><span class="rc-rank">'+(i+1)+'</span>'+(r.img?'<img class="rc-img" src="'+r.img+'" onerror="this.style.display=\'none\'">':'<div class="rc-img" style="display:flex;align-items:center;justify-content:center;font-size:14px">📦</div>')+'<div class="rc-info"><div class="rc-code">'+r.sku+'</div><div class="rc-spec">'+r.title+'</div></div><div class="rc-amt">+'+need+'件</div></div>';
-  }).join('')||'<span style="color:var(--dim);font-size:11px">库存充足</span>';
-  var rdv=document.getElementById('dvRestock');
-  if(rdv) rdv.innerHTML=restockHtml;
 
   // Footer
   var invCount=Object.keys(groupByInv()).length;
