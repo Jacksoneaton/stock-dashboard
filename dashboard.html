@@ -19,16 +19,22 @@
   --shadow-xl:0 8px 30px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.05);
   --radius:12px;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(180deg,#f0f2f7 0%,#f5f6fa 30%);color:var(--text);min-height:100vh}
-.container{max-width:1300px;margin:0 auto;padding:28px 32px 48px;position:relative;z-index:1}
-
-/* Tabs */
-.tabs{display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid var(--border);justify-content:center}
-.tab{padding:10px 24px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;position:relative;letter-spacing:.5px}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--cyan);border-bottom-color:var(--cyan);font-weight:600}
-.tab .badge{display:inline-block;background:rgba(99,102,241,.1);color:var(--cyan);border-radius:10px;padding:1px 8px;font-size:10px;margin-left:6px;font-weight:700}
-.tab .badge-alert{display:inline-block;background:var(--red);color:#fff;border-radius:9px;padding:1px 5px;font-size:10px;margin-left:6px;font-weight:700;min-width:16px;text-align:center;animation:pulse-dot 2s infinite}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(180deg,#f0f2f7 0%,#f5f6fa 30%);color:var(--text);display:flex;min-height:100vh}
+/* ═══ 侧边栏 ═══ */
+.sidebar{width:210px;background:var(--card-bg);border-right:1px solid var(--border);padding:24px 0;flex-shrink:0;box-shadow:var(--shadow-sm);position:relative;z-index:2}
+.sidebar .brand{font-size:15px;font-weight:700;padding:0 24px 24px;border-bottom:1px solid var(--border);margin-bottom:16px;color:var(--text)}
+.sidebar .brand span{color:var(--cyan)}
+.sidebar .section{font-size:10px;color:var(--muted);padding:14px 24px 4px;text-transform:uppercase;letter-spacing:.6px}
+/* ═══ 主区 ═══ */
+.main{flex:1;padding:28px 32px;min-width:0;overflow-y:auto}
+.container{max-width:1300px;margin:0 auto;padding:0 0 48px;position:relative;z-index:1}
+/* Tabs → Sidebar links */
+.tab{display:flex;align-items:center;gap:10px;padding:9px 24px;font-size:13px;color:var(--muted);cursor:pointer;transition:.15s;position:relative;letter-spacing:.5px;border-bottom:none;font-weight:400}
+.tab:hover{color:var(--text);background:rgba(0,0,0,.02)}
+.tab.active{color:var(--cyan);font-weight:600;background:rgba(99,102,241,.05);border-right:2px solid var(--cyan)}
+.tab .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.4;flex-shrink:0}
+.tab .badge{display:inline-block;background:rgba(99,102,241,.1);color:var(--cyan);border-radius:10px;padding:1px 8px;font-size:10px;margin-left:auto;font-weight:700}
+.tab .badge-alert{display:inline-block;background:var(--red);color:#fff;border-radius:9px;padding:1px 5px;font-size:10px;margin-left:auto;font-weight:700;min-width:16px;text-align:center;animation:pulse-dot 2s infinite}
 
 .page{display:none}
 .page.active{display:block}
@@ -525,6 +531,19 @@ footer a{color:var(--dim);text-decoration:none}
 </div>
 <script>var PWD_HASH='fe349d646d284a13600edbefafb159c1529c175806e302f0a2382e256ad838b2',PWD_KEY='hermes_pwd_ok';if(localStorage.getItem(PWD_KEY)==='1')document.getElementById('pwdOverlay').classList.add('hidden');async function checkPwd(){var h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(document.getElementById('pwdInput').value));h=Array.from(new Uint8Array(h)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');if(h===PWD_HASH){localStorage.setItem(PWD_KEY,'1');document.getElementById('pwdOverlay').classList.add('hidden')}else{document.getElementById('pwdErr').textContent='密码错误';var b=document.querySelector('.pwd-box');b.classList.remove('pwd-shake');void b.offsetWidth;b.classList.add('pwd-shake');document.getElementById('pwdInput').value=''}}</script>
 
+<nav class="sidebar">
+  <div class="brand"><span>◈</span> 库存看板</div>
+  <a class="tab active" data-page="dash"><span class="dot"></span> 📦 库存看板</a>
+  <a class="tab" data-page="replen"><span class="dot"></span> 📋 补货预测<span class="badge-alert" id="replenBadge" style="display:none">0</span></a>
+  <a class="tab" data-page="transit"><span class="dot"></span> 🚚 在途管理<span class="badge" id="transitBadge">0</span></a>
+  <div class="section">数据</div>
+  <a class="tab" data-page="dataviz"><span class="dot"></span> 📊 数据看板</a>
+  <a class="tab" data-page="sales"><span class="dot"></span> 💰 销售</a>
+  <a class="tab" data-page="trends"><span class="dot"></span> 🔥 市场趋势</a>
+  <a class="tab" data-page="refund"><span class="dot"></span> 📋 退件提醒<span class="badge-alert" id="refundBadge" style="display:none">0</span></a>
+</nav>
+
+<main class="main">
 <div class="container">
   <!-- Sync status -->
   <div class="sync-bar" id="syncBar"><span class="sync-dot"></span><span id="syncMsg">加载中...</span></div>
@@ -541,16 +560,6 @@ footer a{color:var(--dim);text-decoration:none}
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
-  <!-- Tabs -->
-  <div class="tabs" id="tabs">
-    <div class="tab" data-page="dash">📦 库存看板</div>
-    <div class="tab" data-page="replen">📋 补货预测<span class="badge-alert" id="replenBadge" style="display:none">0</span></div>
-    <div class="tab" data-page="transit">🚚 在途管理<span class="badge" id="transitBadge">0</span></div>
-    <div class="tab" data-page="dataviz">📊 数据看板</div>
-    <div class="tab" data-page="sales">💰 销售</div>
-    <div class="tab" data-page="trends">🔥 市场趋势</div>
-    <div class="tab" data-page="refund">📋 退件提醒<span class="badge-alert" id="refundBadge" style="display:none">0</span></div>
-  </div>
 
   <!-- ═══ 库存看板 ═══ -->
   <div class="page active" id="page-dash">
@@ -2696,5 +2705,6 @@ function renderEstimateTab(){
   grid.innerHTML=html||'<div style="text-align:center;padding:60px;color:var(--muted);font-size:13px">所有SKU预估库存无变动</div>';
 }
 </script>
+</main>
 </body>
 </html>
