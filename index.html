@@ -699,6 +699,21 @@ footer a{color:var(--dim);text-decoration:none}
   .health-bar{gap:8px;padding:6px 10px;font-size:10px}
 }
 
+/* ═══════════ 手机版 class 保底（不依赖 @media） ═══════════ */
+.mobile body{display:block!important}
+.mobile .sidebar{width:100%!important;display:flex!important;flex-direction:row!important;overflow-x:auto!important;padding:0!important;border-right:none!important;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch}
+.mobile .sidebar::-webkit-scrollbar{height:0}
+.mobile .sidebar .brand{display:none!important}
+.mobile .sidebar .section{display:none!important}
+.mobile .main{flex:none!important;width:100%!important;padding:10px 8px!important}
+.mobile .tab{flex-shrink:0;width:44px;padding:8px 4px;font-size:10px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0;line-height:1.2;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.mobile .tab .dot{display:none}
+.mobile .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent;width:auto!important;min-width:44px;padding:8px 10px}
+.mobile .tab .badge,.mobile .tab .badge-alert{position:absolute;top:2px;right:2px;font-size:7px;margin:0;padding:0 2px;min-width:12px;height:12px;line-height:12px;border-radius:6px}
+.mobile .sync-bar{padding:4px 8px;font-size:10px}
+.mobile .health-bar{padding:4px 8px;font-size:9px;gap:6px}
+.mobile .health-item{font-size:9px}
+
 /* ═══════════ 小屏手机 (<400px) ═══════════ */
 @media(max-width:400px){
   .tab{padding:8px 10px;font-size:10px}
@@ -752,7 +767,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">0ddbee7</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">a4952d6</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -998,6 +1013,11 @@ footer a{color:var(--dim);text-decoration:none}
 <div class="toast" id="toast"></div>
 
 <script>
+/* ── 手机版自动检测（不依赖 @media） ── */
+(function(){
+  function checkMobile(){document.body.classList.toggle('mobile',window.innerWidth<=768)}
+  checkMobile();window.addEventListener('resize',checkMobile)
+})();
 var _transitData = [];
 var _openPackages = {};  // 记住哪些包裹是展开的，重绘后恢复
 var _pushId = 0;  // 推送计数器，防止快速连点时锁被提前释放
@@ -2894,7 +2914,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='0ddbee7';
+  var VER='a4952d6';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
