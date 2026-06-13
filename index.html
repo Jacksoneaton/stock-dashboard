@@ -23,6 +23,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .tab:hover{color:var(--cyan)}
 .tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
 .tab .badge{display:inline-block;background:rgba(8,145,178,.1);color:var(--cyan);border-radius:10px;padding:1px 8px;font-size:10px;margin-left:6px;font-weight:700}
+.tab .badge-alert{display:inline-block;background:var(--red);color:#fff;border-radius:9px;padding:1px 5px;font-size:10px;margin-left:6px;font-weight:700;min-width:16px;text-align:center;animation:pulse-dot 2s infinite}
 
 .page{display:none}
 .page.active{display:block}
@@ -40,7 +41,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .sync-bar small{opacity:.6;font-size:10px}
 
 /* Update time */
-.update-time{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);margin-bottom:8px;padding:4px 0;justify-content:center}
+.update-time{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:8px;padding:4px 0;justify-content:center}
 .update-time .ut-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
 .update-time .ut-text{font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
 
@@ -531,19 +532,19 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">b0c8845</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">e03e921</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
   <!-- Tabs -->
   <div class="tabs" id="tabs">
     <div class="tab" data-page="dash">📦 库存看板</div>
-    <div class="tab" data-page="replen">📋 补货预测</div>
+    <div class="tab" data-page="replen">📋 补货预测<span class="badge-alert" id="replenBadge" style="display:none">0</span></div>
     <div class="tab" data-page="transit">🚚 在途管理<span class="badge" id="transitBadge">0</span></div>
     <div class="tab" data-page="dataviz">📊 数据看板</div>
     <div class="tab" data-page="sales">💰 销售</div>
     <div class="tab" data-page="trends">🔥 市场趋势</div>
-    <div class="tab" data-page="refund">📋 退件提醒</div>
+    <div class="tab" data-page="refund">📋 退件提醒<span class="badge-alert" id="refundBadge" style="display:none">0</span></div>
   </div>
 
   <!-- ═══ 库存看板 ═══ -->
@@ -2475,7 +2476,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-13 01:36:21", "友鹰热搜": "2026-06-13 09:01:57", "销售数据": "2026-06-13 06:01:18", "看板部署": "2026-06-13 18:06:32"};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-13 01:36:21", "友鹰热搜": "2026-06-13 09:01:57", "销售数据": "2026-06-13 06:01:18", "看板部署": "2026-06-13 19:06:38"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -2483,20 +2484,48 @@ var HEALTH_MAP = {
   '销售数据':   ['hdSales','htSales', 4, 12],      // 每小时，正常间隔≤2h
   '看板部署':   ['hdDeploy','htDeploy', 4, 12]     // 每小时，正常间隔≤2h
 };
+function updateAlertBadges(){
+  // 补货预测徽标：统计需要补货的 SKU 数
+  try{
+    var replenBadge=document.getElementById('replenBadge');
+    if(replenBadge && typeof REPLENISH!=='undefined'){
+      var needCount=0;
+      if(Array.isArray(REPLENISH)){
+        for(var i=0;i<REPLENISH.length;i++){
+          var r=REPLENISH[i];
+          if((r.suggest_replenish||r.suggest||0)>0 || (r.out_of_stock)) needCount++;
+        }
+      }
+      if(needCount>0){replenBadge.textContent=needCount;replenBadge.style.display='inline-block';}
+      else{replenBadge.style.display='none';}
+    }
+    // 退件提醒徽标：已匹配的退件数
+    var refundBadge=document.getElementById('refundBadge');
+    if(refundBadge && typeof REFUND!=='undefined'){
+      var matchedCount=0;
+      if(REFUND.summary&&REFUND.summary.matched) matchedCount=REFUND.summary.matched;
+      else if(Array.isArray(REFUND.matched)) matchedCount=REFUND.matched.length;
+      if(matchedCount>0){refundBadge.textContent=matchedCount;refundBadge.style.display='inline-block';}
+      else{refundBadge.style.display='none';}
+    }
+  }catch(e){}
+}
 function updateTimestamps(){
   // 每个子页面显示自己数据源的更新时间
   var srcMap={
-    'utDash':    '顺运宝库存',
-    'utDataviz': '友鹰热搜',
-    'utSales':   '销售数据',
-    'utTrends':  '友鹰热搜'
+    'utDash':     '顺运宝库存',
+    'utEstimate': '顺运宝库存',
+    'utDataviz':  '友鹰热搜',
+    'utSales':    '销售数据',
+    'utTrends':   '友鹰热搜',
+    'utRefund':   '顺运宝库存'
   };
   for(var id in srcMap){
     var el=document.getElementById(id);
     if(!el) continue;
     var src=srcMap[id];
     var t=DATA_SOURCES&&DATA_SOURCES[src]?DATA_SOURCES[src]:'未知';
-    el.textContent='🕐 数据更新于 '+t;
+    el.textContent='最后更新：'+t+' · 每 5 分钟自动刷新';
   }
   
   // 数据新鲜度检查 + 健康状态栏
@@ -2556,6 +2585,7 @@ function updateTimestamps(){
       }
     }
   }catch(e){}
+  updateAlertBadges();
 }
 function setHealth(dotId,cls,labelId,text){
   var d=document.getElementById(dotId),l=document.getElementById(labelId);
@@ -2565,7 +2595,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='b0c8845';
+  var VER='e03e921';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
