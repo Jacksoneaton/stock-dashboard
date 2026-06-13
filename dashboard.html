@@ -587,10 +587,10 @@ footer a{color:var(--dim);text-decoration:none}
   .sidebar::-webkit-scrollbar{height:0}
   .sidebar .brand{display:none}
   .sidebar .section{display:none}
-  .tab{flex-shrink:0;width:44px;padding:8px 4px;font-size:10px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0;line-height:1.2;overflow:hidden;text-overflow:ellipsis;text-align:center;position:relative}
+  .tab{flex-shrink:0;padding:8px 10px;font-size:10px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0;line-height:1.2}
   .tab .dot{display:none}
-  .tab .badge,.tab .badge-alert{position:absolute;top:2px;right:2px;font-size:7px;margin:0;padding:0 2px;min-width:12px;height:12px;line-height:12px;border-radius:6px}
-  .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent;width:auto;min-width:44px;padding:8px 10px}
+  .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent}
+  .tab .badge,.tab .badge-alert{font-size:8px;margin-left:3px;padding:1px 3px;min-width:14px;height:14px;line-height:14px}
   .main{flex:none;width:100%;padding:10px 8px}
   .container{padding-bottom:32px}
   /* 顶部同步/健康栏瘦身 */
@@ -706,10 +706,10 @@ footer a{color:var(--dim);text-decoration:none}
 .mobile .sidebar .brand{display:none!important}
 .mobile .sidebar .section{display:none!important}
 .mobile .main{flex:none!important;width:100%!important;padding:10px 8px!important}
-.mobile .tab{flex-shrink:0;width:44px;padding:8px 4px;font-size:10px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0;line-height:1.2;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.mobile .tab{flex-shrink:0;padding:8px 10px;font-size:10px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0;line-height:1.2}
 .mobile .tab .dot{display:none}
-.mobile .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent;width:auto!important;min-width:44px;padding:8px 10px}
-.mobile .tab .badge,.mobile .tab .badge-alert{position:absolute;top:2px;right:2px;font-size:7px;margin:0;padding:0 2px;min-width:12px;height:12px;line-height:12px;border-radius:6px}
+.mobile .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent}
+.mobile .tab .badge,.mobile .tab .badge-alert{font-size:8px;margin-left:3px;padding:1px 3px;min-width:14px;height:14px;line-height:14px}
 .mobile .sync-bar{padding:4px 8px;font-size:10px}
 .mobile .health-bar{padding:4px 8px;font-size:9px;gap:6px}
 .mobile .health-item{font-size:9px}
@@ -2795,7 +2795,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-13 23:37:55", "友鹰热搜": "2026-06-13 09:01:57", "销售数据": "2026-06-13 22:02:22", "看板部署": "2026-06-14 01:06:15"};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-13 23:37:55", "友鹰热搜": "2026-06-13 09:01:57", "销售数据": "2026-06-13 22:02:22", "看板部署": "2026-06-14 02:05:56"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
