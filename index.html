@@ -528,6 +528,132 @@ footer a{color:var(--dim);text-decoration:none}
 .refund-meta code{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);background:rgba(99,102,241,.06);padding:1px 6px;border-radius:4px}
 
 @media(max-width:600px){.refund-grid{grid-template-columns:1fr}.refund-card-row{grid-template-columns:1fr}.refund-arrow{display:none}}
+
+/* ═══════════ 手机端适配 (≤768px) ═══════════ */
+@media(max-width:768px){
+  /* 整体布局：侧边栏→顶部横向滚动 */
+  body{flex-direction:column}
+  .sidebar{width:100%;display:flex;flex-direction:row;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch}
+  .sidebar::-webkit-scrollbar{height:0}
+  .sidebar .brand{display:none}
+  .sidebar .section{display:none}
+  .tab{flex-shrink:0;padding:10px 14px;font-size:11px;border-right:none!important;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0}
+  .tab.active{border-right:none!important;border-bottom:2px solid var(--cyan);background:transparent}
+  .tab .badge,.tab .badge-alert{margin-left:6px}
+  .main{padding:12px 10px}
+  .container{padding-bottom:32px}
+
+  /* 统计卡片：2列 */
+  .stats-row{gap:6px}
+  .stat{padding:10px 6px;min-width:0;border-radius:10px}
+  .stat .num{font-size:18px}
+  .stat .lbl{font-size:10px}
+  .stat .chg{font-size:9px}
+
+  /* 库存卡片网格：2列 */
+  .card-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .card-img{aspect-ratio:3/4}
+  .card-body{padding:8px 10px;gap:4px}
+  .card-title{font-size:10px}
+  .card-inv{font-size:10px}
+  .card-footer{font-size:9px;gap:4px}
+  .spec-tag{padding:1px 6px;font-size:9px}
+  .replenish-tag{font-size:9px;padding:2px 6px}
+
+  /* 图表区：单列 */
+  .chart-row{grid-template-columns:1fr!important}
+  .chart-card h3{font-size:12px}
+
+  /* 销售Tab KPI：2列 */
+  .sales-kpi{grid-template-columns:repeat(2,1fr)}
+  .sales-kpi .sk{padding:12px}
+  .sales-kpi .sk .kv{font-size:20px}
+
+  /* 销售行：单列 */
+  .sales-row{grid-template-columns:1fr}
+  .sales-top .sr .sn{font-size:14px;min-width:20px}
+  .sales-top .sr .sp{width:40px;height:40px}
+  .sales-top .sr .sin .sin{font-size:11px}
+  .sales-top .sr .sa{font-size:12px;min-width:60px}
+  .sales-wow{flex-wrap:wrap}
+  .sales-wow .wow-item{flex:1 1 45%}
+
+  /* 数据看板 KPI：2列 */
+  #page-dataviz .kpi{grid-template-columns:repeat(2,1fr)!important}
+  #page-dataviz .row{grid-template-columns:1fr!important}
+  #page-dataviz .pc-grid,#page-dash .rc-grid,#page-dataviz .rc-grid{grid-template-columns:repeat(2,1fr)}
+  #page-dataviz .k{padding:12px 14px}
+  #page-dataviz .kv{font-size:20px}
+
+  /* 趋势卡片 */
+  .trends-grid{grid-template-columns:repeat(2,1fr)!important}
+  .sub-tabs{padding:3px;border-radius:8px}
+  .sub-tab{padding:6px 12px;font-size:11px}
+
+  /* 补货预测 */
+  .tiers{grid-template-columns:1fr!important}
+  .replen-head h2{font-size:15px}
+
+  /* 表格：横向滚动 */
+  .rep-table,.suggest-table,.pkg-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .rep-table th,.rep-table td,.suggest-table th,.suggest-table td{white-space:nowrap}
+
+  /* 在途管理 */
+  .transit-head{flex-direction:column;align-items:flex-start}
+  .t-summary{gap:6px}
+  .t-stat{padding:10px 14px;min-width:0}
+  .t-stat .tnum{font-size:20px}
+
+  /* 顶部标题 */
+  .dash-topbar{flex-direction:column;gap:8px;margin-bottom:16px}
+  .dash-topbar h1{font-size:16px}
+
+  /* 退件提醒 */
+  .refund-grid{grid-template-columns:1fr}
+  .refund-card-row{grid-template-columns:1fr}
+  .refund-arrow{display:none}
+  .refund-filters{flex-wrap:nowrap;overflow-x:auto;gap:4px;-webkit-overflow-scrolling:touch}
+  .rf-pill{font-size:10px;padding:4px 10px;white-space:nowrap;flex-shrink:0}
+
+  /* 密码门禁 */
+  .pwd-box h2{font-size:20px}
+  .pwd-box input{width:200px;font-size:16px;padding:12px 16px}
+
+  /* 弹窗 */
+  .modal-box{width:95vw;padding:16px;border-radius:14px}
+  .modal-box h3{font-size:14px}
+  .move-box{width:95vw}
+
+  /* Toast */
+  .toast{font-size:11px;padding:6px 14px}
+
+  /* 过滤栏 */
+  .filter-bar{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;gap:4px;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .filter-tag{flex-shrink:0;white-space:nowrap}
+  .search-box{min-width:100px}
+  .filter-bar::-webkit-scrollbar{height:0}
+
+  /* 销售时间段 */
+  .sales-periods{overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;-webkit-overflow-scrolling:touch}
+  .sales-periods .sp-btn{flex-shrink:0}
+
+  /* 健康栏 */
+  .health-bar{gap:8px;padding:6px 10px;font-size:10px}
+}
+
+/* ═══════════ 小屏手机 (<400px) ═══════════ */
+@media(max-width:400px){
+  .tab{padding:8px 10px;font-size:10px}
+  .tab .badge,.tab .badge-alert{font-size:9px}
+  .card-grid{gap:6px}
+  .card-body{padding:6px 8px}
+  .card-title{font-size:9px}
+  .stat .num{font-size:16px}
+  .sales-kpi .sk .kv{font-size:18px}
+  #page-dataviz .kv{font-size:18px}
+  .dash-topbar h1{font-size:15px}
+  .btn{padding:6px 12px;font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -568,7 +694,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">e03e921</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">8ffd79f</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -2629,7 +2755,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='e03e921';
+  var VER='8ffd79f';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
