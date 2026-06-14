@@ -388,49 +388,49 @@ function renderStore(pid){
   }
   
   // Inventory management section
+  // Collect reserved SPECS for this store (per-spec key format: product||spec)
   var storeReserved = {};
   if (RESERVATIONS) {
-    for (var pt in RESERVATIONS) {
-      var r = RESERVATIONS[pt];
+    for (var key in RESERVATIONS) {
+      var r = RESERVATIONS[key];
       if (r.stores && r.stores[pid]) {
-        storeReserved[pt] = r;
+        storeReserved[key] = r;
       }
     }
   }
   
   html += '<div id="sub-inventory" style="display:'+(currentSubTab==='inventory'?'block':'none')+'">';
   
-  // This store's reserved products
+  // This store's reserved specs
   var reservedKeys = Object.keys(storeReserved);
-  html += '<div class="sec-title">🏪 ' + s.name + ' 已保留产品</div>';
+  html += '<div class="sec-title">📦 ' + s.name + ' 已保留规格</div>';
   if (reservedKeys.length === 0) {
-    html += '<div class="empty-state" style="padding:20px">暂无保留产品，前往公共池分配</div>';
+    html += '<div class="empty-state" style="padding:20px">暂无保留规格，前往公共池分配</div>';
   } else {
-    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格数</th><th>规格</th><th>总库存</th><th>本店保留</th><th>操作</th></tr></thead><tbody>';
-    reservedKeys.forEach(function(pt) {
-      var r = storeReserved[pt];
-      var inv = INVENTORY && INVENTORY.products_map ? INVENTORY.products_map[pt] : null;
-      var totalQty = inv ? inv.total_qty : 0;
+    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格</th><th>库存</th><th>本店保留</th><th>操作</th></tr></thead><tbody>';
+    reservedKeys.forEach(function(key) {
+      var r = storeReserved[key];
+      var parts = key.split('||');
+      var pt = parts[0];
+      var specName = parts.slice(1).join('||');
       var resQty = r.stores[pid] || 0;
       var invMap = (INVENTORY && INVENTORY.products_map && INVENTORY.products_map[pt]) ? INVENTORY.products_map[pt] : {};
-      var invImg2 = invMap.image || '';
-      var invCode = invMap.code || '';
+      var invImg = invMap.image || '';
       var invSpecs = invMap.specs || [];
-      var invSpecTip = invSpecs.map(function(s){return s.spec+' ×'+s.qty}).join(' | ');
-      var invSpecBadge = invMap.specCount ? '<span style="font-size:10px;color:var(--cyan);cursor:help" title="'+invSpecTip.replace(/"/g,'&quot;')+'">'+invMap.specCount+'个</span>' : '-';
+      var specQty = 0;
+      invSpecs.forEach(function(s){ if (s.spec === specName) specQty = s.qty || 0; });
       html += '<tr>'
         + '<td style="text-align:center">'+(invImg?'<img src="'+invImg+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="this.style.display=\'none\'">':'')+'</td>'
-        + '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pt+'">'+pt+'</td>'
-        + '<td style="text-align:center">'+invSpecBadge+'</td>'
-        + '<td style="font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+invSpecTip.replace(/"/g,'&quot;')+'">'+(invSpecs.length>0?invSpecs.slice(0,2).map(function(s){return s.spec}).join(' / ')+(invSpecs.length>2?'...':''):'-')+'</td>'
-        + '<td>'+totalQty+'</td>'
+        + '<td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pt+'">'+pt+'</td>'
+        + '<td style="font-size:11px">'+specName+'</td>'
+        + '<td>'+specQty+'</td>'
         + '<td style="font-weight:600;color:var(--cyan)">'+resQty+'</td>'
-        + '<td><button onclick="removeReservation(\''+pt.replace(/'/g,"\\'")+'\',\''+pid+'\')" style="padding:2px 8px;font-size:10px;border:1px solid var(--red);color:var(--red);background:#fff;border-radius:4px;cursor:pointer">取消保留</button></td>'
+        + '<td><button onclick="removeReservation(\''+key.replace(/'/g,"\\'")+'\',\''+pid+'\')" style="padding:2px 8px;font-size:10px;border:1px solid var(--red);color:var(--red);background:#fff;border-radius:4px;cursor:pointer">取消保留</button></td>'
         + '</tr>';
     });
     html += '</tbody></table>';
   }
-  
+
   // Public pool
   html += '<div class="sec-title" style="margin-top:24px">🌐 公共池</div>';
   html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center">';
@@ -463,48 +463,67 @@ function renderStore(pid){
     var pageSize = 50;
     var totalPages = Math.ceil(invProducts.length / pageSize);
     var invPage = 1;
+
+    // Build flat spec list from products
+    var allSpecs = [];
+    invProducts.forEach(function(p) {
+      var pImg = p.image || '';
+      var pStoreName = p.storeName || '';
+      var pCode = p.code || '';
+      (p.specs || []).forEach(function(s, si) {
+        var specKey = p.title + '||' + s.spec;
+        var specQty = s.qty || 0;
+        // Calc reservation for this spec
+        var res = RESERVATIONS && RESERVATIONS[specKey] ? RESERVATIONS[specKey] : null;
+        var reservedTotal = 0;
+        var storeRes = (res && res.stores && res.stores[pid]) ? res.stores[pid] : 0;
+        if (res && res.stores) {
+          for (var sp in res.stores) { reservedTotal += res.stores[sp]; }
+        }
+        var shared = Math.max(0, specQty - reservedTotal);
+        // Build badges
+        var badges = '';
+        if (res && res.stores) {
+          for (var sp in res.stores) {
+            var sname = STORE_DATA[sp] ? STORE_DATA[sp].name : sp;
+            badges += '<span style="display:inline-block;font-size:9px;background:var(--bg);padding:1px 5px;border-radius:3px;margin-right:3px">'+sname+':'+res.stores[sp]+'</span>';
+          }
+        }
+        var subCode = (p.subCodes && p.subCodes[si]) ? p.subCodes[si] : '';
+        allSpecs.push({
+          key: specKey, product: p.title, spec: s.spec, specQty: specQty,
+          image: pImg, storeName: pStoreName, code: pCode, subCode: subCode,
+          reservedTotal: reservedTotal, storeRes: storeRes, shared: shared, badges: badges
+        });
+      });
+    });
+    
+    // Hide fully-allocated specs from public pool
+    allSpecs = allSpecs.filter(function(s){ return s.shared > 0; });
+    
+    var totalPages = Math.ceil(allSpecs.length / pageSize);
     html += '<div id="invPoolList">';
-    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格数</th><th>规格</th><th>总库存</th><th>已分配</th><th>共享可售</th><th>操作</th></tr></thead><tbody>';
+    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格</th><th>库存</th><th>已分配</th><th>可售</th><th>操作</th></tr></thead><tbody>';
     
     var pageStart = (invPage-1) * pageSize;
-    var pageEnd = Math.min(pageStart + pageSize, invProducts.length);
-    invProducts.slice(pageStart, pageEnd).forEach(function(p, idx) {
-      var pt = p.title;
-      var totalQty = p.total_qty || 0;
-      var pSpecs = p.specs || [];
-      var pSpecBadge = pSpecs.length > 0 ? '<span style=\"font-size:10px;background:var(--cyan);color:#fff;padding:1px 6px;border-radius:10px\">'+pSpecs.length+' 个</span>' : '-';
-      var pSpecTip = pSpecs.map(function(s){return s.spec}).join(', ');
-      var res = RESERVATIONS && RESERVATIONS[pt] ? RESERVATIONS[pt] : null;
-      var reservedTotal = 0;
-      var storeRes = (res && res.stores && res.stores[pid]) ? res.stores[pid] : 0;
-      if (res && res.stores) {
-        for (var sp in res.stores) { reservedTotal += res.stores[sp]; }
-      }
-      var shared = Math.max(0, totalQty - reservedTotal);
-      
-      // Build reservation badges
-      var badges = '';
-      if (res && res.stores) {
-        for (var sp in res.stores) {
-          var sname = STORE_DATA[sp] ? STORE_DATA[sp].name : sp;
-          badges += '<span style="display:inline-block;font-size:9px;background:var(--bg);padding:1px 5px;border-radius:3px;margin-right:3px">'+sname+':'+res.stores[sp]+'</span>';
-        }
-      }
-      
-      var pImg = p.image || '';
-      var pCode = p.code || '';
-      var pSubs = p.subCodes ? p.subCodes.join(', ') : '';
-      var pStoreName = p.storeName || '';
-      html += '<tr class="inv-row" data-title="'+pt.replace(/"/g,'&quot;')+'" data-wh="'+pStoreName+'">'
-        + '<td style="text-align:center">'+(pImg?'<img src="'+pImg+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="this.style.display=\'none\'">':'')+'</td>'
-        + '<td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pt+'">'+pt+'</td>'
-        + '<td style="text-align:center">'+pSpecBadge+'</td>'
-        + '<td style="font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pSpecTip.replace(/"/g,'&quot;')+'">'+(pSpecs.length>0?pSpecs.slice(0,2).map(function(s){return s.spec}).join(' / ')+(pSpecs.length>2?'...':''):'-')+'</td>'
-        + '<td style="font-weight:600">'+totalQty+'</td>'
-        + '<td style="font-size:10px">'+badges+'</td>'
-        + '<td style="font-weight:600;color:'+(shared>0?'var(--green)':'var(--red)')+'">'+shared+'</td>'
+    var pageEnd = Math.min(pageStart + pageSize, allSpecs.length);
+    if (allSpecs.length === 0) {
+      html += '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">当前仓库无可分配规格</td></tr>';
+    }
+    allSpecs.slice(pageStart, pageEnd).forEach(function(row) {
+      var pt = row.product;
+      var specQty = row.specQty;
+      var escProduct = pt.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      var escSpec = row.spec.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      html += '<tr class="inv-row" data-title="'+pt.replace(/"/g,'&quot;')+'" data-spec="'+row.spec.replace(/"/g,'&quot;')+'" data-wh="'+row.storeName+'">'
+        + '<td style="text-align:center">'+(row.image?'<img src="'+row.image+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="this.style.display=\'none\'">':'')+'</td>'
+        + '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pt+'">'+pt+'</td>'
+        + '<td style="font-size:11px">'+row.spec+'</td>'
+        + '<td style="font-weight:600">'+specQty+'</td>'
+        + '<td style="font-size:10px">'+row.badges+'</td>'
+        + '<td style="font-weight:600;color:var(--green)">'+row.shared+'</td>'
         + '<td>'
-        + '<button onclick="openAssignModal(\''+pt.replace(/'/g,"\\'")+'\',\''+pid+'\','+totalQty+','+storeRes+')" style="padding:3px 10px;font-size:10px;background:var(--cyan);color:#fff;border:none;border-radius:4px;cursor:pointer">'+(storeRes>0?'修改':'+分配')+'</button>'
+        + '<button onclick="openAssignModal(\''+escProduct+'\',\''+escSpec+'\',\''+pid+'\','+specQty+','+row.storeRes+')" style="padding:3px 10px;font-size:10px;background:var(--cyan);color:#fff;border:none;border-radius:4px;cursor:pointer">'+(row.storeRes>0?'修改':'+分配')+'</button>'
         + '</td>'
         + '</tr>';
     });
@@ -512,7 +531,7 @@ function renderStore(pid){
     // Pagination controls
     html += '<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px;font-size:11px">';
     html += '<button onclick="invPage=Math.max(1,invPage-1);renderStore(currentStore)" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">◀ 上一页</button>';
-    html += '<span style="color:var(--muted)">第 <span id="invPageNum">1</span>/'+totalPages+' 页 · '+invProducts.length+' 个产品</span>';
+    html += '<span style="color:var(--muted)">第 <span id="invPageNum">1</span>/'+totalPages+' 页 · '+allSpecs.length+' 个规格</span>';
     html += '<button onclick="invPage=Math.min(totalPages,invPage+1);renderStore(currentStore)" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">下一页 ▶</button>';
     html += '</div></div>';
   }
@@ -521,7 +540,7 @@ function renderStore(pid){
   html += '<div id="assignModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:100;justify-content:center;align-items:center">'
     + '<div style="background:#fff;border-radius:12px;padding:24px;min-width:320px;max-width:400px;box-shadow:var(--shadow-xl)">'
     + '<h3 style="margin-bottom:12px">📦 分配保留数量</h3>'
-    + '<div id="assignProduct" style="font-size:13px;color:var(--muted);margin-bottom:8px;max-height:60px;overflow:hidden"></div>'
+    + '<div id="assignProduct" style="font-size:13px;color:var(--muted);margin-bottom:4px;max-height:60px;overflow:hidden"></div><div id="assignSpec" style="font-size:11px;color:var(--cyan);margin-bottom:8px"></div>'
     + '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">店铺: <span id="assignStore"></span></div>'
     + '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">总库存: <span id="assignTotal"></span> 件 | 共享可售: <span id="assignShared"></span> 件</div>'
     + '<label style="font-size:12px;font-weight:600">保留数量:</label>'
@@ -564,7 +583,7 @@ document.addEventListener('click', function(e){
 });
 
 // ── Inventory management functions ──
-var _assignPid = null, _assignProduct = null, _assignTotal = 0;
+var _assignPid = null, _assignProduct = null, _assignSpec = null, _assignTotal = 0;
 
 var _currentWarehouse = 'all';
 
@@ -582,19 +601,22 @@ function filterInventory() {
   var rows = document.querySelectorAll('.inv-row');
   rows.forEach(function(r) {
     var title = (r.dataset.title || '').toLowerCase();
+    var spec = (r.dataset.spec || '').toLowerCase();
     var wh = r.dataset.wh || '';
-    var titleMatch = !q || title.indexOf(q) >= 0;
+    var textMatch = !q || title.indexOf(q) >= 0 || spec.indexOf(q) >= 0;
     var whMatch = _currentWarehouse === 'all' || wh === _currentWarehouse;
-    r.style.display = (titleMatch && whMatch) ? '' : 'none';
+    r.style.display = (textMatch && whMatch) ? '' : 'none';
   });
 }
 
-function openAssignModal(product, pid, total, current) {
+function openAssignModal(product, spec, pid, total, current) {
   _assignProduct = product;
+  _assignSpec = spec;
+  document.getElementById('assignSpec').textContent = '规格: ' + spec;
   _assignPid = pid;
   _assignTotal = total;
   
-  document.getElementById('assignProduct').textContent = product;
+  document.getElementById('assignProduct').textContent = product + ' · ' + spec;
   document.getElementById('assignStore').textContent = STORE_DATA[pid] ? STORE_DATA[pid].name : pid;
   document.getElementById('assignTotal').textContent = total;
   
@@ -676,18 +698,19 @@ function closeAssignModal() {
 function saveReservation() {
   var qty = parseInt(document.getElementById('assignQty').value) || 0;
   
+  var specKey = _assignProduct + '||' + _assignSpec;
   if (!RESERVATIONS) RESERVATIONS = {};
-  if (!RESERVATIONS[_assignProduct]) {
-    RESERVATIONS[_assignProduct] = {title: _assignProduct, stores: {}};
+  if (!RESERVATIONS[specKey]) {
+    RESERVATIONS[specKey] = {product: _assignProduct, spec: _assignSpec, stores: {}};
   }
   
   if (qty <= 0) {
-    delete RESERVATIONS[_assignProduct].stores[_assignPid];
-    if (Object.keys(RESERVATIONS[_assignProduct].stores).length === 0) {
-      delete RESERVATIONS[_assignProduct];
+    delete RESERVATIONS[specKey].stores[_assignPid];
+    if (Object.keys(RESERVATIONS[specKey].stores).length === 0) {
+      delete RESERVATIONS[specKey];
     }
   } else {
-    RESERVATIONS[_assignProduct].stores[_assignPid] = qty;
+    RESERVATIONS[specKey].stores[_assignPid] = qty;
   }
   
   // Save to localStorage
@@ -699,11 +722,11 @@ function saveReservation() {
   renderStore(currentStore);  // Refresh
 }
 
-function removeReservation(product, pid) {
-  if (!RESERVATIONS || !RESERVATIONS[product]) return;
-  delete RESERVATIONS[product].stores[pid];
-  if (Object.keys(RESERVATIONS[product].stores).length === 0) {
-    delete RESERVATIONS[product];
+function removeReservation(specKey, pid) {
+  if (!RESERVATIONS || !RESERVATIONS[specKey]) return;
+  delete RESERVATIONS[specKey].stores[pid];
+  if (Object.keys(RESERVATIONS[specKey].stores).length === 0) {
+    delete RESERVATIONS[specKey];
   }
   try {
     localStorage.setItem('hermes_co_reservations', JSON.stringify(RESERVATIONS));
