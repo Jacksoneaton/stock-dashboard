@@ -100,6 +100,7 @@ var STORE_GROUPS = [
 
 var currentStore = null;
 var currentPeriod = 'today';
+var currentSubTab = 'orders';
 
 function buildSidebar(){
   var html = '<div class="brand"><span>◈</span> 公司看板</div>';
@@ -487,9 +488,11 @@ function renderStore(pid){
 function switchPeriod(p){
   currentPeriod = p;
   renderStore(currentStore);
+  restoreSubTab();
 }
 
 function toggleSubTab(el,id){
+  currentSubTab = id;
   document.querySelectorAll('.sub-tab').forEach(function(t){t.classList.remove('active')});
   el.classList.add('active');
   var ids = ['orders','ranking','status','refund','trends','inventory'];
@@ -577,6 +580,14 @@ function loadInventory(pid) {
     });
 }
 
+function restoreSubTab() {
+  if (currentSubTab === 'orders') return;  // default, no action needed
+  var tab = document.querySelector('.sub-tab[data-sub="' + currentSubTab + '"]');
+  if (tab) {
+    tab.click();
+  }
+}
+
 function closeAssignModal() {
   document.getElementById('assignModal').style.display = 'none';
 }
@@ -605,6 +616,7 @@ function saveReservation() {
   
   closeAssignModal();
   renderStore(currentStore);  // Refresh
+  restoreSubTab();
 }
 
 function removeReservation(product, pid) {
@@ -617,6 +629,7 @@ function removeReservation(product, pid) {
     localStorage.setItem('hermes_co_reservations', JSON.stringify(RESERVATIONS));
   } catch(e) {}
   renderStore(currentStore);
+  restoreSubTab();
 }
 
 // Restore reservations from localStorage on load
