@@ -321,12 +321,12 @@ function renderStore(pid){
     var totalRefund = rd.total_refund || 0;
     html += '<div id="sub-refund" style="display:'+(currentSubTab==='refund'?'block':'none')+'">';
     html += '<div class="kpi-row">'
-      + '<div class="kpi-card yellow refund-filter active" data-rf="all" onclick="filterRefund(this,\'all\')" style="cursor:pointer"><div class="lbl">退件总数</div><div class="val">'+totalRefund+'</div></div>'
-      + '<div class="kpi-card green refund-filter" data-rf="matched" onclick="filterRefund(this,\'matched\')" style="cursor:pointer"><div class="lbl">已匹配</div><div class="val">'+rd.matched+'</div></div>'
-      + '<div class="kpi-card red refund-filter" data-rf="unmatched" onclick="filterRefund(this,\'unmatched\')" style="cursor:pointer"><div class="lbl">未匹配</div><div class="val">'+rd.unmatched+'</div></div>'
+      + '<div class="kpi-card refund-filter active" data-rf="single" onclick="toggleSingleFilter(this)" style="cursor:pointer;background:'+(_refundSingle?'var(--cyan)':'var(--card-bg)')+';color:'+(_refundSingle?'#fff':'var(--text)')+'"><div class="lbl">🔍 单一商品</div><div class="val">'+rd.single_matched+'</div></div>'
       + '<div class="kpi-card blue refund-filter" data-rf="exact" onclick="filterRefund(this,\'exact\')" style="cursor:pointer"><div class="lbl">精确匹配</div><div class="val">'+rd.exact+'</div></div>'
       + '<div class="kpi-card purple refund-filter" data-rf="fuzzy" onclick="filterRefund(this,\'fuzzy\')" style="cursor:pointer"><div class="lbl">模糊匹配</div><div class="val">'+rd.fuzzy+'</div></div>'
-      + '<div class="kpi-card refund-filter" data-rf="single" onclick="toggleSingleFilter(this)" style="cursor:pointer;background:'+(_refundSingle?'var(--cyan)':'var(--card-bg)')+';color:'+(_refundSingle?'#fff':'var(--text)')+'"><div class="lbl">🔍 单一商品</div><div class="val">'+rd.single_matched+'</div></div>'
+      + '<div class="kpi-card yellow refund-filter" data-rf="all" onclick="filterRefund(this,\'all\')" style="cursor:pointer"><div class="lbl">退件总数</div><div class="val">'+totalRefund+'</div></div>'
+      + '<div class="kpi-card green refund-filter" data-rf="matched" onclick="filterRefund(this,\'matched\')" style="cursor:pointer"><div class="lbl">已匹配</div><div class="val">'+rd.matched+'</div></div>'
+      + '<div class="kpi-card red refund-filter" data-rf="unmatched" onclick="filterRefund(this,\'unmatched\')" style="cursor:pointer"><div class="lbl">未匹配</div><div class="val">'+rd.unmatched+'</div></div>'
       + '</div>';
     html += '<table class="data-table"><thead><tr>'
       + '<th>类型</th><th>退件商品</th><th>规格</th><th>Qty</th><th>状态</th>'
@@ -634,9 +634,9 @@ var _refundSingle = false;
 
 function filterRefund(el, type) {
   _refundFilter = type;
+  _refundSingle = false;
   document.querySelectorAll('.refund-filter').forEach(function(f){f.classList.remove('active')});
   el.classList.add('active');
-  // Add active style override
   document.querySelectorAll('.refund-filter').forEach(function(f){
     f.style.opacity = f.classList.contains('active') ? '1' : '0.5';
     f.style.transform = f.classList.contains('active') ? 'translateY(-1px)' : '';
@@ -646,6 +646,11 @@ function filterRefund(el, type) {
 
 function toggleSingleFilter(el) {
   _refundSingle = !_refundSingle;
+  if (_refundSingle) {
+    document.querySelectorAll('.refund-filter').forEach(function(f){f.classList.remove('active')});
+    el.classList.add('active');
+    _refundFilter = 'all';
+  }
   renderStore(currentStore);
 }
 
