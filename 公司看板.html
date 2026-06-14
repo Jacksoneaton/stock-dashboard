@@ -395,7 +395,7 @@ function renderStore(pid){
   if (reservedKeys.length === 0) {
     html += '<div class="empty-state" style="padding:20px">暂无保留产品，前往公共池分配</div>';
   } else {
-    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>编码</th><th>总库存</th><th>本店保留</th><th>操作</th></tr></thead><tbody>';
+    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格</th><th>编码</th><th>总库存</th><th>本店保留</th><th>操作</th></tr></thead><tbody>';
     reservedKeys.forEach(function(pt) {
       var r = storeReserved[pt];
       var inv = INVENTORY && INVENTORY.products_map ? INVENTORY.products_map[pt] : null;
@@ -404,9 +404,13 @@ function renderStore(pid){
       var invMap = (INVENTORY && INVENTORY.products_map && INVENTORY.products_map[pt]) ? INVENTORY.products_map[pt] : {};
       var invImg2 = invMap.image || '';
       var invCode = invMap.code || '';
+      var invSpecs = invMap.specs || [];
+      var invSpecTip = invSpecs.map(function(s){return s.spec+' ×'+s.qty}).join(' | ');
+      var invSpecBadge = invMap.specCount ? '<span style="font-size:10px;color:var(--cyan);cursor:help" title="'+invSpecTip.replace(/"/g,'&quot;')+'">'+invMap.specCount+'个</span>' : '-';
       html += '<tr>'
         + '<td style="text-align:center">'+(invImg?'<img src="'+invImg+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="this.style.display=\'none\'">':'')+'</td>'
         + '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pt+'">'+pt+'</td>'
+        + '<td style="text-align:center">'+invSpecBadge+'</td>'
         + '<td style="font-size:10px;font-family:monospace;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+invCode+'">'+invCode+'</td>'
         + '<td>'+totalQty+'</td>'
         + '<td style="font-weight:600;color:var(--cyan)">'+resQty+'</td>'
@@ -433,7 +437,7 @@ function renderStore(pid){
   } else {
     var invProducts = INVENTORY.products;
     html += '<div id="invPoolList">';
-    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>编码</th><th>总库存</th><th>已分配</th><th>共享可售</th><th>操作</th></tr></thead><tbody>';
+    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格</th><th>编码</th><th>总库存</th><th>已分配</th><th>共享可售</th><th>操作</th></tr></thead><tbody>';
     
     invProducts.forEach(function(p, idx) {
       var pt = p.title;
@@ -462,6 +466,7 @@ function renderStore(pid){
       html += '<tr class="inv-row" data-title="'+pt.replace(/"/g,'&quot;')+'" data-wh="'+pStoreName+'">'
         + '<td style="text-align:center">'+(pImg?'<img src="'+pImg+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="this.style.display=\'none\'">':'')+'</td>'
         + '<td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pt+'">'+pt+'</td>'
+        + '<td style="text-align:center">'+pSpecBadge+'</td>'
         + '<td style="font-size:10px;font-family:monospace;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pCode+' | 子编码: '+pSubs+'">'+pCode+'</td>'
         + '<td style="font-weight:600">'+totalQty+'</td>'
         + '<td style="font-size:10px">'+badges+'</td>'
