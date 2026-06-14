@@ -250,7 +250,7 @@ function renderStore(pid){
   
   // Orders table
   html += '<div id="sub-orders"><table class="data-table"><thead><tr>'
-    + '<th>订单号</th><th>商品</th><th>规格</th><th>数量</th><th>单价</th><th>状态</th><th>时间</th>'
+    + '<th>订单号</th><th style="text-align:center">商品</th><th>规格</th><th>数量</th><th>单价</th><th>状态</th><th>时间</th>'
     + '</tr></thead><tbody>';
   var recentOrders = filtered.slice(0,50);
   recentOrders.forEach(function(o){
@@ -282,7 +282,7 @@ function renderStore(pid){
   
   // Ranking table
   html += '<div id="sub-ranking" style="display:none"><table class="data-table"><thead><tr>'
-    + '<th>#</th><th>商品</th><th>规格</th><th>销量</th><th>营收</th>'
+    + '<th>#</th><th style="text-align:center">商品</th><th>规格</th><th>销量</th><th>营收</th>'
     + '</tr></thead><tbody>';
   topProducts.forEach(function(p,i){
     html += '<tr>'
@@ -323,7 +323,7 @@ function renderStore(pid){
       + '</div>';
     html += '<table class="data-table"><thead><tr>'
       + '<th>类型</th><th>退件商品</th><th>规格</th><th>Qty</th><th>状态</th>'
-      + '<th>匹配订单</th><th>规格编码</th><th>订单号</th>'
+      + '<th style="text-align:center">匹配订单</th><th>规格编码</th><th>订单号</th>'
       + '</tr></thead><tbody>';
     var topRefund = refundList.slice(0, 50);
     topRefund.forEach(function(m){
