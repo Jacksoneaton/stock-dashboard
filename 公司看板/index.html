@@ -434,8 +434,19 @@ function renderStore(pid){
   html += '<div class="sec-title" style="margin-top:24px">🌐 公共池</div>';
   html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center">';
   html += '<span style="font-size:11px;color:var(--muted)">仓库:</span>';
-  html += '<button class="inv-warehouse-btn active" data-wh="all" onclick="filterWarehouse(this,\'all\')" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:10px;cursor:pointer">全部</button>';
-  html += '<button class="inv-warehouse-btn" data-wh="QTW" onclick="filterWarehouse(this,\'QTW\')" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:10px;cursor:pointer">QTW仓库 (53)</button>';
+  html += '<button class="inv-warehouse-btn' + (_currentWarehouse === 'all' ? ' active' : '') + '" data-wh="all" onclick="filterWarehouse(this,\'all\')" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:10px;cursor:pointer">全部</button>';
+  if (INVENTORY && INVENTORY.products) {
+    var whCounts = {};
+    INVENTORY.products.forEach(function(p) {
+      var wh = p.storeName || '默认仓库';
+      whCounts[wh] = (whCounts[wh] || 0) + 1;
+    });
+    var whList = Object.keys(whCounts).sort(function(a,b){return whCounts[b]-whCounts[a]});
+    whList.forEach(function(wh) {
+      var isActive = _currentWarehouse === wh ? ' active' : '';
+      html += '<button class="inv-warehouse-btn'+isActive+'" data-wh="'+wh+'" onclick="filterWarehouse(this,\''+wh+'\')" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:10px;cursor:pointer">'+wh+' ('+whCounts[wh]+')</button>';
+    });
+  }
   html += '</div>';
   html += '<input type="text" id="invSearch" placeholder="搜索产品标题..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px" oninput="filterInventory()">';
   
@@ -445,7 +456,9 @@ function renderStore(pid){
     html += '<div id="invLoading" class="empty-state" style="padding:20px">⏳ 加载库存数据中...</div>';
     loadInventory(pid);
   } else {
-    var invProducts = INVENTORY.products;
+    var invProducts = INVENTORY.products.filter(function(p) {
+      return _currentWarehouse === 'all' || (p.storeName || '') === _currentWarehouse;
+    });
     var pageSize = 50;
     var totalPages = Math.ceil(invProducts.length / pageSize);
     var invPage = 1;
@@ -558,7 +571,8 @@ function filterWarehouse(btn, wh) {
   _currentWarehouse = wh;
   document.querySelectorAll('.inv-warehouse-btn').forEach(function(b){b.classList.remove('active')});
   btn.classList.add('active');
-  filterInventory();
+  invPage = 1;
+  renderStore(currentStore);
 }
 
 function filterInventory() {
