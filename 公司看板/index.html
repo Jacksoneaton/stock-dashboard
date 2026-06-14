@@ -429,7 +429,7 @@ function renderStore(pid){
         + '</tr>';
     });
     html += '</tbody></table>';
-    }  // close else from empty-check
+    }
   }
 
   // Public pool
@@ -467,7 +467,7 @@ function renderStore(pid){
   var zsActive = _showZeroStock ? ' active' : '';
   html += '<button class="inv-zero-btn'+zsActive+'" onclick="toggleZeroStock(this)" style="padding:3px 10px;font-size:10px;border:1px solid var(--red);background:'+(_showZeroStock?'var(--red)':'var(--card-bg)')+';color:'+(_showZeroStock?'#fff':'var(--red)')+';border-radius:10px;cursor:pointer;margin-left:4px">🔴 已售罄 ('+zeroCount+')</button>';
   html += '</div>';
-  html += '<input type="text" id="invSearch" placeholder="搜索产品标题..."' style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px" oninput="filterInventory()">';
+  html += '<input type="text" id="invSearch" placeholder="搜索产品标题..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px" oninput="filterInventory()">';
   
   var showInv = currentSubTab === 'inventory';
   if (!INVENTORY || !INVENTORY.products) {
