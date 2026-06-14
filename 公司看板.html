@@ -448,20 +448,21 @@ function renderStore(pid){
     });
   }
   // Count zero-stock specs for this warehouse filter
-  var zeroCount = 0, hasStockCount = 0;
-  invProducts.forEach(function(p) {
-    (p.specs || []).forEach(function(s) {
-      var specKey = p.title + '||' + s.spec;
-      var res = RESERVATIONS && RESERVATIONS[specKey] ? RESERVATIONS[specKey] : null;
-      var reservedTotal = 0;
-      if (res && res.stores) {
-        for (var sp in res.stores) { reservedTotal += res.stores[sp]; }
-      }
-      var shared = Math.max(0, (s.qty || 0) - reservedTotal);
-      if (shared === 0) zeroCount++;
-      else hasStockCount++;
+  var zeroCount = 0;
+  if (INVENTORY && INVENTORY.products) {
+    INVENTORY.products.forEach(function(p) {
+      (p.specs || []).forEach(function(s) {
+        var specKey = p.title + '||' + s.spec;
+        var res = RESERVATIONS && RESERVATIONS[specKey] ? RESERVATIONS[specKey] : null;
+        var reservedTotal = 0;
+        if (res && res.stores) {
+          for (var sp in res.stores) { reservedTotal += res.stores[sp]; }
+        }
+        var shared = Math.max(0, (s.qty || 0) - reservedTotal);
+        if (shared === 0) zeroCount++;
+      });
     });
-  });
+  }
   var zsActive = _showZeroStock ? ' active' : '';
   html += '<button class="inv-zero-btn'+zsActive+'" onclick="toggleZeroStock(this)" style="padding:3px 10px;font-size:10px;border:1px solid var(--red);background:'+(_showZeroStock?'var(--red)':'var(--card-bg)')+';color:'+(_showZeroStock?'#fff':'var(--red)')+';border-radius:10px;cursor:pointer;margin-left:4px">🔴 已售罄 ('+zeroCount+')</button>';
   html += '</div>';
