@@ -239,22 +239,22 @@ function renderStore(pid){
   var hasRefund = REFUND && REFUND.stores && REFUND.stores[pid];
   var hasTrends = YOUYING_STORES && YOUYING_STORES[pid];
   html += '<div class="sub-tabs" id="subTabs">'
-    + '<span class="sub-tab active" data-sub="orders">📋 订单列表</span>'
-    + '<span class="sub-tab" data-sub="ranking">🔥 热销排行</span>'
-    + '<span class="sub-tab" data-sub="status">📊 状态分布</span>';
+    + '<span class="sub-tab'+(currentSubTab==='orders'?' active':'')+'" data-sub="orders">📋 订单列表</span>'
+    + '<span class="sub-tab'+(currentSubTab==='ranking'?' active':'')+'" data-sub="ranking">🔥 热销排行</span>'
+    + '<span class="sub-tab'+(currentSubTab==='status'?' active':'')+'" data-sub="status">📊 状态分布</span>';
   if (hasTrends) {
     var yw = YOUYING_STORES[pid];
-    html += '<span class="sub-tab" data-sub="trends">📈 市场趋势 <span style="font-size:9px;color:var(--cyan)">'+(Object.keys(yw.keywords||{}).length||0)+'词</span></span>';
+    html += '<span class="sub-tab'+(currentSubTab==='trends'?' active':'')+'" data-sub="trends">📈 市场趋势 <span style="font-size:9px;color:var(--cyan)">'+(Object.keys(yw.keywords||{}).length||0)+'词</span></span>';
   }
   if (hasRefund) {
     var rd = REFUND.stores[pid];
-    html += '<span class="sub-tab" data-sub="refund">📋 退件提醒 <span style="font-size:9px;background:var(--red);color:#fff;padding:1px 5px;border-radius:8px">'+rd.matched+'</span></span>';
+    html += '<span class="sub-tab'+(currentSubTab==='refund'?' active':'')+'" data-sub="refund">📋 退件提醒 <span style="font-size:9px;background:var(--red);color:#fff;padding:1px 5px;border-radius:8px">'+rd.matched+'</span></span>';
   }
-  html += '<span class="sub-tab" data-sub="inventory">📦 库存管理</span>';
+  html += '<span class="sub-tab'+(currentSubTab==='inventory'?' active':'')+'" data-sub="inventory">📦 库存管理</span>';
   html += '</div>';
   
   // Orders table
-  html += '<div id="sub-orders"><table class="data-table"><thead><tr>'
+  html += '<div id="sub-orders" style="display:'+(currentSubTab==='orders'?'block':'none')+'"><table class="data-table"><thead><tr>'
     + '<th>订单号</th><th style="text-align:center">商品</th><th>规格</th><th>数量</th><th>单价</th><th>状态</th><th>时间</th>'
     + '</tr></thead><tbody>';
   var recentOrders = filtered.slice(0,50);
@@ -286,7 +286,7 @@ function renderStore(pid){
   html += '</tbody></table></div>';
   
   // Ranking table
-  html += '<div id="sub-ranking" style="display:none"><table class="data-table"><thead><tr>'
+  html += '<div id="sub-ranking" style="display:'+(currentSubTab==='ranking'?'block':'none')+'"><table class="data-table"><thead><tr>'
     + '<th>#</th><th style="text-align:center">商品</th><th>规格</th><th>销量</th><th>营收</th>'
     + '</tr></thead><tbody>';
   topProducts.forEach(function(p,i){
@@ -304,7 +304,7 @@ function renderStore(pid){
   var allStatuses = orders.map(function(o){return o.orderStatus});
   var statusCount = {};
   allStatuses.forEach(function(s){statusCount[s]=(statusCount[s]||0)+1});
-  html += '<div id="sub-status" style="display:none">';
+  html += '<div id="sub-status" style="display:'+(currentSubTab==='status'?'block':'none')+'">';
   html += '<div class="kpi-row">'
     + '<div class="kpi-card yellow"><div class="lbl">待发货</div><div class="val">'+(statusCount['READY_TO_SHIP']||0)+'</div></div>'
     + '<div class="kpi-card green"><div class="lbl">已发货</div><div class="val">'+(statusCount['SHIPPED']||0)+'</div></div>'
@@ -318,7 +318,7 @@ function renderStore(pid){
     var rd = REFUND.stores[pid];
     var refundList = rd.matched_list || [];
     var totalRefund = rd.total_refund || 0;
-    html += '<div id="sub-refund" style="display:none">';
+    html += '<div id="sub-refund" style="display:'+(currentSubTab==='refund'?'block':'none')+'">';
     html += '<div class="kpi-row">'
       + '<div class="kpi-card yellow"><div class="lbl">退件总数</div><div class="val">'+totalRefund+'</div></div>'
       + '<div class="kpi-card green"><div class="lbl">已匹配</div><div class="val">'+rd.matched+'</div></div>'
@@ -356,7 +356,7 @@ function renderStore(pid){
     var topN = yentries.slice(0, 20);
     var maxVol = topN.length>0 ? (topN[0].search_volume||1) : 1;
     
-    html += '<div id="sub-trends" style="display:none">';
+    html += '<div id="sub-trends" style="display:'+(currentSubTab==='trends'?'block':'none')+'">';
     html += '<div class="kpi-row">'
       + '<div class="kpi-card blue"><div class="lbl">关键词数</div><div class="val">'+yentries.length+'</div></div>'
       + '<div class="kpi-card green"><div class="lbl">最高搜索量</div><div class="val">'+(topN.length>0?topN[0].search_volume.toLocaleString():'-')+'</div></div>'
@@ -387,7 +387,7 @@ function renderStore(pid){
     }
   }
   
-  html += '<div id="sub-inventory" style="display:none">';
+  html += '<div id="sub-inventory" style="display:'+(currentSubTab==='inventory'?'block':'none')+'">';
   
   // This store's reserved products
   var reservedKeys = Object.keys(storeReserved);
@@ -425,6 +425,7 @@ function renderStore(pid){
   html += '</div>';
   html += '<input type="text" id="invSearch" placeholder="搜索产品标题..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px" oninput="filterInventory()">';
   
+  var showInv = currentSubTab === 'inventory';
   if (!INVENTORY || !INVENTORY.products) {
     // Lazy load inventory from separate JSON
     html += '<div id="invLoading" class="empty-state" style="padding:20px">⏳ 加载库存数据中...</div>';
@@ -495,7 +496,6 @@ function renderStore(pid){
 function switchPeriod(p){
   currentPeriod = p;
   renderStore(currentStore);
-  restoreSubTab();
 }
 
 function toggleSubTab(el,id){
@@ -599,14 +599,6 @@ function loadInventory(pid) {
     });
 }
 
-function restoreSubTab() {
-  if (currentSubTab === 'orders') return;  // default, no action needed
-  var tab = document.querySelector('.sub-tab[data-sub="' + currentSubTab + '"]');
-  if (tab) {
-    tab.click();
-  }
-}
-
 function closeAssignModal() {
   document.getElementById('assignModal').style.display = 'none';
 }
@@ -635,7 +627,6 @@ function saveReservation() {
   
   closeAssignModal();
   renderStore(currentStore);  // Refresh
-  restoreSubTab();
 }
 
 function removeReservation(product, pid) {
@@ -648,7 +639,6 @@ function removeReservation(product, pid) {
     localStorage.setItem('hermes_co_reservations', JSON.stringify(RESERVATIONS));
   } catch(e) {}
   renderStore(currentStore);
-  restoreSubTab();
 }
 
 // Restore reservations from localStorage on load
