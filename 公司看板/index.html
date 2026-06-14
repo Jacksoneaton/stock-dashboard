@@ -522,6 +522,13 @@ function renderStore(pid){
       allSpecs = allSpecs.filter(function(s){ return s.shared > 0; });
     }
     
+    // Calculate batch-claimable total per product (sum of shared across all specs)
+    var productTotals = {};
+    allSpecs.forEach(function(s) {
+      if (!productTotals[s.product]) productTotals[s.product] = { total: 0, image: s.image, storeName: s.storeName };
+      productTotals[s.product].total += s.shared;
+    });
+    
     var totalPages = Math.ceil(allSpecs.length / pageSize);
     html += '<div id="invPoolList">';
     html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格</th><th>库存</th><th>已分配</th><th>可售</th><th>操作</th></tr></thead><tbody>';
@@ -534,11 +541,18 @@ function renderStore(pid){
     if (allSpecs.length === 0) {
       html += '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">' + (_showZeroStock ? '✅ 所有规格均有可售库存' : '当前仓库无可分配规格') + '</td></tr>';
     } else {
+    var seenProducts = {};
     allSpecs.slice(pageStart, pageEnd).forEach(function(row) {
       var pt = row.product;
       var specQty = row.specQty;
       var escProduct = pt.replace(/'/g,"\\'").replace(/"/g,'&quot;');
       var escSpec = row.spec.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      var isFirstOfProduct = !seenProducts[pt];
+      seenProducts[pt] = true;
+      var batchBtn = '';
+      if (isFirstOfProduct && !_showZeroStock && productTotals[pt] && productTotals[pt].total > 0) {
+        batchBtn = ' <button onclick="batchClaimAll(\''+escProduct+'\',\''+pid+'\')" style="padding:3px 8px;font-size:10px;background:var(--green);color:#fff;border:none;border-radius:4px;cursor:pointer" title="一键认领该产品所有可售规格（共'+productTotals[pt].total+'件）">📦整批</button>';
+      }
       html += '<tr class="inv-row" data-title="'+pt.replace(/"/g,'&quot;')+'" data-spec="'+row.spec.replace(/"/g,'&quot;')+'" data-wh="'+row.storeName+'">'
         + '<td style="text-align:center">'+(row.image?'<img src="'+row.image+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="this.style.display=\'none\'">':'')+'</td>'
         + '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pt+'">'+pt+'</td>'
@@ -548,6 +562,7 @@ function renderStore(pid){
         + '<td style="font-weight:600;color:var(--green)">'+row.shared+'</td>'
         + '<td>'
         + '<button onclick="openAssignModal(\''+escProduct+'\',\''+escSpec+'\',\''+pid+'\','+specQty+','+row.storeRes+')" style="padding:3px 10px;font-size:10px;background:var(--cyan);color:#fff;border:none;border-radius:4px;cursor:pointer">'+(row.storeRes>0?'修改':'+分配')+'</button>'
+        + batchBtn
         + '</td>'
         + '</tr>';
     });
@@ -761,6 +776,46 @@ function saveReservation() {
   
   closeAssignModal();
   renderStore(currentStore);  // Refresh
+}
+
+function batchClaimAll(product, pid) {
+  // Reserve all shared (claimable) quantity for every spec of this product
+  if (!INVENTORY || !INVENTORY.products) return;
+  
+  if (!RESERVATIONS) RESERVATIONS = {};
+  
+  var claimed = 0;
+  INVENTORY.products.forEach(function(p) {
+    if (p.title !== product) return;
+    (p.specs || []).forEach(function(s) {
+      var specKey = p.title + '||' + s.spec;
+      var specQty = s.qty || 0;
+      
+      // Calculate shared (total - all other stores' reservations)
+      var res = RESERVATIONS[specKey];
+      var reservedTotal = 0;
+      if (res && res.stores) {
+        for (var sp in res.stores) { reservedTotal += res.stores[sp]; }
+      }
+      var shared = Math.max(0, specQty - reservedTotal);
+      if (shared <= 0) return;
+      
+      // Reserve
+      if (!RESERVATIONS[specKey]) {
+        RESERVATIONS[specKey] = {product: p.title, spec: s.spec, stores: {}};
+      }
+      RESERVATIONS[specKey].stores[pid] = shared;
+      claimed += shared;
+    });
+  });
+  
+  if (claimed > 0) {
+    try {
+      localStorage.setItem('hermes_co_reservations', JSON.stringify(RESERVATIONS));
+    } catch(e) {}
+  }
+  
+  renderStore(currentStore);
 }
 
 function removeReservation(specKey, pid) {
