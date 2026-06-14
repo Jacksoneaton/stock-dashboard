@@ -353,13 +353,7 @@ function renderStore(pid){
         + '<td style="font-size:10px;font-family:monospace">'+(m.order.orderSn||'')+'</td>'
         + '</tr>';
     });
-    html += '</tbody></table>';
-    // Pagination controls
-    html += '<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px;font-size:11px">';
-    html += '<button onclick="invPage=Math.max(1,invPage-1);renderStore(currentStore)" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">◀ 上一页</button>';
-    html += '<span style="color:var(--muted)">第 <span id="invPageNum">1</span>/'+totalPages+' 页 · '+invProducts.length+' 个产品</span>';
-    html += '<button onclick="invPage=Math.min(totalPages,invPage+1);renderStore(currentStore)" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">下一页 ▶</button>';
-    html += '</div></div>';
+    html += '</tbody></table></div>';
   }
   
   // Trends section (per-store category keywords)
