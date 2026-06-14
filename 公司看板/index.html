@@ -533,10 +533,8 @@ function renderStore(pid){
     var pageStart = (invPage-1) * pageSize;
     var pageEnd = Math.min(pageStart + pageSize, allSpecs.length);
     if (allSpecs.length === 0) {
-      if (allSpecs.length === 0) {
       html += '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">' + (_showZeroStock ? '✅ 所有规格均有可售库存' : '当前仓库无可分配规格') + '</td></tr>';
     } else {
-    }
     allSpecs.slice(pageStart, pageEnd).forEach(function(row) {
       var pt = row.product;
       var specQty = row.specQty;
@@ -554,8 +552,8 @@ function renderStore(pid){
         + '</td>'
         + '</tr>';
     });
+    }
     html += '</tbody></table>';
-    // Pagination controls
     html += '<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px;font-size:11px">';
     html += '<button onclick="invPage=Math.max(1,invPage-1);renderStore(currentStore)" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">◀ 上一页</button>';
     html += '<span style="color:var(--muted)">第 <span id="invPageNum">1</span>/'+totalPages+' 页 · '+allSpecs.length+' 个规格</span>';
