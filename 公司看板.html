@@ -429,6 +429,7 @@ function renderStore(pid){
         + '</tr>';
     });
     html += '</tbody></table>';
+    }  // close else from empty-check
   }
 
   // Public pool
@@ -448,8 +449,25 @@ function renderStore(pid){
       html += '<button class="inv-warehouse-btn'+isActive+'" data-wh="'+wh+'" onclick="filterWarehouse(this,\''+wh+'\')" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:10px;cursor:pointer">'+wh+' ('+whCounts[wh]+')</button>';
     });
   }
+  // Count zero-stock specs for this warehouse filter
+  var zeroCount = 0, hasStockCount = 0;
+  invProducts.forEach(function(p) {
+    (p.specs || []).forEach(function(s) {
+      var specKey = p.title + '||' + s.spec;
+      var res = RESERVATIONS && RESERVATIONS[specKey] ? RESERVATIONS[specKey] : null;
+      var reservedTotal = 0;
+      if (res && res.stores) {
+        for (var sp in res.stores) { reservedTotal += res.stores[sp]; }
+      }
+      var shared = Math.max(0, (s.qty || 0) - reservedTotal);
+      if (shared === 0) zeroCount++;
+      else hasStockCount++;
+    });
+  });
+  var zsActive = _showZeroStock ? ' active' : '';
+  html += '<button class="inv-zero-btn'+zsActive+'" onclick="toggleZeroStock(this)" style="padding:3px 10px;font-size:10px;border:1px solid var(--red);background:'+(_showZeroStock?'var(--red)':'var(--card-bg)')+';color:'+(_showZeroStock?'#fff':'var(--red)')+';border-radius:10px;cursor:pointer;margin-left:4px">🔴 已分配完 ('+zeroCount+')</button>';
   html += '</div>';
-  html += '<input type="text" id="invSearch" placeholder="搜索产品标题..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px" oninput="filterInventory()">';
+  html += '<input type="text" id="invSearch" placeholder="搜索产品标题..."' style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px" oninput="filterInventory()">';
   
   var showInv = currentSubTab === 'inventory';
   if (!INVENTORY || !INVENTORY.products) {
@@ -498,17 +516,26 @@ function renderStore(pid){
       });
     });
     
-    // Hide fully-allocated specs from public pool
-    allSpecs = allSpecs.filter(function(s){ return s.shared > 0; });
+    // Show/hide based on _showZeroStock
+    if (_showZeroStock) {
+      allSpecs = allSpecs.filter(function(s){ return s.shared === 0; });
+    } else {
+      allSpecs = allSpecs.filter(function(s){ return s.shared > 0; });
+    }
     
     var totalPages = Math.ceil(allSpecs.length / pageSize);
     html += '<div id="invPoolList">';
     html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格</th><th>库存</th><th>已分配</th><th>可售</th><th>操作</th></tr></thead><tbody>';
+    if (_showZeroStock) {
+      html = html.replace('<tbody>', '<tbody style="background:rgba(255,0,0,0.03)">');
+    }
     
     var pageStart = (invPage-1) * pageSize;
     var pageEnd = Math.min(pageStart + pageSize, allSpecs.length);
     if (allSpecs.length === 0) {
-      html += '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">当前仓库无可分配规格</td></tr>';
+      if (allSpecs.length === 0) {
+      html += '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">' + (_showZeroStock ? '✅ 所有规格均有可售库存' : '当前仓库无可分配规格') + '</td></tr>';
+    } else {
     }
     allSpecs.slice(pageStart, pageEnd).forEach(function(row) {
       var pt = row.product;
@@ -586,10 +613,27 @@ document.addEventListener('click', function(e){
 var _assignPid = null, _assignProduct = null, _assignSpec = null, _assignTotal = 0;
 
 var _currentWarehouse = 'all';
+var _showZeroStock = false;
+
+function toggleZeroStock(btn) {
+  _showZeroStock = !_showZeroStock;
+  if (_showZeroStock) {
+    document.querySelectorAll('.inv-warehouse-btn').forEach(function(b){b.classList.remove('active')});
+    document.querySelectorAll('.inv-zero-btn').forEach(function(b){b.classList.add('active'); b.style.background='var(--red)'; b.style.color='#fff';});
+  } else {
+    document.querySelectorAll('.inv-zero-btn').forEach(function(b){b.classList.remove('active'); b.style.background='var(--card-bg)'; b.style.color='var(--red)';});
+    document.querySelector('.inv-warehouse-btn[data-wh="all"]').classList.add('active');
+    _currentWarehouse = 'all';
+  }
+  invPage = 1;
+  renderStore(currentStore);
+}
 
 function filterWarehouse(btn, wh) {
+  _showZeroStock = false;
   _currentWarehouse = wh;
   document.querySelectorAll('.inv-warehouse-btn').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.inv-zero-btn').forEach(function(b){b.classList.remove('active'); b.style.background='var(--card-bg)'; b.style.color='var(--red)';});
   btn.classList.add('active');
   invPage = 1;
   renderStore(currentStore);
