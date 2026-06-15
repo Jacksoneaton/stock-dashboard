@@ -903,10 +903,6 @@ footer a{color:var(--dim);text-decoration:none}
     <div class="search-box" style="margin-bottom:10px"><input type="text" id="replenSearch" placeholder="搜索 SKU / 商品名称 / 规格..." oninput="filterReplen()"></div>
     <div id="replenTable"></div>
     <div class="total-bar" id="replenTotal"></div>
-    <div class="suggest-section" id="suggestSection" style="display:none">
-      <div class="suggest-title">💡 建议新增囤货规格</div>
-      <div id="suggestContent"></div>
-    </div>
     <div class="suggest-section" id="partialSection" style="display:none">
       <div class="suggest-title" style="color:var(--yellow)">📦 已建QTW但缺规格（30天销量）</div>
       <div id="partialContent"></div>
@@ -2041,7 +2037,6 @@ function renderReplenTab(){
     '<div class="tier-card c"><div class="tier-label">C 级 · 慢销</div><div class="tier-count">'+c.length+'</div><div class="tier-rule"><1件/天 → 备7天 · 预警2天</div></div>';
   document.getElementById('replenSearch').value='';
   renderReplenTable(items);
-  renderSuggested();
   renderPending();
 }
 function filterReplen(){
@@ -2143,34 +2138,6 @@ function sparkSVG(keyword, color){
     '</svg>'+
     '<div style="text-align:center;font-size:9px;color:'+trendColor+';font-weight:600">'+trendLabel+' (30天)</div>'+
   '</div>';
-}
-
-function renderSuggested(){
-  var el=document.getElementById('suggestSection');
-  var content=document.getElementById('suggestContent');
-  if(!SUGGESTED||!SUGGESTED.length){
-    el.style.display='none';
-    return;
-  }
-  el.style.display='block';
-  var rows=SUGGESTED.map(function(s){
-    // 兼容两种格式：新格式(spec_name/daily_avg/suggest_qty) + 旧格式(itemName/daily/suggest)
-    var spec=s.spec_name||'';
-    if(!spec&&s.variants&&s.variants.length) spec=s.variants[0].modelName||'';
-    spec=spec.substring(0,25);
-    var id=s.itemId||s.model_id||s.id||'';
-    var daily=s.daily||s.daily_avg||0;
-    var suggestQty=s.suggest_qty||s.suggest||0;
-    var pic=s.itemPic||'';
-    var picHtml=pic ? '<img src="'+pic+'" style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin-right:12px;flex-shrink:0;background:#f0f4ff" onerror="this.style.display=\'none\'">' : '';
-    var specHtml=spec ? '<span class="sug-spec">'+spec+'</span>' : '';
-    return '<tr>'+
-      '<td style="display:flex;align-items:center">'+picHtml+'<div>'+specHtml+'<span class="sug-mid">#'+id+'</span></div></td>'+
-      '<td style="text-align:center"><span class="sug-qty">'+daily.toFixed(2)+'</span> /天</td>'+
-      '<td style="text-align:center">'+suggestQty+' 件</td>'+
-    '</tr>';
-  }).join('');
-  content.innerHTML='<table class="suggest-table"><thead><tr><th>规格</th><th style="text-align:center">日均</th><th style="text-align:center">建议试囤</th></tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
 function renderPending(){
