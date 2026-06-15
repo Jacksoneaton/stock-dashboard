@@ -702,7 +702,28 @@ function renderStore(pid){
     + '<div style="display:flex;gap:8px;justify-content:flex-end">'
     + '<button onclick="closeAssignModal()" style="padding:6px 16px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-size:12px">取消</button>'
     + '<button onclick="saveReservation()" style="padding:6px 16px;background:var(--cyan);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">保存</button>'
-    + '</div></div></div>';
+  html += '</div></div>';  // close assign modal
+  
+  // Reservation change log
+  html += '<div style="margin-top:24px">';
+  html += '<div class="sec-title">📝 保留变更日志 ('+_reservationLog.length+'条)</div>';
+  html += '<div id="resLogBody">';
+  if (_reservationLog.length === 0) {
+    html += '<div class="empty-state" style="padding:12px">暂无变更记录</div>';
+  } else {
+    html += '<table class="data-table"><thead><tr><th>时间</th><th>店铺</th><th>产品</th><th>规格</th><th>旧→新</th></tr></thead><tbody>';
+    _reservationLog.slice(0, 50).forEach(function(entry) {
+      html += '<tr>'
+        + '<td style="font-size:10px;white-space:nowrap">' + entry.time + '</td>'
+        + '<td style="font-size:11px">' + entry.store + '</td>'
+        + '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + (entry.product||'').replace(/"/g,'&quot;') + '">' + (entry.product||'') + '</td>'
+        + '<td style="font-size:10px;color:var(--muted)">' + (entry.spec||'') + '</td>'
+        + '<td style="font-size:11px;font-family:monospace">' + (entry.oldQty||0) + ' → <span style="font-weight:600;color:' + (entry.newQty>entry.oldQty?'var(--green)':'var(--red)') + '">' + (entry.newQty||0) + '</span></td>'
+        + '</tr>';
+    });
+    html += '</tbody></table>';
+  }
+  html += '</div></div>';
   
   html += '</div>';  // close sub-inventory
 
@@ -914,6 +935,27 @@ function closeAssignModal() {
   document.getElementById('assignModal').style.display = 'none';
 }
 
+// ── Reservation change log ──
+var _reservationLog = [];
+try {
+  var savedLog = localStorage.getItem('hermes_co_reservation_log');
+  if (savedLog) _reservationLog = JSON.parse(savedLog);
+} catch(e) { _reservationLog = []; }
+
+function logReservationChange(storePid, product, spec, oldQty, newQty) {
+  var now = new Date();
+  var ts = now.getFullYear() + '-' + 
+    String(now.getMonth()+1).padStart(2,'0') + '-' + 
+    String(now.getDate()).padStart(2,'0') + ' ' +
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0');
+  var storeName = (STORE_DATA[storePid] && STORE_DATA[storePid].name) || storePid;
+  _reservationLog.unshift({time: ts, store: storeName, product: product, spec: spec, oldQty: oldQty, newQty: newQty});
+  if (_reservationLog.length > 200) _reservationLog = _reservationLog.slice(0, 200);
+  try { localStorage.setItem('hermes_co_reservation_log', JSON.stringify(_reservationLog)); } catch(e) {}
+}
+
 function saveReservation() {
   var qty = parseInt(document.getElementById('assignQty').value) || 0;
   
@@ -939,6 +981,8 @@ function saveReservation() {
     RESERVATIONS[specKey] = {product: _assignProduct, spec: _assignSpec, stores: {}};
   }
   
+  var oldQty = (RESERVATIONS[specKey].stores && RESERVATIONS[specKey].stores[_assignPid]) || 0;
+  
   if (qty <= 0) {
     delete RESERVATIONS[specKey].stores[_assignPid];
     if (Object.keys(RESERVATIONS[specKey].stores).length === 0) {
@@ -953,6 +997,7 @@ function saveReservation() {
     localStorage.setItem('hermes_co_reservations', JSON.stringify(RESERVATIONS));
   } catch(e) {}
   saveReservationsToGitHub();
+  logReservationChange(_assignPid, _assignProduct, _assignSpec, oldQty, qty);
   
   closeAssignModal();
   renderStore(currentStore);
@@ -1015,10 +1060,14 @@ function batchClaimAll(product, pid) {
 
 function removeReservation(specKey, pid) {
   if (!RESERVATIONS || !RESERVATIONS[specKey]) return;
+  var oldQty = (RESERVATIONS[specKey].stores && RESERVATIONS[specKey].stores[pid]) || 0;
+  var product = RESERVATIONS[specKey].product || specKey.split('||')[0];
+  var spec = RESERVATIONS[specKey].spec || specKey.split('||').slice(1).join('||');
   delete RESERVATIONS[specKey].stores[pid];
   if (Object.keys(RESERVATIONS[specKey].stores).length === 0) {
     delete RESERVATIONS[specKey];
   }
+  logReservationChange(pid, product, spec, oldQty, 0);
   try {
     localStorage.setItem('hermes_co_reservations', JSON.stringify(RESERVATIONS));
   } catch(e) {}
