@@ -937,19 +937,19 @@ try {
   }
 } catch(e) {}
 
-// Init: load GitHub reservations, then build UI
-// Always start on orders tab (prevents blank inventory from hiding orders on reload)
-loadReservationsFromGitHub(function() {
-  currentSubTab = 'orders';
-  buildSidebar();
-  var firstPid = null;
-  STORE_GROUPS.forEach(function(g){
-    g.shops.forEach(function(pid){
-      if(!firstPid && STORE_DATA[pid]) firstPid = pid;
-    });
+// Init: render immediately, then sync reservations asynchronously
+currentSubTab = 'orders';
+buildSidebar();
+var firstPid = null;
+STORE_GROUPS.forEach(function(g){
+  g.shops.forEach(function(pid){
+    if(!firstPid && STORE_DATA[pid]) firstPid = pid;
   });
-  if(firstPid) selectStore(firstPid);
 });
+if(firstPid) selectStore(firstPid);
+
+// Sync reservations from GitHub in background (doesn't block rendering)
+loadReservationsFromGitHub();
 </script>
 </body>
 </html>
