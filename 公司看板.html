@@ -78,11 +78,42 @@ tr.over-alloc:hover{background:rgba(239,68,68,.12)!important}
   .kpi-card{padding:12px 14px}
   .kpi-card .val{font-size:20px}
 }
+/* ── 全局分配视图 ── */
+.view-switch{display:flex;gap:8px;margin-bottom:20px}
+.view-switch .vs-btn{padding:7px 20px;border-radius:var(--radius-full);font-size:13px;cursor:pointer;background:var(--card-bg);border:1px solid var(--border);color:var(--muted);transition:.15s;font-weight:500}
+.view-switch .vs-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.view-switch .vs-btn.active{background:var(--cyan);color:#fff;border-color:var(--cyan);box-shadow:0 2px 8px rgba(99,102,241,.25)}
+.global-matrix-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.global-matrix-wrap table{border-collapse:collapse;font-size:11px;background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow-sm);width:max-content;min-width:100%}
+.global-matrix-wrap th{background:var(--bg);padding:8px 6px;text-align:center;font-weight:600;color:var(--muted);font-size:10px;position:sticky;top:0;z-index:1;white-space:nowrap}
+.global-matrix-wrap th:first-child{text-align:left;min-width:200px;position:sticky;left:0;z-index:2;background:var(--bg)}
+.global-matrix-wrap td{padding:6px 4px;text-align:center;border-bottom:1px solid var(--border);cursor:pointer;transition:.1s;min-width:44px;font-size:11px;user-select:none}
+.global-matrix-wrap td:first-child{text-align:left;font-size:10px;white-space:nowrap;position:sticky;left:0;background:var(--card-bg);z-index:1;font-weight:500;cursor:default}
+.global-matrix-wrap tr:hover td{background:rgba(99,102,241,.04)}
+.global-matrix-wrap tr:hover td:first-child{background:rgba(99,102,241,.04)}
+.global-matrix-wrap .cell-has{color:var(--cyan);font-weight:600}
+.global-matrix-wrap .cell-none{color:var(--dim)}
+.global-matrix-wrap .cell-has:hover{background:rgba(99,102,241,.15)!important;border-radius:3px}
+.global-matrix-wrap .cell-none:hover{background:rgba(99,102,241,.06)!important;border-radius:3px;color:var(--cyan)}
+.global-matrix-wrap .row-total{font-weight:700;color:var(--text);cursor:default}
+.global-search{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px}
+.global-pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px;font-size:11px}
+.global-pagination button{padding:4px 12px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer;font-size:11px}
+.global-pagination button:disabled{opacity:.4;cursor:default}
+@media(max-width:768px){
+  .global-matrix-wrap th:first-child{min-width:140px}
+  .global-matrix-wrap td{min-width:32px;font-size:10px;padding:4px 2px}
+  .view-switch .vs-btn{padding:6px 14px;font-size:12px}
+}
 </style>
 </head>
 <body>
 <nav class="sidebar" id="sidebar"></nav>
 <main class="main" id="main">
+  <div class="view-switch">
+    <button class="vs-btn active" data-view="store">🏪 单店视图</button>
+    <button class="vs-btn" data-view="global">📊 全局视图</button>
+  </div>
   <div class="empty-state">👈 选择一家店铺查看数据</div>
 </main>
 
@@ -158,6 +189,7 @@ var STORE_GROUPS = [
 var currentStore = null;
 var currentPeriod = 'today';
 var currentSubTab = 'orders';
+var _currentView = 'store';  // 'store' | 'global'
 
 function buildSidebar(){
   var html = '<div class="brand"><span>◈</span> 公司看板</div>';
@@ -179,6 +211,7 @@ function buildSidebar(){
 }
 
 function selectStore(pid){
+  _currentView = 'store';
   currentStore = pid;
   currentPeriod = 'today';
   document.querySelectorAll('.sidebar .shop').forEach(function(el){el.classList.remove('active')});
@@ -235,7 +268,11 @@ function renderStore(pid){
   try {
   var s = STORE_DATA[pid];
   if(!s){
-    document.getElementById('main').innerHTML = '<div class="empty-state">📭 暂无数据<br><small>该店铺尚未接入</small></div>';
+    document.getElementById('main').innerHTML = '<div class="view-switch">'
+    + '<button class="vs-btn active" data-view="store">🏪 单店视图</button>'
+    + '<button class="vs-btn" data-view="global">📊 全局视图</button>'
+    + '</div>'
+    + '<div class="empty-state">📭 暂无数据<br><small>该店铺尚未接入</small></div>';
     return;
   }
   var orders = s.orders || [];
@@ -299,7 +336,11 @@ function renderStore(pid){
   
   var periodLabel = isFallbackAll ? '全部' : periodLabels[currentPeriod];
   
-  var html = '<div class="store-header"><h1>'+s.name+'</h1><div class="meta">共 '+s.total+' 条订单 · 平台ID: '+s.platformShopId+' · '+(isFallbackAll?'今天暂无新单，显示全部订单 · ':'')+'数据更新: '+DATA_TIME+'</div></div>';
+  var html = '<div class="view-switch">'
+    + '<button class="vs-btn active" data-view="store">🏪 单店视图</button>'
+    + '<button class="vs-btn" data-view="global">📊 全局视图</button>'
+    + '</div>'
+    + '<div class="store-header"><h1>'+s.name+'</h1><div class="meta">共 '+s.total+' 条订单 · 平台ID: '+s.platformShopId+' · '+(isFallbackAll?'今天暂无新单，显示全部订单 · ':'')+'数据更新: '+DATA_TIME+'</div></div>';
   
   // date tabs
   html += '<div class="date-tabs">'+pHtml+'</div>';
@@ -772,7 +813,11 @@ function renderStore(pid){
 
   document.getElementById('main').innerHTML = html;
   } catch(e) {
-    document.getElementById('main').innerHTML = '<div class="empty-state" style="color:var(--red)">⚠️ 渲染出错<br><span style="font-size:18px;font-weight:700">'+e.message+'</span><br><small style="font-size:11px;color:var(--muted)">'+e.stack.toString().replace(/\n/g,'<br>')+'</small></div>';
+    document.getElementById('main').innerHTML = '<div class="view-switch">'
+    + '<button class="vs-btn active" data-view="store">🏪 单店视图</button>'
+    + '<button class="vs-btn" data-view="global">📊 全局视图</button>'
+    + '</div>'
+    + '<div class="empty-state" style="color:var(--red)">⚠️ 渲染出错<br><span style="font-size:18px;font-weight:700">'+e.message+'</span><br><small style="font-size:11px;color:var(--muted)">'+e.stack.toString().replace(/\n/g,'<br>')+'</small></div>';
     console.error('renderStore error:', e);
   }
 }
@@ -823,25 +868,36 @@ document.addEventListener('click', function(e){
         toggleOccRateSort();
         return;
       }
+      if (el.dataset.view) {
+        switchView(el.dataset.view);
+        return;
+      }
+      if (el.dataset.globalPage) {
+        globalGoPage(parseInt(el.dataset.globalPage));
+        return;
+      }
       if (el.dataset.action) {
         if (el.dataset.action === 'exportRes') { exportReservations(); return; }
         if (el.dataset.action === 'importRes') { importReservations(); return; }
+        if (el.dataset.action === 'closeAssign') { closeAssignModal(); return; }
+        if (el.dataset.action === 'saveAssign') { saveReservation(); return; }
       }
       if (el.dataset.cell) {
         var parts = el.dataset.cell.split('|');
         var cellSpecKey = parts.slice(0, -1).join('|');
         var cellPid = parts[parts.length - 1];
         var cellRes = RESERVATIONS && RESERVATIONS[cellSpecKey];
-        if (cellRes && cellRes.stores && cellRes.stores[cellPid] !== undefined) {
-          var realQty = 999999;
-          if (INVENTORY && INVENTORY.products_map && INVENTORY.products_map[cellRes.product]) {
-            var im = INVENTORY.products_map[cellRes.product];
-            (im.specs || []).forEach(function(s) {
-              if (s.spec === cellRes.spec) realQty = s.qty || 0;
-            });
-          }
-          openAssignModal(cellRes.product, cellRes.spec, cellPid, realQty, cellRes.stores[cellPid]);
+        var currentQty = (cellRes && cellRes.stores && cellRes.stores[cellPid]) ? cellRes.stores[cellPid] : 0;
+        var prodName = cellRes ? cellRes.product : cellSpecKey.split('||')[0];
+        var specName = cellRes ? cellRes.spec : cellSpecKey.split('||').slice(1).join('||');
+        var realQty = 999999;
+        if (INVENTORY && INVENTORY.products_map && INVENTORY.products_map[prodName]) {
+          var im = INVENTORY.products_map[prodName];
+          (im.specs || []).forEach(function(s) {
+            if (s.spec === specName) realQty = s.qty || 0;
+          });
         }
+        openAssignModal(prodName, specName, cellPid, realQty, currentQty);
         return;
       }
       // Inventory table buttons via data attributes
@@ -1113,7 +1169,11 @@ function saveReservation() {
   logReservationChange(_assignPid, _assignProduct, _assignSpec, oldQty, qty);
   
   closeAssignModal();
-  renderStore(currentStore);
+  if (_currentView === 'global') {
+    renderGlobalView();
+  } else {
+    renderStore(currentStore);
+  }
 }
 
 function batchClaimAll(product, pid) {
@@ -1186,6 +1246,142 @@ function removeReservation(specKey, pid) {
   } catch(e) {}
   saveReservationsToGitHub();
   renderStore(currentStore);
+}
+
+// ── Global allocation view ──
+var _globalPage = 1;
+var _globalSearch = '';
+
+function switchView(mode) {
+  _currentView = mode;
+  if (mode === 'global') {
+    _globalPage = 1;
+    renderGlobalView();
+  } else {
+    if (currentStore) {
+      renderStore(currentStore);
+    } else {
+      var firstPid = null;
+      STORE_GROUPS.forEach(function(g){
+        g.shops.forEach(function(pid){
+          if(!firstPid && STORE_DATA[pid]) firstPid = pid;
+        });
+      });
+      if (firstPid) selectStore(firstPid);
+    }
+  }
+}
+
+function renderGlobalView() {
+  var main = document.getElementById('main');
+
+  // Collect stores for matrix columns
+  var matrixStores = [];
+  STORE_GROUPS.forEach(function(g) {
+    if (g.name !== '待接入') {
+      g.shops.forEach(function(sp) {
+        if (STORE_DATA[sp]) matrixStores.push(sp);
+      });
+    }
+  });
+
+  var html = '<div class="view-switch">'
+    + '<button class="vs-btn' + (_currentView==='store'?' active':'') + '" data-view="store" style="cursor:pointer">🏪 单店视图</button>'
+    + '<button class="vs-btn' + (_currentView==='global'?' active':'') + '" data-view="global" style="cursor:pointer">📊 全局视图</button>'
+    + '</div>';
+
+  // Build spec list from RESERVATIONS
+  var allSpecKeys = [];
+  if (RESERVATIONS) {
+    for (var k in RESERVATIONS) { allSpecKeys.push(k); }
+  }
+  allSpecKeys.sort();
+
+  // ── Search filter ──
+  html += '<input type="text" class="global-search" id="globalSearch" placeholder="搜索产品或规格..." value="' + _globalSearch.replace(/"/g,'&quot;') + '" oninput="onGlobalSearch(this.value)" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px">';
+
+  var filtered = _globalSearch ? allSpecKeys.filter(function(k) {
+    var r = RESERVATIONS[k];
+    var s = ((r.product||'') + ' ' + (r.spec||'')).toLowerCase();
+    return s.indexOf(_globalSearch.toLowerCase()) >= 0;
+  }) : allSpecKeys;
+
+  html += '<div style="font-size:10px;color:var(--muted);margin-bottom:10px">共 ' + allSpecKeys.length + ' 个规格 · ' + matrixStores.length + ' 家店铺' + (_globalSearch ? ' · 筛选 ' + filtered.length + ' 个' : '') + '</div>';
+
+  if (allSpecKeys.length === 0) {
+    html += '<div class="empty-state">📭 暂无保留数据<br><small>在单店视图中为规格分配库存后，这里会显示全局概览</small></div>';
+  } else if (filtered.length === 0) {
+    html += '<div class="empty-state">🔍 未找到匹配 "' + _globalSearch + '" 的规格</div>';
+  } else {
+    // ── Pagination ──
+    var pageSize = 50;
+    var totalPages = Math.ceil(filtered.length / pageSize);
+    if (_globalPage > totalPages) _globalPage = totalPages;
+    var pageStart = (_globalPage - 1) * pageSize;
+    var pageEnd = Math.min(pageStart + pageSize, filtered.length);
+
+    html += '<div class="global-matrix-wrap"><table><thead><tr><th>产品 · 规格</th>';
+    matrixStores.forEach(function(sp) {
+      var sn = STORE_DATA[sp] ? STORE_DATA[sp].name : sp;
+      html += '<th title="' + sn.replace(/"/g,'&quot;') + '" style="max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + sn.substring(0, 5) + '</th>';
+    });
+    html += '<th>合计</th></tr></thead><tbody>';
+
+    filtered.slice(pageStart, pageEnd).forEach(function(key) {
+      var r = RESERVATIONS[key];
+      var product = r.product || '';
+      var spec = r.spec || '';
+      var rowTotal = 0;
+      html += '<tr><td title="' + (product + ' · ' + spec).replace(/"/g, '&quot;') + '">'
+        + '<span style="font-weight:500">' + product + '</span>'
+        + ' <span style="color:var(--muted);font-size:10px">' + spec + '</span></td>';
+      matrixStores.forEach(function(sp) {
+        var qty = (r.stores && r.stores[sp]) ? r.stores[sp] : 0;
+        rowTotal += qty;
+        var cellClass = qty > 0 ? 'cell-has' : 'cell-none';
+        html += '<td data-cell="' + key + '|' + sp + '" class="' + cellClass + '">' + (qty > 0 ? qty : '-') + '</td>';
+      });
+      html += '<td class="row-total" style="cursor:default">' + rowTotal + '</td></tr>';
+    });
+
+    html += '</tbody></table></div>';
+
+    // Pagination
+    if (totalPages > 1) {
+      html += '<div class="global-pagination">';
+      html += '<button' + (_globalPage <= 1 ? ' disabled' : '') + ' data-global-page="' + (_globalPage-1) + '" style="cursor:pointer">◀ 上一页</button>';
+      html += '<span style="color:var(--muted)">第 ' + _globalPage + ' / ' + totalPages + ' 页 · ' + filtered.length + ' 条</span>';
+      html += '<button' + (_globalPage >= totalPages ? ' disabled' : '') + ' data-global-page="' + (_globalPage+1) + '" style="cursor:pointer">下一页 ▶</button>';
+      html += '</div>';
+    }
+  }
+
+  // Assign modal (same as in single-store view) — needed for global view too
+  html += '<div id="assignModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:100;justify-content:center;align-items:center">'
+    + '<div style="background:#fff;border-radius:12px;padding:24px;min-width:320px;max-width:400px;box-shadow:var(--shadow-xl)">'
+    + '<h3 style="margin-bottom:12px">📦 分配保留数量</h3>'
+    + '<div id="assignProduct" style="font-size:13px;color:var(--muted);margin-bottom:4px;max-height:60px;overflow:hidden"></div><div id="assignSpec" style="font-size:11px;color:var(--cyan);margin-bottom:8px"></div>'
+    + '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">店铺: <span id="assignStore"></span></div>'
+    + '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">总库存: <span id="assignTotal"></span> 件 | 共享可售: <span id="assignShared"></span> 件</div>'
+    + '<label style="font-size:12px;font-weight:600">保留数量:</label>'
+    + '<input type="number" id="assignQty" min="0" value="0" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;margin:4px 0 12px;font-size:14px">'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+    + '<button data-action="closeAssign" style="padding:6px 16px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-size:12px">取消</button>'
+    + '<button data-action="saveAssign" style="padding:6px 16px;background:var(--cyan);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">保存</button>'
+    + '</div></div></div>';
+
+  main.innerHTML = html;
+}
+
+function onGlobalSearch(val) {
+  _globalSearch = val;
+  _globalPage = 1;
+  renderGlobalView();
+}
+
+function globalGoPage(p) {
+  _globalPage = p;
+  renderGlobalView();
 }
 
 // Restore reservations: localStorage first (fast), GitHub overwrites (authoritative)
