@@ -580,6 +580,7 @@ function renderStore(pid){
   
   html += '<div id="sub-inventory" style="display:'+(currentSubTab==='inventory'?'block':'none')+'">';
   html += '<div style="font-size:10px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">';
+  html += '<span>库存数据更新: '+INVENTORY_TIME+'</span>';
   html += '<span><button data-action="exportRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📥 导出</button> ';
   html += '<button data-action="importRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📤 导入</button> ';
   html += '<button data-action="showChangeLog" style="padding:3px 12px;font-size:10px;border:1px dashed var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer;color:var(--muted)">📝 变更日志 ('+_reservationLog.length+'条)</button></span>';
