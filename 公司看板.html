@@ -826,7 +826,7 @@ function renderStore(pid){
         + '<td style="font-size:11px">'+row.spec+'</td>'
         + '<td style="font-weight:600;color:'+(isOverAlloc?'var(--red)':'var(--text)')+'">'+specQty+(isOverAlloc?' <span style="font-size:9px;background:var(--red);color:#fff;padding:1px 4px;border-radius:3px">已超额</span>':'')+'</td>'
         + '<td style="font-size:10px">'+row.badges+'</td>'
-        + '<td style="font-size:11px;color:'+(row.specQty>0&&row.reservedTotal/row.specQty>0.8?'var(--red)':row.reservedTotal>0?'var(--cyan)':'var(--muted)')+'">'+(row.specQty>0?Math.round(row.reservedTotal/row.specQty*100)+'%':'-')+'</td>'
+        + '<td style="min-width:75px">'+(row.specQty>0?'<div style="display:flex;align-items:center;gap:5px"><div style="flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.min(100,Math.round(row.reservedTotal/row.specQty*100))+'%;background:'+getOccRateColor(row.reservedTotal,row.specQty)+';border-radius:3px;min-width:0;transition:width .3s"></div></div><span style="font-size:10px;color:var(--muted);white-space:nowrap">'+Math.round(row.reservedTotal/row.specQty*100)+'%</span></div>':'-')+'</td>'
         + '<td style="font-weight:600;color:var(--green)">'+row.shared+'</td>'
         + '<td>'
         + '<button data-assign="'+escProduct+'||'+escSpec+'" data-apid="'+pid+'" data-aqty="'+specQty+'" data-asres="'+row.storeRes+'" style="padding:3px 10px;font-size:10px;background:var(--cyan);color:#fff;border:none;border-radius:4px;cursor:pointer">'+(row.storeRes>0?'修改':'+分配')+'</button>'
@@ -1049,6 +1049,13 @@ function toggleOccRateSort() {
   _occRateSort = _occRateSort === 'asc' ? 'desc' : _occRateSort === 'desc' ? null : 'asc';
   _invPage = 1;
   renderStore(currentStore);
+}
+function getOccRateColor(reserved, total) {
+  if (total <= 0) return 'var(--dim)';
+  var rate = reserved / total;
+  if (rate > 0.8) return 'var(--red)';
+  if (rate > 0.5) return 'var(--yellow)';
+  return 'var(--green)';
 }
 
 function filterWarehouse(btn, wh) {
