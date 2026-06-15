@@ -143,6 +143,9 @@ var _ghToken = 'ghp_mu...DaZw' + 'oAkPsakitY9QeX0Uwi5X';
 var _resSha = null;
 var _resUrl = 'https://api.github.com/repos/Jacksoneaton/stock-dashboard/contents/%E5%85%AC%E5%8F%B8%E7%9C%8B%E6%9D%BF%E6%95%B0%E6%8D%AE/inventory_reservations.json';
 
+var _changeLogSha = null;
+var _changeLogUrl = 'https://api.github.com/repos/Jacksoneaton/stock-dashboard/contents/%E5%85%AC%E5%8F%B8%E7%9C%8B%E6%9D%BF%E6%95%B0%E6%8D%AE/inventory_change_log.json';
+
 function loadReservationsFromGitHub(cb) {
   fetch(_resUrl + '?ref=gh-pages&t=' + Date.now())
     .then(function(r) { return r.json(); })
@@ -161,6 +164,50 @@ function loadReservationsFromGitHub(cb) {
     })
     .catch(function(e) { console.log('Reservations load failed:', e); })
     .finally(function() { if (cb) cb(); });
+}
+
+function loadChangeLogFromGitHub(cb) {
+  fetch(_changeLogUrl + '?ref=gh-pages&t=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.sha) _changeLogSha = data.sha;
+      if (data.content) {
+        try {
+          var decoded = JSON.parse(atob(data.content.replace(/\s/g, '')));
+          if (decoded && decoded.length > 0) {
+            _reservationLog = decoded;
+            try { localStorage.setItem('hermes_co_reservation_log', JSON.stringify(_reservationLog)); } catch(e) {}
+          }
+        } catch(e) { console.log('Change log parse error:', e); }
+      }
+    })
+    .catch(function(e) { console.log('Change log load failed:', e); })
+    .finally(function() { if (cb) cb(); });
+}
+
+function saveChangeLogToGitHub() {
+  if (!_reservationLog) _reservationLog = [];
+  var payload = {
+    message: 'update inventory change log',
+    content: btoa(unescape(encodeURIComponent(JSON.stringify(_reservationLog)))),
+    branch: 'gh-pages'
+  };
+  if (_changeLogSha) payload.sha = _changeLogSha;
+
+  fetch(_changeLogUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'token ' + _ghToken,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.content && data.content.sha) _changeLogSha = data.content.sha;
+  })
+  .catch(function(e) { console.log('Change log save failed:', e); });
 }
 
 function saveReservationsToGitHub() {
@@ -801,22 +848,31 @@ function renderStore(pid){
     + '<button onclick="saveReservation()" style="padding:6px 16px;background:var(--cyan);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">保存</button>'
   html += '</div></div>';  // close assign modal
   
-  // Reservation change log
-  html += '<div style="margin-top:24px">';
-  html += '<div class="sec-title">📝 保留变更日志 ('+_reservationLog.length+'条)</div>';
-  html += '<div id="resLogBody">';
+  // Reservation change log — now as popup button
+  html += '<div style="margin-top:24px;text-align:center">';
+  html += '<button data-action="showChangeLog" style="padding:8px 20px;font-size:12px;border:1px dashed var(--border);background:var(--card-bg);border-radius:var(--radius-full);cursor:pointer;color:var(--muted);transition:.15s" onmouseover="this.style.borderColor=\'var(--cyan)\';this.style.color=\'var(--cyan)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--muted)\'">📝 变更日志 ('+_reservationLog.length+'条)</button>';
+  html += '</div>';
+  
+  // ── Change log popup modal ──
+  html += '<div id="changeLogModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:200;justify-content:center;align-items:center">';
+  html += '<div style="background:#fff;border-radius:14px;padding:24px;max-width:700px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-xl)">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">';
+  html += '<h3 style="margin:0;font-size:16px">📝 保留变更日志 ('+_reservationLog.length+'条)</h3>';
+  html += '<button data-action="closeChangeLog" style="padding:4px 12px;border:1px solid var(--border);background:var(--card-bg);border-radius:6px;cursor:pointer;font-size:12px">✕ 关闭</button>';
+  html += '</div>';
   if (_reservationLog.length === 0) {
-    html += '<div class="empty-state" style="padding:12px">暂无变更记录</div>';
+    html += '<div class="empty-state" style="padding:20px;color:var(--muted)">暂无变更记录</div>';
   } else {
-    html += '<table class="data-table"><thead><tr><th>时间</th><th>店铺</th><th>产品</th><th>规格</th><th>旧→新</th></tr></thead><tbody>';
-    _reservationLog.slice(0, 50).forEach(function(entry) {
-      html += '<tr>'
-        + '<td style="font-size:10px;white-space:nowrap">' + entry.time + '</td>'
-        + '<td style="font-size:11px">' + entry.store + '</td>'
-        + '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + (entry.product||'').replace(/"/g,'&quot;') + '">' + (entry.product||'') + '</td>'
-        + '<td style="font-size:10px;color:var(--muted)">' + (entry.spec||'') + '</td>'
-        + '<td style="font-size:11px;font-family:monospace">' + (entry.oldQty||0) + ' → <span style="font-weight:600;color:' + (entry.newQty>entry.oldQty?'var(--green)':'var(--red)') + '">' + (entry.newQty||0) + '</span></td>'
-        + '</tr>';
+    html += '<table class="data-table"><thead><tr><th>时间</th><th>操作人</th><th>店铺</th><th>产品</th><th>规格</th><th>旧→新</th></tr></thead><tbody>';
+    _reservationLog.forEach(function(entry) {
+      html += '<tr>';
+      html += '<td style="font-size:10px;white-space:nowrap">' + entry.time + '</td>';
+      html += '<td style="font-size:10px;color:var(--muted)">' + (entry.user||'运营') + '</td>';
+      html += '<td style="font-size:11px">' + entry.store + '</td>';
+      html += '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + (entry.product||'').replace(/\"/g,'&quot;') + '">' + (entry.product||'') + '</td>';
+      html += '<td style="font-size:10px;color:var(--muted)">' + (entry.spec||'') + '</td>';
+      html += '<td style="font-size:11px;font-family:monospace">' + (entry.oldQty||0) + ' → <span style="font-weight:600;color:' + (entry.newQty>entry.oldQty?'var(--green)':'var(--red)') + '">' + (entry.newQty||0) + '</span></td>';
+      html += '</tr>';
     });
     html += '</tbody></table>';
   }
@@ -894,6 +950,8 @@ document.addEventListener('click', function(e){
         if (el.dataset.action === 'importRes') { importReservations(); return; }
         if (el.dataset.action === 'closeAssign') { closeAssignModal(); return; }
         if (el.dataset.action === 'saveAssign') { saveReservation(); return; }
+        if (el.dataset.action === 'showChangeLog') { showChangeLogPopup(); return; }
+        if (el.dataset.action === 'closeChangeLog') { closeChangeLogPopup(); return; }
       }
       if (el.dataset.cell) {
         var parts = el.dataset.cell.split('|');
@@ -1094,9 +1152,10 @@ function logReservationChange(storePid, product, spec, oldQty, newQty) {
     String(now.getMinutes()).padStart(2,'0') + ':' +
     String(now.getSeconds()).padStart(2,'0');
   var storeName = (STORE_DATA[storePid] && STORE_DATA[storePid].name) || storePid;
-  _reservationLog.unshift({time: ts, store: storeName, product: product, spec: spec, oldQty: oldQty, newQty: newQty});
-  if (_reservationLog.length > 200) _reservationLog = _reservationLog.slice(0, 200);
+  _reservationLog.unshift({time: ts, store: storeName, user: '运营', product: product, spec: spec, oldQty: oldQty, newQty: newQty});
+  if (_reservationLog.length > 500) _reservationLog = _reservationLog.slice(0, 500);
   try { localStorage.setItem('hermes_co_reservation_log', JSON.stringify(_reservationLog)); } catch(e) {}
+  saveChangeLogToGitHub();
 }
 
 // ── Export / Import reservations ──
@@ -1405,6 +1464,14 @@ function globalGoPage(p) {
   renderGlobalView();
 }
 
+// ── Change log popup functions ──
+function showChangeLogPopup() {
+  document.getElementById('changeLogModal').style.display = 'flex';
+}
+function closeChangeLogPopup() {
+  document.getElementById('changeLogModal').style.display = 'none';
+}
+
 // Restore reservations: localStorage first (fast), GitHub overwrites (authoritative)
 try {
   var saved = localStorage.getItem('hermes_co_reservations');
@@ -1430,6 +1497,7 @@ if(firstPid) selectStore(firstPid);
 
 // Sync reservations from GitHub in background (doesn't block rendering)
 loadReservationsFromGitHub();
+loadChangeLogFromGitHub();
 </script>
 </body>
 </html>
