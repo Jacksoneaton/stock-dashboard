@@ -937,14 +937,10 @@ try {
   }
 } catch(e) {}
 
-// Restore last sub-tab from localStorage
-try {
-  var saved = localStorage.getItem('hermes_co_subtab');
-  if (saved) currentSubTab = saved;
-} catch(e) {}
-
 // Init: load GitHub reservations, then build UI
+// Always start on orders tab (prevents blank inventory from hiding orders on reload)
 loadReservationsFromGitHub(function() {
+  currentSubTab = 'orders';
   buildSidebar();
   var firstPid = null;
   STORE_GROUPS.forEach(function(g){
