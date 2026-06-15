@@ -246,12 +246,7 @@ var STORE_GROUPS = [
 
 var currentStore = null;
 var currentPeriod = 'today';
-var // Restore tab state from session (inventory tab stays after refresh)
-try {
-  var savedTab = sessionStorage.getItem('hermes_co_tab');
-  if (savedTab === 'inventory') currentSubTab = 'inventory';
-} catch(e) {}
-if (!currentSubTab) currentSubTab = 'orders';
+var currentSubTab = 'orders';
 var _currentView = 'store';  // 'store' | 'global'
 
 function buildSidebar(){
