@@ -1143,7 +1143,7 @@ var _ghToken='ghp_muuP2slnS728DaZw' + 'oAkPsakitY9QeX0Uwi5X';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='ee95138_202606160005';
+  var ver='ee95138_202606160006';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -1227,7 +1227,8 @@ setInterval(function(){
         _transitData=remote;
         try{localStorage.setItem('hermes_transit',JSON.stringify(remote));}catch(e){}
         setSyncStatus('synced','已同步 · GitHub');
-        refreshAll();
+        // 在途数据变了→只更新统计数字和在途标记，不重建卡片（避免图片闪烁）
+        updateTransitUI();
       }
     }catch(e){}
   };
@@ -1248,6 +1249,29 @@ function totalTransit(){
     for(var k in p.items) t+=p.items[k];
   });
   return t;
+}
+// 在途数据变更时，只更新统计和标记，不重建卡片（避免图片闪烁）
+function updateTransitUI(){
+  // 更新统计栏
+  var tran=totalTransit();
+  var stats=document.querySelectorAll('#statsRow .stat .num');
+  if(stats.length>=5){stats[4].textContent=tran;stats[4].setAttribute('data-value',tran);}
+  // 更新每个卡片的在途标记
+  var groups=groupByInv();
+  var cards=document.querySelectorAll('#cardGrid .card');
+  cards.forEach(function(card,ci){
+    if(ci>=groups.length) return;
+    var g=groups[ci];
+    var transSkus=g.specs.filter(function(s){return getTransit(s.sku)>0}).length;
+    // 更新在途提示文字
+    var hint=card.querySelector('.transit-hint');
+    if(transSkus>0){
+      if(hint){hint.textContent='🚚 '+transSkus+'个有在途';hint.style.display='';}
+      else{/* no hint element, skip */}
+    }else{
+      if(hint) hint.style.display='none';
+    }
+  });
 }
 
 function saveTransitToGitHub(data,cb){
@@ -2865,7 +2889,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-15 17:00:13", "友鹰热搜": "2026-06-15 09:05:50", "销售数据": "2026-06-15 17:02:04", "看板部署": "2026-06-15 23:06:10", "货憨憨订单": "2026-06-15 22:31:47", "tasks": {"货憨憨订单": {"last_success": "2026-06-15 21:32:30", "records_pulled": "18", "new_added": 0, "total_after": 1076}}};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-15 17:00:13", "友鹰热搜": "2026-06-15 09:05:50", "销售数据": "2026-06-15 17:02:04", "看板部署": "2026-06-16 00:06:07", "货憨憨订单": "2026-06-15 22:31:47", "tasks": {"货憨憨订单": {"last_success": "2026-06-15 21:32:30", "records_pulled": "18", "new_added": 0, "total_after": 1076}}};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
