@@ -216,7 +216,19 @@ function fmtStatus(s){
 
 function fmtImg(pic, name){
   if(!pic) return (name||'');
-  return '<img src="'+pic+'" style="width:48px;height:48px;object-fit:cover;border-radius:4px;vertical-align:middle" title="'+(name||'').replace(/"/g,'&quot;')+'" onerror="this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\''+(name||'').replace(/'/g,"\\'")+'\')">';
+  var safe = (name||'').replace(/"/g,'&quot;');
+  return '<img src="'+pic+'" style="width:48px;height:48px;object-fit:cover;border-radius:4px;vertical-align:middle" title="'+safe+'" data-name="'+safe+'" onerror="imgOnError(this)">';
+}
+
+// Image error handler — reads fallback text from data-name attribute (safe, no inline escaping)
+function imgOnError(img) {
+  img.style.display = 'none';
+  var name = img.getAttribute('data-name') || '';
+  if (name) {
+    var span = document.createElement('span');
+    span.textContent = name;
+    img.parentNode.insertBefore(span, img.nextSibling);
+  }
 }
 
 function renderStore(pid){
