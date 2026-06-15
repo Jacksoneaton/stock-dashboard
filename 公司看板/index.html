@@ -272,6 +272,7 @@ function selectStore(pid){
   _currentView = 'store';
   currentStore = pid;
   currentPeriod = 'today';
+  _invPage = 1;
   document.querySelectorAll('.sidebar .shop').forEach(function(el){el.classList.remove('active')});
   var el = document.querySelector('.sidebar .shop[data-pid="'+pid+'"]');
   if(el) el.classList.add('active');
