@@ -477,7 +477,11 @@ function renderStore(pid){
   }
   
   html += '<div id="sub-inventory" style="display:'+(currentSubTab==='inventory'?'block':'none')+'">';
-  html += '<div style="font-size:10px;color:var(--muted);margin-bottom:12px">库存数据更新: '+INVENTORY_TIME+'</div>';
+  html += '<div style="font-size:10px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">';
+  html += '<span>库存数据更新: '+INVENTORY_TIME+'</span>';
+  html += '<span><button data-action="exportRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📥 导出</button> ';
+  html += '<button data-action="importRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📤 导入</button></span>';
+  html += '</div>';
   
   // This store's reserved specs
   var reservedKeys = Object.keys(storeReserved);
@@ -780,6 +784,10 @@ document.addEventListener('click', function(e){
         toggleOccRateSort();
         return;
       }
+      if (el.dataset.action) {
+        if (el.dataset.action === 'exportRes') { exportReservations(); return; }
+        if (el.dataset.action === 'importRes') { importReservations(); return; }
+      }
     }
     el = el.parentElement;
   }
@@ -954,6 +962,45 @@ function logReservationChange(storePid, product, spec, oldQty, newQty) {
   _reservationLog.unshift({time: ts, store: storeName, product: product, spec: spec, oldQty: oldQty, newQty: newQty});
   if (_reservationLog.length > 200) _reservationLog = _reservationLog.slice(0, 200);
   try { localStorage.setItem('hermes_co_reservation_log', JSON.stringify(_reservationLog)); } catch(e) {}
+}
+
+// ── Export / Import reservations ──
+function exportReservations() {
+  var data = JSON.stringify(RESERVATIONS || {}, null, 2);
+  var blob = new Blob([data], {type: 'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  var ds = new Date().toISOString().slice(0,10);
+  a.download = '保留配置_' + ds + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function importReservations() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var data = JSON.parse(ev.target.result);
+        var count = 0;
+        for (var k in data) { if (k !== '_note') { RESERVATIONS[k] = data[k]; count++; } }
+        try { localStorage.setItem('hermes_co_reservations', JSON.stringify(RESERVATIONS)); } catch(ex) {}
+        saveReservationsToGitHub();
+        renderStore(currentStore);
+        alert('✅ 导入成功！共 ' + count + ' 条保留配置');
+      } catch(err) {
+        alert('❌ 导入失败：文件格式错误');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 function saveReservation() {
