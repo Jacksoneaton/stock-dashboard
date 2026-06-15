@@ -706,17 +706,20 @@ function toggleSubTab(el,id){
 document.addEventListener('click', function(e){
   var el = e.target;
   while (el) {
-    if (el.classList.contains('sub-tab') && el.dataset.sub) {
-      toggleSubTab(el, el.dataset.sub);
-      return;
-    }
-    if (el.classList.contains('date-tab') && el.dataset.period) {
-      switchPeriod(el.dataset.period);
-      return;
-    }
-    if (el.classList.contains('shop') && el.dataset.pid) {
-      selectStore(el.dataset.pid);
-      return;
+    // Skip non-element nodes (text nodes, etc.) which don't have classList
+    if (el.nodeType === 1) {
+      if (el.dataset.sub && el.classList.contains('sub-tab')) {
+        toggleSubTab(el, el.dataset.sub);
+        return;
+      }
+      if (el.dataset.period && el.classList.contains('date-tab')) {
+        switchPeriod(el.dataset.period);
+        return;
+      }
+      if (el.dataset.pid && el.classList.contains('shop')) {
+        selectStore(el.dataset.pid);
+        return;
+      }
     }
     el = el.parentElement;
   }
