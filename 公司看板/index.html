@@ -549,6 +549,14 @@ function renderStore(pid){
   var zsActive = _showZeroStock ? ' active' : '';
   html += '<button class="inv-zero-btn'+zsActive+'" onclick="toggleZeroStock(this)" style="padding:3px 10px;font-size:10px;border:1px solid var(--red);background:'+(_showZeroStock?'var(--red)':'var(--card-bg)')+';color:'+(_showZeroStock?'#fff':'var(--red)')+';border-radius:10px;cursor:pointer;margin-left:4px">🔴 已售罄 ('+zeroCount+')</button>';
   html += '</div>';
+  // Allocation filter buttons
+  html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center">';
+  html += '<span style="font-size:11px;color:var(--muted)">分配:</span>';
+  var afs = [{v:'all',t:'全部'},{v:'unallocated',t:'未分配'},{v:'partial',t:'部分分配'},{v:'full',t:'全部分配'}];
+  afs.forEach(function(af){
+    html += '<button class="inv-alloc-btn'+(af.v===_allocFilter?' active':'')+'" data-af="'+af.v+'" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:'+(af.v===_allocFilter?'var(--cyan)':'var(--card-bg)')+';color:'+(af.v===_allocFilter?'#fff':'var(--muted)')+';border-radius:10px;cursor:pointer">'+af.t+'</button>';
+  });
+  html += '</div>';
   html += '<input type="text" id="invSearch" placeholder="搜索产品标题..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px" oninput="filterInventory()">';
   
   var showInv = currentSubTab === 'inventory';
@@ -599,11 +607,20 @@ function renderStore(pid){
       });
     });
     
-    // Show/hide based on _showZeroStock
+    // Show/hide based on _showZeroStock and _allocFilter
     if (_showZeroStock) {
       allSpecs = allSpecs.filter(function(s){ return s.shared === 0; });
     } else {
-      allSpecs = allSpecs.filter(function(s){ return s.shared > 0; });
+      // Apply allocation filter (mutually exclusive with zero-stock)
+      if (_allocFilter === 'unallocated') {
+        allSpecs = allSpecs.filter(function(s){ return s.reservedTotal === 0; });
+      } else if (_allocFilter === 'partial') {
+        allSpecs = allSpecs.filter(function(s){ return s.reservedTotal > 0 && s.reservedTotal < s.specQty; });
+      } else if (_allocFilter === 'full') {
+        allSpecs = allSpecs.filter(function(s){ return s.reservedTotal >= s.specQty && s.specQty > 0; });
+      } else {
+        allSpecs = allSpecs.filter(function(s){ return s.shared > 0; });
+      }
     }
     
     // Calculate batch-claimable total per product (sum of shared across all specs)
@@ -615,7 +632,7 @@ function renderStore(pid){
     
     var totalPages = Math.ceil(allSpecs.length / pageSize);
     html += '<div id="invPoolList">';
-    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格</th><th>库存</th><th>已分配</th><th>可售</th><th>操作</th></tr></thead><tbody>';
+    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格</th><th>库存</th><th>已分配</th><th>占用率</th><th>可售</th><th>操作</th></tr></thead><tbody>';
     if (_showZeroStock) {
       html = html.replace('<tbody>', '<tbody style="background:rgba(255,0,0,0.03)">');
     }
@@ -644,6 +661,7 @@ function renderStore(pid){
         + '<td style="font-size:11px">'+row.spec+'</td>'
         + '<td style="font-weight:600;color:'+(isOverAlloc?'var(--red)':'var(--text)')+'">'+specQty+(isOverAlloc?' <span style="font-size:9px;background:var(--red);color:#fff;padding:1px 4px;border-radius:3px">已超额</span>':'')+'</td>'
         + '<td style="font-size:10px">'+row.badges+'</td>'
+        + '<td style="font-size:11px;color:'+(row.specQty>0&&row.reservedTotal/row.specQty>0.8?'var(--red)':row.reservedTotal>0?'var(--cyan)':'var(--muted)')+'">'+(row.specQty>0?Math.round(row.reservedTotal/row.specQty*100)+'%':'-')+'</td>'
         + '<td style="font-weight:600;color:var(--green)">'+row.shared+'</td>'
         + '<td>'
         + '<button onclick="openAssignModal(\''+escProduct+'\',\''+escSpec+'\',\''+pid+'\','+specQty+','+row.storeRes+')" style="padding:3px 10px;font-size:10px;background:var(--cyan);color:#fff;border:none;border-radius:4px;cursor:pointer">'+(row.storeRes>0?'修改':'+分配')+'</button>'
@@ -721,6 +739,10 @@ document.addEventListener('click', function(e){
         selectStore(el.dataset.pid);
         return;
       }
+      if (el.dataset.af) {
+        filterAlloc(el.dataset.af);
+        return;
+      }
     }
     el = el.parentElement;
   }
@@ -731,6 +753,7 @@ var _assignPid = null, _assignProduct = null, _assignSpec = null, _assignTotal =
 
 var _currentWarehouse = 'all';
 var _showZeroStock = false;
+var _allocFilter = 'all';
 
 function toggleZeroStock(btn) {
   _showZeroStock = !_showZeroStock;
@@ -742,6 +765,16 @@ function toggleZeroStock(btn) {
     document.querySelector('.inv-warehouse-btn[data-wh="all"]').classList.add('active');
     _currentWarehouse = 'all';
   }
+  invPage = 1;
+  renderStore(currentStore);
+}
+
+function filterAlloc(af) {
+  _allocFilter = af;
+  _showZeroStock = false;
+  document.querySelectorAll('.inv-zero-btn').forEach(function(b){b.classList.remove('active'); b.style.background='var(--card-bg)'; b.style.color='var(--red)';});
+  document.querySelectorAll('.inv-alloc-btn').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.inv-alloc-btn[data-af="'+af+'"]').forEach(function(b){b.classList.add('active')});
   invPage = 1;
   renderStore(currentStore);
 }
