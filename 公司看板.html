@@ -232,6 +232,7 @@ function imgOnError(img) {
 }
 
 function renderStore(pid){
+  try {
   var s = STORE_DATA[pid];
   if(!s){
     document.getElementById('main').innerHTML = '<div class="empty-state">📭 暂无数据<br><small>该店铺尚未接入</small></div>';
@@ -675,6 +676,10 @@ function renderStore(pid){
   html += '</div>';  // close sub-inventory
 
   document.getElementById('main').innerHTML = html;
+  } catch(e) {
+    document.getElementById('main').innerHTML = '<div class="empty-state">⚠️ 渲染出错<br><small>'+e.message+'</small><br><small style="color:var(--muted)">请刷新重试或联系管理员</small></div>';
+    console.error('renderStore error:', e);
+  }
 }
 
 function switchPeriod(p){
