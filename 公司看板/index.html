@@ -511,7 +511,7 @@ function renderStore(pid){
         + '<td style="font-size:11px">'+specName+'</td>'
         + '<td>'+specQty+'</td>'
         + '<td style="font-weight:600;color:'+(isOverAlloc?'var(--red)':'var(--cyan)')+'">'+resQty+(isOverAlloc?' <span style="font-size:9px;color:var(--red)">⚠超额</span>':'')+'</td>'
-        + '<td><button onclick="removeReservation(\''+key.replace(/'/g,"\\'")+'\',\''+pid+'\')" style="padding:2px 8px;font-size:10px;border:1px solid var(--red);color:var(--red);background:#fff;border-radius:4px;cursor:pointer">取消保留</button></td>'
+        + '<td><button data-remove="'+key.replace(/"/g,'&quot;')+'" data-rmpid="'+pid+'" style="padding:2px 8px;font-size:10px;border:1px solid var(--red);color:var(--red);background:#fff;border-radius:4px;cursor:pointer">取消保留</button></td>'
         + '</tr>';
     });
     html += '</tbody></table>';
@@ -702,13 +702,13 @@ function renderStore(pid){
       var pt = row.product;
       var specQty = row.specQty;
       var isOverAlloc = row.reservedTotal >= specQty && specQty > 0;
-      var escProduct = pt.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-      var escSpec = row.spec.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      var escProduct = pt.replace(/"/g,'&quot;');
+      var escSpec = row.spec.replace(/"/g,'&quot;');
       var isFirstOfProduct = !seenProducts[pt];
       seenProducts[pt] = true;
       var batchBtn = '';
       if (isFirstOfProduct && !_showZeroStock && productTotals[pt] && productTotals[pt].total > 0) {
-        batchBtn = ' <button onclick="batchClaimAll(\''+escProduct+'\',\''+pid+'\')" style="padding:3px 8px;font-size:10px;background:var(--green);color:#fff;border:none;border-radius:4px;cursor:pointer" title="一键认领该产品所有可售规格（共'+productTotals[pt].total+'件）">📦整批</button>';
+        batchBtn = ' <button data-batch="'+escProduct+'" data-bpid="'+pid+'" style="padding:3px 8px;font-size:10px;background:var(--green);color:#fff;border:none;border-radius:4px;cursor:pointer" title="一键认领该产品所有可售规格（共'+productTotals[pt].total+'件）">📦整批</button>';
       }
       html += '<tr class="inv-row' + (isOverAlloc ? ' over-alloc' : '') + '" data-title="'+pt.replace(/"/g,'&quot;')+'" data-spec="'+row.spec.replace(/"/g,'&quot;')+'" data-wh="'+row.storeName+'">'
         + '<td style="text-align:center">'+(row.image?'<img src="'+row.image+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="this.style.display=\'none\'">':'')+'</td>'
@@ -719,7 +719,7 @@ function renderStore(pid){
         + '<td style="font-size:11px;color:'+(row.specQty>0&&row.reservedTotal/row.specQty>0.8?'var(--red)':row.reservedTotal>0?'var(--cyan)':'var(--muted)')+'">'+(row.specQty>0?Math.round(row.reservedTotal/row.specQty*100)+'%':'-')+'</td>'
         + '<td style="font-weight:600;color:var(--green)">'+row.shared+'</td>'
         + '<td>'
-        + '<button onclick="openAssignModal(\''+escProduct+'\',\''+escSpec+'\',\''+pid+'\','+specQty+','+row.storeRes+')" style="padding:3px 10px;font-size:10px;background:var(--cyan);color:#fff;border:none;border-radius:4px;cursor:pointer">'+(row.storeRes>0?'修改':'+分配')+'</button>'
+        + '<button data-assign="'+escProduct+'||'+escSpec+'" data-apid="'+pid+'" data-aqty="'+specQty+'" data-asres="'+row.storeRes+'" style="padding:3px 10px;font-size:10px;background:var(--cyan);color:#fff;border:none;border-radius:4px;cursor:pointer">'+(row.storeRes>0?'修改':'+分配')+'</button>'
         + batchBtn
         + '</td>'
         + '</tr>';
@@ -833,7 +833,6 @@ document.addEventListener('click', function(e){
         var cellPid = parts[parts.length - 1];
         var cellRes = RESERVATIONS && RESERVATIONS[cellSpecKey];
         if (cellRes && cellRes.stores && cellRes.stores[cellPid] !== undefined) {
-          // Look up actual inventory qty
           var realQty = 999999;
           if (INVENTORY && INVENTORY.products_map && INVENTORY.products_map[cellRes.product]) {
             var im = INVENTORY.products_map[cellRes.product];
@@ -845,6 +844,15 @@ document.addEventListener('click', function(e){
         }
         return;
       }
+      // Inventory table buttons via data attributes
+      if (el.dataset.remove) { removeReservation(el.dataset.remove, el.dataset.rmpid); return; }
+      if (el.dataset.assign) {
+        var aparts = el.dataset.assign.split('||');
+        var aprod = aparts[0], aspec = aparts.slice(1).join('||');
+        openAssignModal(aprod, aspec, el.dataset.apid, parseInt(el.dataset.aqty)||0, parseInt(el.dataset.asres)||0);
+        return;
+      }
+      if (el.dataset.batch) { batchClaimAll(el.dataset.batch, el.dataset.bpid); return; }
     }
     el = el.parentElement;
   }
