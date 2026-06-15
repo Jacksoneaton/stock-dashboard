@@ -234,6 +234,13 @@ function renderStore(pid){
     return t >= range.start && t < range.end;
   });
   
+  // If "today" has 0 orders, auto fallback to all orders
+  var isFallbackAll = false;
+  if (currentPeriod === 'today' && filtered.length === 0) {
+    filtered = orders.slice();
+    isFallbackAll = true;
+  }
+  
   // compute stats
   var totalOrders = filtered.length;
   var totalRevenue = 0;
@@ -277,16 +284,18 @@ function renderStore(pid){
     pHtml += '<span class="date-tab'+(p===currentPeriod?' active':'')+'" onclick="switchPeriod(\''+p+'\')">'+periodLabels[p]+'</span>';
   });
   
-  var html = '<div class="store-header"><h1>'+s.name+'</h1><div class="meta">共 '+s.total+' 条订单 · 平台ID: '+s.platformShopId+' · 数据更新: '+DATA_TIME+'</div></div>';
+  var periodLabel = isFallbackAll ? '全部' : periodLabels[currentPeriod];
+  
+  var html = '<div class="store-header"><h1>'+s.name+'</h1><div class="meta">共 '+s.total+' 条订单 · 平台ID: '+s.platformShopId+' · '+(isFallbackAll?'今天暂无新单，显示全部订单 · ':'')+'数据更新: '+DATA_TIME+'</div></div>';
   
   // date tabs
   html += '<div class="date-tabs">'+pHtml+'</div>';
   
   // KPI row
   html += '<div class="kpi-row">'
-    + '<div class="kpi-card blue"><div class="lbl">'+periodLabels[currentPeriod]+'订单</div><div class="val">'+totalOrders+'</div></div>'
-    + '<div class="kpi-card green"><div class="lbl">'+periodLabels[currentPeriod]+'营收 (TWD)</div><div class="val">$'+totalRevenue.toLocaleString()+'</div></div>'
-    + '<div class="kpi-card purple"><div class="lbl">'+periodLabels[currentPeriod]+'件数</div><div class="val">'+totalItems+'</div></div>'
+    + '<div class="kpi-card blue"><div class="lbl">'+periodLabel+'订单</div><div class="val">'+totalOrders+'</div></div>'
+    + '<div class="kpi-card green"><div class="lbl">'+periodLabel+'营收 (TWD)</div><div class="val">$'+totalRevenue.toLocaleString()+'</div></div>'
+    + '<div class="kpi-card purple"><div class="lbl">'+periodLabel+'件数</div><div class="val">'+totalItems+'</div></div>'
     + '<div class="kpi-card yellow"><div class="lbl">待发货</div><div class="val">'+pendingCount+'</div></div>'
     + '<div class="kpi-card red"><div class="lbl">已取消</div><div class="val">'+cancelledCount+'</div></div>'
     + '</div>';
