@@ -828,10 +828,10 @@ function renderStore(pid){
     }
     html += '</tbody></table>';
     html += '<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px;font-size:11px">';
-    html += '<button data-inv-page="prev" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">◀ 上一页</button>';
     _invTotalPages = totalPages;
-    html += '<span style="color:var(--muted)">第 <span id="invPageNum">1</span>/'+totalPages+' 页 · '+allSpecs.length+' 个规格</span>';
-    html += '<button data-inv-page="next" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">下一页 ▶</button>';
+    html += '<button data-inv-page="prev"' + (_invPage <= 1 ? ' disabled style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;opacity:.4;cursor:default"' : ' style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer"') + '>◀ 上一页</button>';
+    html += '<span style="color:var(--muted)">第 <span id="invPageNum">'+_invPage+'</span>/'+totalPages+' 页 · '+allSpecs.length+' 个规格</span>';
+    html += '<button data-inv-page="next"' + (_invPage >= totalPages ? ' disabled style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;opacity:.4;cursor:default"' : ' style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer"') + '>下一页 ▶</button>';
     html += '</div></div>';
   }
   
@@ -933,7 +933,9 @@ document.addEventListener('click', function(e){
       if (el.dataset.invPage) {
         if (el.dataset.invPage === 'prev') _invPage = Math.max(1, _invPage-1);
         else _invPage = Math.min(_invTotalPages, _invPage+1);
+        var _savedPage = _invPage;
         renderStore(currentStore);
+        _invPage = _savedPage;
         return;
       }
       if (el.dataset.af) {
