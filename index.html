@@ -1143,7 +1143,7 @@ var _ghToken='ghp_muuP2slnS728DaZw' + 'oAkPsakitY9QeX0Uwi5X';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='ee95138_202606160105';
+  var ver='ee95138_202606160140';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -1424,8 +1424,13 @@ function renderCharts(){
     donutSvg+='<circle cx="100" cy="100" r="48" fill="var(--card-bg)"/><text x="100" y="94" text-anchor="middle" font-size="20" font-weight="700" fill="var(--text)">'+totalArc+'</text><text x="100" y="112" text-anchor="middle" font-size="10" fill="var(--muted)">有销量 SKU</text></svg>';
   }
   var legendHtml=segs.map(function(s){return '<div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:2px;background:'+s.color+'"></div><span style="font-size:10px;color:var(--muted);white-space:nowrap">'+s.label+'</span></div>';}).join('');
+  // 缓存：内容没变跳过 DOM 更新，避免图表图片闪烁
+  var chartKey=restockHtml+'|||'+salesHtml+'|||'+donutSvg;
+  if(chartKey===_lastChartsKey) return;
+  _lastChartsKey=chartKey;
   document.getElementById('donutChart').innerHTML=donutSvg+'<div style="display:flex;flex-direction:column;gap:4px">'+legendHtml+'</div>';
 }
+var _lastChartsKey='';
 
 function renderCards(groups,filter,search){
   var html='';
@@ -1472,7 +1477,7 @@ function renderCards(groups,filter,search){
 }
 
 var currentFilter='all',currentSearch='';
-var _lastCardsHTML='',_lastCardsFilter='',_lastCardsSearch='';
+var _lastCardsHTML='',_lastCardsFilter='all',_lastCardsSearch='';
 function setFilter(el,f){currentFilter=f;document.querySelectorAll('#filterBar .filter-tag').forEach(function(t){t.classList.remove('active')});el.classList.add('active');applyFilter(currentSearch)}
 function applyFilter(v){currentSearch=v;renderCards(groupByInv(),currentFilter,currentSearch)}
 
@@ -2183,6 +2188,7 @@ function renderPending(){
 }
 
 function refreshAll(){
+  _lastCardsHTML='';_lastCardsFilter='all';_lastCardsSearch='';_lastChartsKey='';
   var groups=groupByInv();
   renderDashboard(groups);
   renderCards(groups,'all','');
@@ -2889,7 +2895,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-15 17:00:13", "友鹰热搜": "2026-06-15 09:05:50", "销售数据": "2026-06-15 17:02:04", "看板部署": "2026-06-16 00:06:07", "货憨憨订单": "2026-06-15 22:31:47", "tasks": {"货憨憨订单": {"last_success": "2026-06-15 21:32:30", "records_pulled": "18", "new_added": 0, "total_after": 1076}}};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-15 17:00:13", "友鹰热搜": "2026-06-15 09:05:50", "销售数据": "2026-06-15 17:02:04", "看板部署": "2026-06-16 01:06:04", "货憨憨订单": "2026-06-15 22:31:47", "tasks": {"货憨憨订单": {"last_success": "2026-06-15 21:32:30", "records_pulled": "18", "new_added": 0, "total_after": 1076}}};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
