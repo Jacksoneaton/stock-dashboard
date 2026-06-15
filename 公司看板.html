@@ -796,7 +796,9 @@ function loadInventory(pid) {
           };
         });
       }
-      renderStore(pid || currentStore);
+      // Refresh current store with freshly loaded inventory data
+      renderStore(currentStore);
+      _inventoryLoading = false;
     })
     .catch(function(e) {
       console.error('Inventory load failed:', e);
