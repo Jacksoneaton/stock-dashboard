@@ -2213,7 +2213,7 @@ function renderPending(){
     var nHtml='';
     noStock.forEach(function(item){
       var tagColor=item.suggestion.indexOf('全码')>=0?'var(--green)':item.suggestion.indexOf('单规格')>=0?'var(--cyan)':'var(--purple)';
-      var picHtml=item.itemPic?'<img src=\"'+item.itemPic+'\" style=\"width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0;margin-right:10px\" onerror=\"this.style.display=\\'none\\'\">':'';
+      var picHtml=item.itemPic?'<img src="'+item.itemPic+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0;margin-right:10px" onerror="this.style.display=\'none\'">':'';
       nHtml+='<div class=\"suggest-card\" style=\"padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start\">'+
         picHtml+
         '<div style=\"flex:1;min-width:0\">'+
