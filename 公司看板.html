@@ -234,9 +234,9 @@ function renderStore(pid){
     return t >= range.start && t < range.end;
   });
   
-  // If "today" has 0 orders, auto fallback to all orders
+  // If current period has 0 orders, auto fallback to all orders
   var isFallbackAll = false;
-  if (currentPeriod === 'today' && filtered.length === 0) {
+  if (filtered.length === 0) {
     filtered = orders.slice();
     isFallbackAll = true;
   }
@@ -281,7 +281,7 @@ function renderStore(pid){
   var periodLabels = {today:'今天',yesterday:'昨天','7days':'过去7天','30days':'过去30天',month:'本月'};
   var pHtml = '';
   ['today','yesterday','7days','30days','month'].forEach(function(p){
-    pHtml += '<span class="date-tab'+(p===currentPeriod?' active':'')+'" onclick="switchPeriod(\''+p+'\')">'+periodLabels[p]+'</span>';
+    pHtml += '<span class="date-tab'+(p===currentPeriod?' active':'')+'" data-period="'+p+'">'+periodLabels[p]+'</span>';
   });
   
   var periodLabel = isFallbackAll ? '全部' : periodLabels[currentPeriod];
@@ -685,11 +685,17 @@ function toggleSubTab(el,id){
   }
 }
 
-// Event delegation for sub-tabs (handles dynamically created tabs)
+// Event delegation for sub-tabs and date-tabs (handles dynamically created elements)
 document.addEventListener('click', function(e){
   var tab = e.target.closest('.sub-tab');
-  if (!tab || !tab.dataset.sub) return;
-  toggleSubTab(tab, tab.dataset.sub);
+  if (tab && tab.dataset.sub) {
+    toggleSubTab(tab, tab.dataset.sub);
+    return;
+  }
+  var dateTab = e.target.closest('.date-tab');
+  if (dateTab && dateTab.dataset.period) {
+    switchPeriod(dateTab.dataset.period);
+  }
 });
 
 // ── Inventory management functions ──
