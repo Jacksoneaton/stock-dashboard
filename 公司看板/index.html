@@ -584,6 +584,7 @@ function renderStore(pid){
   html += '<span><button data-action="exportRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📥 导出</button> ';
   html += '<button data-action="importRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📤 导入</button> ';
   html += '<button data-action="showChangeLog" style="padding:3px 12px;font-size:10px;border:1px dashed var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer;color:var(--muted)">📝 变更日志 ('+_reservationLog.length+'条)</button></span>';
+  html += '</div>';
   
   // This store's reserved specs
   var reservedKeys = Object.keys(storeReserved);
