@@ -167,10 +167,10 @@ function buildSidebar(){
     g.shops.forEach(function(pid){
       var s = STORE_DATA[pid];
       if(s){
-        html += '<a class="shop" data-pid="'+pid+'" onclick="selectStore(\''+pid+'\')">'
+        html += '<a class="shop" data-pid="'+pid+'">'
           + s.name + ' <span class="count">'+s.total+'</span></a>';
       } else {
-        html += '<a class="shop" data-pid="'+pid+'" onclick="selectStore(\''+pid+'\')">'
+        html += '<a class="shop" data-pid="'+pid+'">'
           + (pid==='22089114'?'琪屿·Vibe':'你的喵系女友 miao') + '</a>';
       }
     });
@@ -685,16 +685,23 @@ function toggleSubTab(el,id){
   }
 }
 
-// Event delegation for sub-tabs and date-tabs (handles dynamically created elements)
+// Event delegation: sub-tabs, date-tabs, and store sidebar (manually walk up DOM for max compatibility)
 document.addEventListener('click', function(e){
-  var tab = e.target.closest('.sub-tab');
-  if (tab && tab.dataset.sub) {
-    toggleSubTab(tab, tab.dataset.sub);
-    return;
-  }
-  var dateTab = e.target.closest('.date-tab');
-  if (dateTab && dateTab.dataset.period) {
-    switchPeriod(dateTab.dataset.period);
+  var el = e.target;
+  while (el) {
+    if (el.classList.contains('sub-tab') && el.dataset.sub) {
+      toggleSubTab(el, el.dataset.sub);
+      return;
+    }
+    if (el.classList.contains('date-tab') && el.dataset.period) {
+      switchPeriod(el.dataset.period);
+      return;
+    }
+    if (el.classList.contains('shop') && el.dataset.pid) {
+      selectStore(el.dataset.pid);
+      return;
+    }
+    el = el.parentElement;
   }
 });
 
