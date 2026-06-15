@@ -473,15 +473,21 @@ footer a{color:var(--dim);text-decoration:none}
 .sales-trend .bar-fill{width:100%;background:linear-gradient(180deg,var(--cyan),rgba(8,145,178,.3));border-radius:4px 4px 0 0;transition:height .4s ease;min-height:2px}
 .sales-trend .bar-val{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:4px;text-align:center}
 .sales-trend .bar-label{font-size:10px;color:var(--dim);margin-top:6px;text-align:center}
-.sales-wow{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:12px}
-.sales-wow .wow-item{flex:1;text-align:center;background:#f8fafb;border-radius:8px;padding:10px 8px}
-.sales-wow .wow-icon{font-size:16px;margin-bottom:2px}
-.sales-wow .wow-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.sales-wow .wow-val{font-size:13px;font-family:'JetBrains Mono',monospace;font-weight:600;line-height:1.2}
-.sales-wow .wow-delta{font-size:10px;font-family:'JetBrains Mono',monospace;margin-top:2px}
-.sales-wow .wow-delta.up{color:var(--green)}
-.sales-wow .wow-delta.down{color:var(--red)}
-@media(max-width:768px){.sales-kpi{grid-template-columns:repeat(2,1fr)}.sales-row{grid-template-columns:1fr}.sales-orders .so-name{max-width:100px}}
+.sales-wow{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:10px}
+.sales-wow .wow-item{flex:1;min-width:0;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 14px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.sales-wow .wow-item::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--cyan);opacity:.3}
+.sales-wow .wow-item.up::before{background:var(--green)}
+.sales-wow .wow-item.down::before{background:var(--red)}
+.sales-wow .wow-item.flat::before{background:var(--dim)}
+.sales-wow .wow-label{font-size:10px;color:var(--muted);letter-spacing:.3px;margin-bottom:6px}
+.sales-wow .wow-val{font-size:22px;font-weight:800;line-height:1.1;letter-spacing:-.5px;margin-bottom:6px;word-break:break-word}
+.sales-wow .wow-val small{font-size:12px;font-weight:500;color:var(--muted);margin-left:2px}
+.sales-wow .wow-delta{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-bottom:3px}
+.sales-wow .wow-delta.up{background:rgba(34,197,94,.08);color:var(--green)}
+.sales-wow .wow-delta.down{background:rgba(239,68,68,.08);color:var(--red)}
+.sales-wow .wow-delta.flat{background:rgba(0,0,0,.04);color:var(--muted)}
+.sales-wow .wow-vs{font-size:9px;color:var(--dim);letter-spacing:.2px}
+@media(max-width:768px){.sales-kpi{grid-template-columns:repeat(2,1fr)}.sales-row{grid-template-columns:1fr}.sales-orders .so-name{max-width:100px}.sales-wow .wow-item{flex:1 1 45%}.sales-wow .wow-val{font-size:18px}}
 
 
 /* Sub-tabs */
@@ -2392,15 +2398,25 @@ function renderSalesTab(){
   var yst=SALES.periods.yesterday||{orders:0,revenue:0,items:0};
   function dd(a,b){return b?((a-b)/b*100):null;}
   function df(v){if(v===null)return'--';var s=v>=0?'+':'';return s+v.toFixed(1)+'%';}
-  function dc(v){return v===null?'wow-delta':v>=0?'wow-delta up':'wow-delta down';}
   function di(v){return v===null?'➖':v>=0?'🟢':'🔴';}
+  function dcls(v){return v===null?'flat':v>=0?'up':'down';}
+  function wowCard(label,val,unit,delta,pct,vs){
+    var cls=dcls(delta);
+    var icon=di(delta);
+    return '<div class="wow-item '+cls+'">'+
+      '<div class="wow-label">'+label+'</div>'+
+      '<div class="wow-val">'+(unit?unit:'')+val+(unit?'':'')+'</div>'+
+      '<div class="wow-delta '+cls+'">'+icon+' '+pct+'</div>'+
+      '<div class="wow-vs">'+vs+'</div>'+
+    '</div>';
+  }
   var dr=dd(dod.revenue,yst.revenue),do2=dd(dod.orders,yst.orders),dit=dd(dod.items,yst.items);
   var ta=dod.orders?dod.revenue/dod.orders:0,ya=yst.orders?yst.revenue/yst.orders:0,da=ya?((ta-ya)/ya*100):null;
   document.getElementById('salesDod').innerHTML=
-    '<div class="wow-item"><div class="wow-label">今天营业额</div><div class="wow-val">NT$'+dod.revenue.toLocaleString()+'</div><div class="'+dc(dr)+'">'+di(dr)+' '+df(dr)+' vs 昨天</div></div>'+
-    '<div class="wow-item"><div class="wow-label">今天订单</div><div class="wow-val">'+dod.orders+' 单</div><div class="'+dc(do2)+'">'+di(do2)+' '+df(do2)+' vs 昨天</div></div>'+
-    '<div class="wow-item"><div class="wow-label">今天件数</div><div class="wow-val">'+dod.items+' 件</div><div class="'+dc(dit)+'">'+di(dit)+' '+df(dit)+' vs 昨天</div></div>'+
-    '<div class="wow-item"><div class="wow-label">客单价</div><div class="wow-val">NT$'+Math.round(ta)+'</div><div class="'+dc(da)+'">'+di(da)+' '+df(da)+' vs 昨天</div></div>';
+    wowCard('今天营业额','NT$ '+dod.revenue.toLocaleString(),'',dr,df(dr),'vs 昨天')+
+    wowCard('今天订单',dod.orders,' 单',do2,df(do2),'vs 昨天')+
+    wowCard('今天件数',dod.items,' 件',dit,df(dit),'vs 昨天')+
+    wowCard('客单价','NT$ '+Math.round(ta).toLocaleString(),'',da,df(da),'vs 昨天');
 
   // Top products with revenue bars
   var maxRev=(p.topProducts||[]).reduce(function(m,x){return Math.max(m,x.revenue);},1);
@@ -2460,10 +2476,11 @@ function renderSalesTab(){
   function fmtDelta(v){if(v===null)return '--';var s=v>=0?'+':'';return s+v.toFixed(1)+'%';}
   function deltaCls(v){if(v===null)return'wow-delta';return v>=0?'wow-delta up':'wow-delta down';}
   function deltaIcon(v){if(v===null)return'➖';return v>=0?'🟢':'🔴';}
+  function d2cls(v){return v===null?'flat':v>=0?'up':'down';}
   document.getElementById('salesWow').innerHTML=
-    '<div class="wow-item"><div class="wow-label">本周营业额</div><div class="wow-val">NT$ '+Math.round(thisWeek.rev).toLocaleString()+'</div><div class="'+deltaCls(wowRevs)+'">'+deltaIcon(wowRevs)+' '+fmtDelta(wowRevs)+' vs 上周</div></div>'+
-    '<div class="wow-item"><div class="wow-label">本周订单</div><div class="wow-val">'+thisWeek.cnt+' 单</div><div class="'+deltaCls(wowCnt)+'">'+deltaIcon(wowCnt)+' '+fmtDelta(wowCnt)+' vs 上周</div></div>'+
-    '<div class="wow-item"><div class="wow-label">客单价</div><div class="wow-val">NT$'+Math.round(tAov)+'</div><div class="'+deltaCls(wowAov)+'">'+deltaIcon(wowAov)+' '+fmtDelta(wowAov)+' vs 上周</div></div>';
+    wowCard('本周营业额','NT$ '+Math.round(thisWeek.rev).toLocaleString(),'',wowRevs,fmtDelta(wowRevs),'vs 上周')+
+    wowCard('本周订单',thisWeek.cnt,' 单',wowCnt,fmtDelta(wowCnt),'vs 上周')+
+    wowCard('客单价','NT$ '+Math.round(tAov).toLocaleString(),'',wowAov,fmtDelta(wowAov),'vs 上周');
 
   // Order detail — 卡片式，按订单号合并显示
   var pd=_salesPeriod;
