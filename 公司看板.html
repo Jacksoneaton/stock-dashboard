@@ -270,9 +270,11 @@ function buildSidebar(){
 
 function selectStore(pid){
   _currentView = 'store';
+  var storeChanged = (currentStore !== pid);
   currentStore = pid;
   currentPeriod = 'today';
-  _invPage = 1;
+  if (storeChanged) _invPage = 1;
+  try { sessionStorage.setItem('hermes_co_store', pid); } catch(e) {}
   document.querySelectorAll('.sidebar .shop').forEach(function(el){el.classList.remove('active')});
   var el = document.querySelector('.sidebar .shop[data-pid="'+pid+'"]');
   if(el) el.classList.add('active');
@@ -1502,10 +1504,10 @@ try {
 } catch(e) {}
 
 // Init: render immediately, then sync reservations asynchronously
-// Restore tab state from session (inventory tab stays after refresh)
+// Restore tab + store state from session (survives refresh)
 try {
   var savedTab = sessionStorage.getItem('hermes_co_tab');
-  if (savedTab === 'inventory') currentSubTab = 'inventory';
+  if (savedTab) currentSubTab = savedTab;
 } catch(e) {}
 if (!currentSubTab) currentSubTab = 'orders';
 buildSidebar();
@@ -1515,7 +1517,11 @@ STORE_GROUPS.forEach(function(g){
     if(!firstPid && STORE_DATA[pid]) firstPid = pid;
   });
 });
-if(firstPid) selectStore(firstPid);
+// Restore last-selected store, fall back to first store
+var startPid = null;
+try { startPid = sessionStorage.getItem('hermes_co_store'); } catch(e) {}
+if (!startPid || !STORE_DATA[startPid]) startPid = firstPid;
+if(startPid) selectStore(startPid);
 
 // Sync reservations from GitHub in background (doesn't block rendering)
 loadReservationsFromGitHub();
