@@ -629,6 +629,7 @@ function renderStore(pid){
     allSpecs.slice(pageStart, pageEnd).forEach(function(row) {
       var pt = row.product;
       var specQty = row.specQty;
+      var isOverAlloc = row.reservedTotal >= specQty && specQty > 0;
       var escProduct = pt.replace(/'/g,"\\'").replace(/"/g,'&quot;');
       var escSpec = row.spec.replace(/'/g,"\\'").replace(/"/g,'&quot;');
       var isFirstOfProduct = !seenProducts[pt];
