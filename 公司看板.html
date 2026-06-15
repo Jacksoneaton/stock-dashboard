@@ -714,7 +714,7 @@ function renderStore(pid){
     });
     var pageSize = 50;
     var totalPages = Math.ceil(invProducts.length / pageSize);
-    var invPage = 1;
+    _invPage = 1;
 
     // Build flat spec list from products
     var allSpecs = [];
@@ -788,7 +788,7 @@ function renderStore(pid){
       html = html.replace('<tbody>', '<tbody style="background:rgba(255,0,0,0.03)">');
     }
     
-    var pageStart = (invPage-1) * pageSize;
+    var pageStart = (_invPage-1) * pageSize;
     var pageEnd = Math.min(pageStart + pageSize, allSpecs.length);
     if (allSpecs.length === 0) {
       var esMsg = '当前仓库无可分配规格';
@@ -828,9 +828,10 @@ function renderStore(pid){
     }
     html += '</tbody></table>';
     html += '<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px;font-size:11px">';
-    html += '<button onclick="invPage=Math.max(1,invPage-1);renderStore(currentStore)" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">◀ 上一页</button>';
+    html += '<button data-inv-page="prev" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">◀ 上一页</button>';
+    _invTotalPages = totalPages;
     html += '<span style="color:var(--muted)">第 <span id="invPageNum">1</span>/'+totalPages+' 页 · '+allSpecs.length+' 个规格</span>';
-    html += '<button onclick="invPage=Math.min(totalPages,invPage+1);renderStore(currentStore)" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">下一页 ▶</button>';
+    html += '<button data-inv-page="next" style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">下一页 ▶</button>';
     html += '</div></div>';
   }
   
@@ -929,6 +930,12 @@ document.addEventListener('click', function(e){
         selectStore(el.dataset.pid);
         return;
       }
+      if (el.dataset.invPage) {
+        if (el.dataset.invPage === 'prev') _invPage = Math.max(1, _invPage-1);
+        else _invPage = Math.min(_invTotalPages, _invPage+1);
+        renderStore(currentStore);
+        return;
+      }
       if (el.dataset.af) {
         filterAlloc(el.dataset.af);
         return;
@@ -993,6 +1000,8 @@ var _currentWarehouse = 'all';
 var _showZeroStock = false;
 var _allocFilter = 'all';
 var _occRateSort = null;
+var _invPage = 1;
+var _invTotalPages = 1;
 
 function toggleZeroStock(btn) {
   _showZeroStock = !_showZeroStock;
@@ -1004,7 +1013,7 @@ function toggleZeroStock(btn) {
     document.querySelector('.inv-warehouse-btn[data-wh="all"]').classList.add('active');
     _currentWarehouse = 'all';
   }
-  invPage = 1;
+  _invPage = 1;
   renderStore(currentStore);
 }
 
@@ -1014,13 +1023,13 @@ function filterAlloc(af) {
   document.querySelectorAll('.inv-zero-btn').forEach(function(b){b.classList.remove('active'); b.style.background='var(--card-bg)'; b.style.color='var(--red)';});
   document.querySelectorAll('.inv-alloc-btn').forEach(function(b){b.classList.remove('active')});
   document.querySelectorAll('.inv-alloc-btn[data-af="'+af+'"]').forEach(function(b){b.classList.add('active')});
-  invPage = 1;
+  _invPage = 1;
   renderStore(currentStore);
 }
 
 function toggleOccRateSort() {
   _occRateSort = _occRateSort === 'asc' ? 'desc' : _occRateSort === 'desc' ? null : 'asc';
-  invPage = 1;
+  _invPage = 1;
   renderStore(currentStore);
 }
 
@@ -1030,7 +1039,7 @@ function filterWarehouse(btn, wh) {
   document.querySelectorAll('.inv-warehouse-btn').forEach(function(b){b.classList.remove('active')});
   document.querySelectorAll('.inv-zero-btn').forEach(function(b){b.classList.remove('active'); b.style.background='var(--card-bg)'; b.style.color='var(--red)';});
   btn.classList.add('active');
-  invPage = 1;
+  _invPage = 1;
   renderStore(currentStore);
 }
 
