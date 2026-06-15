@@ -274,6 +274,8 @@ function imgOnError(img) {
     img.parentNode.insertBefore(span, img.nextSibling);
   }
 }
+function imgHide(img){img.style.display="none"}
+
 
 function renderStore(pid){
   try {
@@ -558,7 +560,7 @@ function renderStore(pid){
       if (r.stores) { for (var sp in r.stores) { if (sp !== pid) otherRes += r.stores[sp]; } }
       var isOverAlloc = resQty + otherRes >= specQty && specQty > 0;
       html += '<tr' + (isOverAlloc ? ' style="background:rgba(239,68,68,.08)"' : '') + '>'
-        + '<td style="text-align:center">'+(invImg?'<img src="'+invImg+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="this.style.display=\'none\'">':'')+'</td>'
+        + '<td style="text-align:center">'+(invImg?'<img src="'+invImg+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="imgHide(this)" data-fb="1">':'')+'</td>'
         + '<td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pt+'">'+pt+'</td>'
         + '<td style="font-size:11px">'+specName+'</td>'
         + '<td>'+specQty+'</td>'
@@ -763,7 +765,7 @@ function renderStore(pid){
         batchBtn = ' <button data-batch="'+escProduct+'" data-bpid="'+pid+'" style="padding:3px 8px;font-size:10px;background:var(--green);color:#fff;border:none;border-radius:4px;cursor:pointer" title="一键认领该产品所有可售规格（共'+productTotals[pt].total+'件）">📦整批</button>';
       }
       html += '<tr class="inv-row' + (isOverAlloc ? ' over-alloc' : '') + '" data-title="'+pt.replace(/"/g,'&quot;')+'" data-spec="'+row.spec.replace(/"/g,'&quot;')+'" data-wh="'+row.storeName+'">'
-        + '<td style="text-align:center">'+(row.image?'<img src="'+row.image+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="this.style.display=\'none\'">':'')+'</td>'
+        + '<td style="text-align:center">'+(row.image?'<img src="'+row.image+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="imgHide(this)" data-fb="1">':'')+'</td>'
         + '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pt+'">'+pt+'</td>'
         + '<td style="font-size:11px">'+row.spec+'</td>'
         + '<td style="font-weight:600;color:'+(isOverAlloc?'var(--red)':'var(--text)')+'">'+specQty+(isOverAlloc?' <span style="font-size:9px;background:var(--red);color:#fff;padding:1px 4px;border-radius:3px">已超额</span>':'')+'</td>'
