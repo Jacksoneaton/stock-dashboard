@@ -49,6 +49,7 @@ img,svg{max-width:100%;height:auto}
 .refund-filter.active{box-shadow:0 0 0 2px var(--cyan)!important}
 tr.over-alloc{background:rgba(239,68,68,.06)!important}
 tr.over-alloc:hover{background:rgba(239,68,68,.12)!important}
+.export-picker-btn:hover{background:var(--bg)!important}
 /* table */
 .data-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card-bg);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
 .data-table th{background:var(--bg);padding:8px 12px;text-align:left;font-weight:600;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.3px}
@@ -583,7 +584,12 @@ function renderStore(pid){
   html += '<div id="sub-inventory" style="display:'+(currentSubTab==='inventory'?'block':'none')+'">';
   html += '<div style="font-size:10px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:nowrap;gap:8px">';
   html += '<span>库存数据更新: '+INVENTORY_TIME+'</span>';
-  html += '<span><button data-action="exportRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📥 导出</button> ';
+  html += '<span><span style="position:relative;display:inline-block">';
+  html += '<button data-action="showExportPicker" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📥 导出</button>';
+  html += '<div id="exportPicker" style="display:none;position:absolute;top:100%;left:0;z-index:50;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;box-shadow:var(--shadow-lg);padding:4px;min-width:120px;margin-top:2px">';
+  html += '<button data-action="exportJSON" class="export-picker-btn" style="display:block;width:100%;padding:5px 10px;font-size:11px;border:none;background:transparent;cursor:pointer;text-align:left;border-radius:3px">📄 JSON</button>';
+  html += '<button data-action="exportCSV" class="export-picker-btn" style="display:block;width:100%;padding:5px 10px;font-size:11px;border:none;background:transparent;cursor:pointer;text-align:left;border-radius:3px">📊 CSV (Excel)</button>';
+  html += '</div></span> ';
   html += '<button data-action="importRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📤 导入</button> ';
   html += '<button data-action="showChangeLog" style="padding:3px 12px;font-size:10px;border:1px dashed var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer;color:var(--muted)">📝 变更日志 ('+_reservationLog.length+'条)</button></span>';
   html += '</div>';
@@ -959,7 +965,9 @@ document.addEventListener('click', function(e){
         return;
       }
       if (el.dataset.action) {
-        if (el.dataset.action === 'exportRes') { exportReservations(); return; }
+        if (el.dataset.action === 'showExportPicker') { showExportPicker(); return; }
+        if (el.dataset.action === 'exportJSON') { exportReservationsJSON(); return; }
+        if (el.dataset.action === 'exportCSV') { exportReservationsCSV(); return; }
         if (el.dataset.action === 'importRes') { importReservations(); return; }
         if (el.dataset.action === 'closeAssign') { closeAssignModal(); return; }
         if (el.dataset.action === 'saveAssign') { saveReservation(); return; }
@@ -1178,7 +1186,25 @@ function logReservationChange(storePid, product, spec, oldQty, newQty) {
 }
 
 // ── Export / Import reservations ──
-function exportReservations() {
+function showExportPicker() {
+  var picker = document.getElementById('exportPicker');
+  if (!picker) return;
+  if (picker.style.display === 'block') { picker.style.display = 'none'; return; }
+  // Hide change log modal first if open
+  var cl = document.getElementById('changeLogModal');
+  if (cl) cl.style.display = 'none';
+  picker.style.display = 'block';
+  // Close picker on next outside click
+  setTimeout(function() {
+    document.addEventListener('click', hideExportPicker, {once: true});
+  }, 10);
+}
+function hideExportPicker() {
+  var picker = document.getElementById('exportPicker');
+  if (picker) picker.style.display = 'none';
+}
+function exportReservationsJSON() {
+  hideExportPicker();
   var data = JSON.stringify(RESERVATIONS || {}, null, 2);
   var blob = new Blob([data], {type: 'application/json'});
   var a = document.createElement('a');
@@ -1189,31 +1215,141 @@ function exportReservations() {
   a.click();
   document.body.removeChild(a);
 }
-
+function exportReservationsCSV() {
+  hideExportPicker();
+  var data = RESERVATIONS || {};
+  var keys = Object.keys(data).sort();
+  // Collect all active store IDs
+  var storeIds = [];
+  STORE_GROUPS.forEach(function(g) {
+    g.shops.forEach(function(sp) {
+      if (STORE_DATA[sp]) storeIds.push(sp);
+    });
+  });
+  // Build CSV header
+  var header = ['产品', '规格'];
+  storeIds.forEach(function(sid) {
+    var sn = STORE_DATA[sid] ? STORE_DATA[sid].name : sid;
+    header.push('"' + sn.replace(/"/g, '""') + '"');
+  });
+  var rows = [header.join(',')];
+  // Data rows
+  keys.forEach(function(key) {
+    var r = data[key];
+    var cols = [
+      '"' + (r.product || '').replace(/"/g, '""') + '"',
+      '"' + (r.spec || '').replace(/"/g, '""') + '"'
+    ];
+    storeIds.forEach(function(sid) {
+      cols.push((r.stores && r.stores[sid]) ? r.stores[sid] : 0);
+    });
+    rows.push(cols.join(','));
+  });
+  var csv = '\uFEFF' + rows.join('\n');
+  var blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  var ds = new Date().toISOString().slice(0,10);
+  a.download = '保留配置_' + ds + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
 function importReservations() {
   var input = document.createElement('input');
   input.type = 'file';
-  input.accept = '.json';
+  input.accept = '.json,.csv';
   input.onchange = function(e) {
     var file = e.target.files[0];
     if (!file) return;
+    var ext = (file.name.split('.').pop() || '').toLowerCase();
     var reader = new FileReader();
     reader.onload = function(ev) {
       try {
-        var data = JSON.parse(ev.target.result);
-        var count = 0;
-        for (var k in data) { if (k !== '_note') { RESERVATIONS[k] = data[k]; count++; } }
-        try { localStorage.setItem('hermes_co_reservations', JSON.stringify(RESERVATIONS)); } catch(ex) {}
-        saveReservationsToGitHub();
-        renderStore(currentStore);
-        alert('✅ 导入成功！共 ' + count + ' 条保留配置');
+        if (ext === 'csv') {
+          importReservationsFromCSV(ev.target.result);
+        } else {
+          var data = JSON.parse(ev.target.result);
+          var count = 0;
+          for (var k in data) { if (k !== '_note') { RESERVATIONS[k] = data[k]; count++; } }
+          try { localStorage.setItem('hermes_co_reservations', JSON.stringify(RESERVATIONS)); } catch(ex) {}
+          saveReservationsToGitHub();
+          renderStore(currentStore);
+          alert('✅ 导入成功！共 ' + count + ' 条保留配置（JSON）');
+        }
       } catch(err) {
-        alert('❌ 导入失败：文件格式错误');
+        alert('❌ 导入失败：文件格式错误 - ' + err.message);
       }
     };
     reader.readAsText(file);
   };
   input.click();
+}
+function importReservationsFromCSV(csvText) {
+  var lines = csvText.split(/\r?\n/).filter(function(l) { return l.trim(); });
+  if (lines.length < 2) throw new Error('CSV 至少需要表头和数据行');
+  // Remove BOM if present
+  if (lines[0].charCodeAt(0) === 0xFEFF) lines[0] = lines[0].slice(1);
+  var headers = parseCSVLine(lines[0]);
+  // Build store name → store ID mapping
+  var nameToId = {};
+  STORE_GROUPS.forEach(function(g) {
+    g.shops.forEach(function(sp) {
+      if (STORE_DATA[sp]) nameToId[STORE_DATA[sp].name] = sp;
+    });
+  });
+  // Map header columns (index 2+) to store IDs
+  var colStore = {}; // col index → store ID
+  for (var i = 2; i < headers.length; i++) {
+    var hname = (headers[i] || '').trim();
+    if (nameToId[hname]) colStore[i] = nameToId[hname];
+  }
+  // Parse data rows
+  var count = 0;
+  for (var r = 1; r < lines.length; r++) {
+    var cols = parseCSVLine(lines[r]);
+    var product = (cols[0] || '').trim();
+    var spec = (cols[1] || '').trim();
+    if (!product || !spec) continue;
+    var specKey = product + '||' + spec;
+    if (!RESERVATIONS[specKey]) {
+      RESERVATIONS[specKey] = {product: product, spec: spec, stores: {}};
+    }
+    for (var ci in colStore) {
+      var qty = parseInt(cols[ci]) || 0;
+      if (qty > 0) {
+        RESERVATIONS[specKey].stores[colStore[ci]] = qty;
+      }
+    }
+    count++;
+  }
+  try { localStorage.setItem('hermes_co_reservations', JSON.stringify(RESERVATIONS)); } catch(ex) {}
+  saveReservationsToGitHub();
+  renderStore(currentStore);
+  alert('✅ 导入成功！共 ' + count + ' 条保留配置（CSV）');
+}
+function parseCSVLine(line) {
+  var result = [];
+  var current = '';
+  var inQuotes = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"'; i++;
+        } else {
+          inQuotes = false;
+        }
+      } else { current += ch; }
+    } else {
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { result.push(current); current = ''; }
+      else { current += ch; }
+    }
+  }
+  result.push(current);
+  return result;
 }
 
 function saveReservation() {
