@@ -319,6 +319,10 @@ function fmtTime(t){
   if(!t) return '';
   return t.replace(' ','<br>');
 }
+function fmtTimeInline(t){
+  if(!t) return '';
+  return t;
+}
 
 function fmtStatus(s){
   var m = {'READY_TO_SHIP':'待发货','SHIPPED':'已发货','COMPLETED':'已完成','CANCELLED':'已取消','TO_CONFIRM_RECEIVE':'待确认'};
@@ -453,37 +457,54 @@ function renderStore(pid){
   html += '<span class="sub-tab'+(currentSubTab==='inventory'?' active':'')+'" data-sub="inventory">📦 库存管理</span>';
   html += '</div>';
   
-  // Orders table
-  html += '<div id="sub-orders" style="display:'+(currentSubTab==='orders'?'block':'none')+'"><table class="data-table"><thead><tr>'
-    + '<th>订单号</th><th style="text-align:center">商品</th><th>规格</th><th>数量</th><th>单价</th><th>状态</th><th>时间</th>'
-    + '</tr></thead><tbody>';
-  var recentOrders = filtered.slice(0,50);
-  recentOrders.forEach(function(o){
-    var goods = o.shopOrderGoods || [];
-    var first = goods[0] || {};
-    html += '<tr>'
-      + '<td style="font-family:monospace;font-size:10px">'+o.orderSn+'</td>'
-      + '<td style="text-align:center">'+fmtImg(first.itemPic, first.itemName)+'</td>'
-      + '<td style="font-size:11px;color:var(--muted)">'+(first.modelName||'')+'</td>'
-      + '<td>'+goods.reduce(function(a,g){return a+(g.modelQuantityPurchased||1)},0)+'</td>'
-      + '<td style="font-family:monospace;font-size:11px">$'+(first.modelDiscountedPrice||0)+'</td>'
-      + '<td>'+fmtStatus(o.orderStatus)+'</td>'
-      + '<td style="font-size:10px;color:var(--muted)">'+fmtTime(o.createTime)+'</td>'
-      + '</tr>';
-    if(goods.length > 1){
-      for(var i=1;i<goods.length;i++){
-        html += '<tr>'
-          + '<td></td>'
-          + '<td style="text-align:center">'+fmtImg(goods[i].itemPic, goods[i].itemName)+'</td>'
-          + '<td style="font-size:11px;color:var(--muted)">'+(goods[i].modelName||'')+'</td>'
-          + '<td>'+(goods[i].modelQuantityPurchased||1)+'</td>'
-          + '<td style="font-family:monospace;font-size:11px">$'+(goods[i].modelDiscountedPrice||0)+'</td>'
-          + '<td></td><td></td>'
-          + '</tr>';
-      }
+  // Orders — card-based (同库存看板「最近订单」风格)
+  html += '<div id="sub-orders" style="display:'+(currentSubTab==='orders'?'block':'none')+'">';
+  // Group by order number
+  var orderMap = {}, orderList = [];
+  filtered.forEach(function(o) {
+    var sn = o.orderSn || '';
+    if (!orderMap[sn]) {
+      orderMap[sn] = {orderSn: sn, createTime: o.createTime, orderStatus: o.orderStatus, items: [], total: 0};
+      orderList.push(orderMap[sn]);
     }
+    var goods = o.shopOrderGoods || [];
+    goods.forEach(function(g) {
+      orderMap[sn].items.push(g);
+      orderMap[sn].total += (g.modelDiscountedPrice || 0) * (g.modelQuantityPurchased || 1);
+    });
   });
-  html += '</tbody></table></div>';
+  orderList.reverse(); // newest first
+  if (orderList.length === 0) {
+    html += '<div class="empty-state" style="padding:20px">暂无订单</div>';
+  } else {
+    orderList.slice(0, 50).forEach(function(ord) {
+      // Card header
+      html += '<div class="order-card" style="background:var(--card-bg);border-radius:var(--radius);padding:12px;margin-bottom:8px;box-shadow:var(--shadow-sm)">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">';
+      html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+      html += '<code style="font-size:11px;color:var(--cyan);font-weight:600">'+ord.orderSn+'</code>';
+      html += '<span style="font-size:10px;color:var(--muted)">'+fmtTimeInline(ord.createTime)+'</span>';
+      html += fmtStatus(ord.orderStatus);
+      html += '</div>';
+      html += '<div style="font-size:11px;color:var(--muted);white-space:nowrap">'+ord.items.length+'件 · <b style="color:var(--text)">$'+ord.total.toLocaleString()+'</b></div>';
+      html += '</div>';
+      // Item rows
+      ord.items.forEach(function(g) {
+        var escItem = (g.itemName||'').replace(/"/g,'&quot;').substring(0,40);
+        var escPic = (g.itemPic||'').replace(/"/g,'&quot;');
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px">';
+        html += (g.itemPic?'<img src="'+escPic+'" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="imgHide(this)">':'');
+        html += '<div style="flex:1;min-width:0">';
+        html += '<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escItem+'</div>';
+        html += '<div style="color:var(--muted);font-size:10px">'+(g.modelName||'-')+' ×'+(g.modelQuantityPurchased||1)+'</div>';
+        html += '</div>';
+        html += '<span style="font-weight:600;white-space:nowrap">$'+(g.modelDiscountedPrice||0)+'</span>';
+        html += '</div>';
+      });
+      html += '</div>'; // close card
+    });
+  }
+  html += '</div>'; // close sub-orders
   
   // Ranking table
   html += '<div id="sub-ranking" style="display:'+(currentSubTab==='ranking'?'block':'none')+'"><table class="data-table"><thead><tr>'
