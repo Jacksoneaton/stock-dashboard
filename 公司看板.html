@@ -711,7 +711,7 @@ function renderStore(pid){
     html += '<button class="inv-alloc-btn'+(af.v===_allocFilter?' active':'')+'" data-af="'+af.v+'" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:'+(af.v===_allocFilter?'var(--cyan)':'var(--card-bg)')+';color:'+(af.v===_allocFilter?'#fff':'var(--muted)')+';border-radius:10px;cursor:pointer">'+af.t+'</button>';
   });
   html += '</div>';
-  html += '<input type="text" id="invSearch" placeholder="搜索产品标题..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px" oninput="filterInventory()">';
+  html += '<input type="text" id="invSearch" placeholder="搜索产品、规格或编码..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px" oninput="filterInventory()">';
   
   var showInv = currentSubTab === 'inventory';
   if (!INVENTORY || !INVENTORY.products) {
@@ -820,7 +820,7 @@ function renderStore(pid){
       if (isFirstOfProduct && !_showZeroStock && productTotals[pt] && productTotals[pt].total > 0) {
         batchBtn = ' <button data-batch="'+escProduct+'" data-bpid="'+pid+'" style="padding:3px 8px;font-size:10px;background:var(--green);color:#fff;border:none;border-radius:4px;cursor:pointer" title="一键认领该产品所有可售规格（共'+productTotals[pt].total+'件）">📦整批</button>';
       }
-      html += '<tr class="inv-row' + (isOverAlloc ? ' over-alloc' : '') + '" data-title="'+pt.replace(/"/g,'&quot;')+'" data-spec="'+row.spec.replace(/"/g,'&quot;')+'" data-wh="'+row.storeName+'">'
+      html += '<tr class="inv-row' + (isOverAlloc ? ' over-alloc' : '') + '" data-title="'+pt.replace(/"/g,'&quot;')+'" data-spec="'+row.spec.replace(/"/g,'&quot;')+'" data-code="'+(row.code||'').replace(/"/g,'&quot;')+'" data-subcode="'+(row.subCode||'').replace(/"/g,'&quot;')+'" data-wh="'+row.storeName+'">'
         + '<td style="text-align:center">'+(row.image?'<img src="'+row.image+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="imgHide(this)" data-fb="1">':'')+'</td>'
         + '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+pt+'">'+pt+'</td>'
         + '<td style="font-size:11px">'+row.spec+'</td>'
@@ -1075,8 +1075,10 @@ function filterInventory() {
   rows.forEach(function(r) {
     var title = (r.dataset.title || '').toLowerCase();
     var spec = (r.dataset.spec || '').toLowerCase();
+    var code = (r.dataset.code || '').toLowerCase();
+    var subcode = (r.dataset.subcode || '').toLowerCase();
     var wh = r.dataset.wh || '';
-    var textMatch = !q || title.indexOf(q) >= 0 || spec.indexOf(q) >= 0;
+    var textMatch = !q || title.indexOf(q) >= 0 || spec.indexOf(q) >= 0 || code.indexOf(q) >= 0 || subcode.indexOf(q) >= 0;
     var whMatch = _currentWarehouse === 'all' || wh === _currentWarehouse;
     r.style.display = (textMatch && whMatch) ? '' : 'none';
   });
