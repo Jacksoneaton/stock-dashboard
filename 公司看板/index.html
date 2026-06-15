@@ -167,10 +167,10 @@ function buildSidebar(){
     g.shops.forEach(function(pid){
       var s = STORE_DATA[pid];
       if(s){
-        html += '<a class="shop" data-pid="'+pid+'">'
+        html += '<a class="shop" data-pid="'+pid+'" onclick="selectStore(this.dataset.pid)">'
           + s.name + ' <span class="count">'+s.total+'</span></a>';
       } else {
-        html += '<a class="shop" data-pid="'+pid+'">'
+        html += '<a class="shop" data-pid="'+pid+'" onclick="selectStore(this.dataset.pid)">'
           + (pid==='22089114'?'琪屿·Vibe':'你的喵系女友 miao') + '</a>';
       }
     });
@@ -281,7 +281,7 @@ function renderStore(pid){
   var periodLabels = {today:'今天',yesterday:'昨天','7days':'过去7天','30days':'过去30天',month:'本月'};
   var pHtml = '';
   ['today','yesterday','7days','30days','month'].forEach(function(p){
-    pHtml += '<span class="date-tab'+(p===currentPeriod?' active':'')+'" data-period="'+p+'">'+periodLabels[p]+'</span>';
+    pHtml += '<span class="date-tab'+(p===currentPeriod?' active':'')+'" data-period="'+p+'" onclick="switchPeriod(this.dataset.period)">'+periodLabels[p]+'</span>';
   });
   
   var periodLabel = isFallbackAll ? '全部' : periodLabels[currentPeriod];
@@ -304,18 +304,18 @@ function renderStore(pid){
   var hasRefund = REFUND && REFUND.stores && REFUND.stores[pid];
   var hasTrends = YOUYING_STORES && YOUYING_STORES[pid];
   html += '<div class="sub-tabs" id="subTabs">'
-    + '<span class="sub-tab'+(currentSubTab==='orders'?' active':'')+'" data-sub="orders">📋 订单列表</span>'
-    + '<span class="sub-tab'+(currentSubTab==='ranking'?' active':'')+'" data-sub="ranking">🔥 热销排行</span>'
-    + '<span class="sub-tab'+(currentSubTab==='status'?' active':'')+'" data-sub="status">📊 状态分布</span>';
+    + '<span class="sub-tab'+(currentSubTab==='orders'?' active':'')+'" data-sub="orders" onclick="toggleSubTab(this,this.dataset.sub)">📋 订单列表</span>'
+    + '<span class="sub-tab'+(currentSubTab==='ranking'?' active':'')+'" data-sub="ranking" onclick="toggleSubTab(this,this.dataset.sub)">🔥 热销排行</span>'
+    + '<span class="sub-tab'+(currentSubTab==='status'?' active':'')+'" data-sub="status" onclick="toggleSubTab(this,this.dataset.sub)">📊 状态分布</span>';
   if (hasTrends) {
     var yw = YOUYING_STORES[pid];
-    html += '<span class="sub-tab'+(currentSubTab==='trends'?' active':'')+'" data-sub="trends">📈 市场趋势 <span style="font-size:9px;color:var(--cyan)">'+(Object.keys(yw.keywords||{}).length||0)+'词</span></span>';
+    html += '<span class="sub-tab'+(currentSubTab==='trends'?' active':'')+'" data-sub="trends" onclick="toggleSubTab(this,this.dataset.sub)">📈 市场趋势 <span style="font-size:9px;color:var(--cyan)">'+(Object.keys(yw.keywords||{}).length||0)+'词</span></span>';
   }
   if (hasRefund) {
     var rd = REFUND.stores[pid];
-    html += '<span class="sub-tab'+(currentSubTab==='refund'?' active':'')+'" data-sub="refund">📋 退件提醒 <span style="font-size:9px;background:var(--red);color:#fff;padding:1px 5px;border-radius:8px">'+rd.matched+'</span></span>';
+    html += '<span class="sub-tab'+(currentSubTab==='refund'?' active':'')+'" data-sub="refund" onclick="toggleSubTab(this,this.dataset.sub)">📋 退件提醒 <span style="font-size:9px;background:var(--red);color:#fff;padding:1px 5px;border-radius:8px">'+rd.matched+'</span></span>';
   }
-  html += '<span class="sub-tab'+(currentSubTab==='inventory'?' active':'')+'" data-sub="inventory">📦 库存管理</span>';
+  html += '<span class="sub-tab'+(currentSubTab==='inventory'?' active':'')+'" data-sub="inventory" onclick="toggleSubTab(this,this.dataset.sub)">📦 库存管理</span>';
   html += '</div>';
   
   // Orders table
