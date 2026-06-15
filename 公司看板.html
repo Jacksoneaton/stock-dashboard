@@ -623,6 +623,13 @@ function renderStore(pid){
       }
     }
     
+    // Sort by占用率 if requested
+    if (_occRateSort === 'asc') {
+      allSpecs.sort(function(a,b) { return (a.reservedTotal/(a.specQty||1)) - (b.reservedTotal/(b.specQty||1)); });
+    } else if (_occRateSort === 'desc') {
+      allSpecs.sort(function(a,b) { return (b.reservedTotal/(b.specQty||1)) - (a.reservedTotal/(a.specQty||1)); });
+    }
+    
     // Calculate batch-claimable total per product (sum of shared across all specs)
     var productTotals = {};
     allSpecs.forEach(function(s) {
@@ -632,7 +639,7 @@ function renderStore(pid){
     
     var totalPages = Math.ceil(allSpecs.length / pageSize);
     html += '<div id="invPoolList">';
-    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格</th><th>库存</th><th>已分配</th><th>占用率</th><th>可售</th><th>操作</th></tr></thead><tbody>';
+    html += '<table class="data-table"><thead><tr><th style="text-align:center">图片</th><th>产品</th><th>规格</th><th>库存</th><th>已分配</th><th style="cursor:pointer" data-sort="occRate">占用率' + (_occRateSort==='asc'?' ▲':_occRateSort==='desc'?' ▼':'') + '</th><th>可售</th><th>操作</th></tr></thead><tbody>';
     if (_showZeroStock) {
       html = html.replace('<tbody>', '<tbody style="background:rgba(255,0,0,0.03)">');
     }
@@ -640,7 +647,12 @@ function renderStore(pid){
     var pageStart = (invPage-1) * pageSize;
     var pageEnd = Math.min(pageStart + pageSize, allSpecs.length);
     if (allSpecs.length === 0) {
-      html += '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">' + (_showZeroStock ? '✅ 所有规格均有可售库存' : '当前仓库无可分配规格') + '</td></tr>';
+      var esMsg = '当前仓库无可分配规格';
+      if (_showZeroStock) esMsg = '✅ 所有规格均有可售库存';
+      else if (_allocFilter === 'unallocated') esMsg = '✅ 所有规格均已分配';
+      else if (_allocFilter === 'partial') esMsg = '📊 无部分分配规格';
+      else if (_allocFilter === 'full') esMsg = '📦 无全部分配规格';
+      html += '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">' + esMsg + '</td></tr>';
     } else {
     var seenProducts = {};
     allSpecs.slice(pageStart, pageEnd).forEach(function(row) {
@@ -743,6 +755,10 @@ document.addEventListener('click', function(e){
         filterAlloc(el.dataset.af);
         return;
       }
+      if (el.dataset.sort) {
+        toggleOccRateSort();
+        return;
+      }
     }
     el = el.parentElement;
   }
@@ -754,6 +770,7 @@ var _assignPid = null, _assignProduct = null, _assignSpec = null, _assignTotal =
 var _currentWarehouse = 'all';
 var _showZeroStock = false;
 var _allocFilter = 'all';
+var _occRateSort = null;
 
 function toggleZeroStock(btn) {
   _showZeroStock = !_showZeroStock;
@@ -775,6 +792,12 @@ function filterAlloc(af) {
   document.querySelectorAll('.inv-zero-btn').forEach(function(b){b.classList.remove('active'); b.style.background='var(--card-bg)'; b.style.color='var(--red)';});
   document.querySelectorAll('.inv-alloc-btn').forEach(function(b){b.classList.remove('active')});
   document.querySelectorAll('.inv-alloc-btn[data-af="'+af+'"]').forEach(function(b){b.classList.add('active')});
+  invPage = 1;
+  renderStore(currentStore);
+}
+
+function toggleOccRateSort() {
+  _occRateSort = _occRateSort === 'asc' ? 'desc' : _occRateSort === 'desc' ? null : 'asc';
   invPage = 1;
   renderStore(currentStore);
 }
