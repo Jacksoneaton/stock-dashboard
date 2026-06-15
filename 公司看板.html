@@ -246,7 +246,12 @@ var STORE_GROUPS = [
 
 var currentStore = null;
 var currentPeriod = 'today';
-var currentSubTab = 'orders';
+var // Restore tab state from session (inventory tab stays after refresh)
+try {
+  var savedTab = sessionStorage.getItem('hermes_co_tab');
+  if (savedTab === 'inventory') currentSubTab = 'inventory';
+} catch(e) {}
+if (!currentSubTab) currentSubTab = 'orders';
 var _currentView = 'store';  // 'store' | 'global'
 
 function buildSidebar(){
@@ -579,7 +584,7 @@ function renderStore(pid){
   }
   
   html += '<div id="sub-inventory" style="display:'+(currentSubTab==='inventory'?'block':'none')+'">';
-  html += '<div style="font-size:10px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">';
+  html += '<div style="font-size:10px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:nowrap;gap:8px">';
   html += '<span>库存数据更新: '+INVENTORY_TIME+'</span>';
   html += '<span><button data-action="exportRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📥 导出</button> ';
   html += '<button data-action="importRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📤 导入</button> ';
@@ -899,7 +904,7 @@ function switchPeriod(p){
 
 function toggleSubTab(el,id){
   currentSubTab = id;
-  try { localStorage.setItem('hermes_co_subtab', id); } catch(e) {}
+  try { sessionStorage.setItem('hermes_co_tab', id); } catch(e) {}
   document.querySelectorAll('.sub-tab').forEach(function(t){t.classList.remove('active')});
   el.classList.add('active');
   var ids = ['orders','ranking','status','refund','trends','inventory'];
@@ -933,6 +938,7 @@ document.addEventListener('click', function(e){
       if (el.dataset.invPage) {
         if (el.dataset.invPage === 'prev') _invPage = Math.max(1, _invPage-1);
         else _invPage = Math.min(_invTotalPages, _invPage+1);
+        try { sessionStorage.setItem('hermes_co_invpage', _invPage); } catch(e) {}
         var _savedPage = _invPage;
         renderStore(currentStore);
         _invPage = _savedPage;
@@ -1003,6 +1009,10 @@ var _showZeroStock = false;
 var _allocFilter = 'all';
 var _occRateSort = null;
 var _invPage = 1;
+try {
+  var savedInvPage = sessionStorage.getItem('hermes_co_invpage');
+  if (savedInvPage) _invPage = parseInt(savedInvPage) || 1;
+} catch(e) {}
 var _invTotalPages = 1;
 
 function toggleZeroStock(btn) {
@@ -1496,7 +1506,12 @@ try {
 } catch(e) {}
 
 // Init: render immediately, then sync reservations asynchronously
-currentSubTab = 'orders';
+// Restore tab state from session (inventory tab stays after refresh)
+try {
+  var savedTab = sessionStorage.getItem('hermes_co_tab');
+  if (savedTab === 'inventory') currentSubTab = 'inventory';
+} catch(e) {}
+if (!currentSubTab) currentSubTab = 'orders';
 buildSidebar();
 var firstPid = null;
 STORE_GROUPS.forEach(function(g){
