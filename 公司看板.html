@@ -517,6 +517,45 @@ function renderStore(pid){
     html += '</tbody></table>';
     }
 
+  // ── All-store reservation matrix ──
+  html += '<div style="margin-top:24px">';
+  html += '<div class="sec-title">📊 全部店铺保留概览</div>';
+  
+  var allSpecKeys = [];
+  if (RESERVATIONS) { for (var k in RESERVATIONS) { allSpecKeys.push(k); } }
+  allSpecKeys.sort();
+  
+  var matrixStores = [];
+  STORE_GROUPS.forEach(function(g){ if (g.name !== '待接入') { g.shops.forEach(function(sp){ if (STORE_DATA[sp]) matrixStores.push(sp); }); } });
+  
+  if (allSpecKeys.length === 0) {
+    html += '<div class="empty-state" style="padding:12px">暂无保留数据</div>';
+  } else {
+    html += '<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>规格</th>';
+    matrixStores.forEach(function(sp){
+      var sn = STORE_DATA[sp] ? STORE_DATA[sp].name : sp;
+      html += '<th style="font-size:10px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+sn+'">'+sn+'</th>';
+    });
+    html += '<th style="font-size:10px">合计</th></tr></thead><tbody>';
+    
+    allSpecKeys.slice(0, 100).forEach(function(key){
+      var r = RESERVATIONS[key];
+      var product = r.product || '';
+      var spec = r.spec || '';
+      var rowTotal = 0;
+      html += '<tr><td style="font-size:10px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(product+' '+spec).replace(/"/g,'&quot;')+'">'+product+' · '+spec+'</td>';
+      matrixStores.forEach(function(sp){
+        var qty = (r.stores && r.stores[sp]) ? r.stores[sp] : 0;
+        rowTotal += qty;
+        html += '<td data-cell="'+key+'|'+sp+'" class="matrix-cell" style="text-align:center;cursor:pointer;font-weight:'+(qty>0?'600':'400')+';color:'+(qty>0?'var(--cyan)':'var(--dim)')+'">'+(qty>0?qty:'-')+'</td>';
+      });
+      html += '<td style="text-align:center;font-weight:600">'+rowTotal+'</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    if (allSpecKeys.length > 100) html += '<div style="font-size:10px;color:var(--muted);margin-top:4px">仅显示前 100 条，共 '+allSpecKeys.length+' 条</div>';
+  }
+  html += '</div>';
+
   // Public pool
   html += '<div class="sec-title" style="margin-top:24px">🌐 公共池</div>';
   html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center">';
@@ -787,6 +826,24 @@ document.addEventListener('click', function(e){
       if (el.dataset.action) {
         if (el.dataset.action === 'exportRes') { exportReservations(); return; }
         if (el.dataset.action === 'importRes') { importReservations(); return; }
+      }
+      if (el.dataset.cell) {
+        var parts = el.dataset.cell.split('|');
+        var cellSpecKey = parts.slice(0, -1).join('|');
+        var cellPid = parts[parts.length - 1];
+        var cellRes = RESERVATIONS && RESERVATIONS[cellSpecKey];
+        if (cellRes && cellRes.stores && cellRes.stores[cellPid] !== undefined) {
+          // Look up actual inventory qty
+          var realQty = 999999;
+          if (INVENTORY && INVENTORY.products_map && INVENTORY.products_map[cellRes.product]) {
+            var im = INVENTORY.products_map[cellRes.product];
+            (im.specs || []).forEach(function(s) {
+              if (s.spec === cellRes.spec) realQty = s.qty || 0;
+            });
+          }
+          openAssignModal(cellRes.product, cellRes.spec, cellPid, realQty, cellRes.stores[cellPid]);
+        }
+        return;
       }
     }
     el = el.parentElement;
