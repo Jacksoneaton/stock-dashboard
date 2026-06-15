@@ -1147,7 +1147,7 @@ var _ghToken='ghp_muuP2slnS728DaZw' + 'oAkPsakitY9QeX0Uwi5X';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='ee95138_202606160338';
+  var ver='ee95138_202606160341';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -2444,7 +2444,7 @@ function renderSalesTab(){
     '<div class="wow-item"><div class="wow-label">本周订单</div><div class="wow-val">'+thisWeek.cnt+' 单</div><div class="'+deltaCls(wowCnt)+'">'+deltaIcon(wowCnt)+' '+fmtDelta(wowCnt)+' vs 上周</div></div>'+
     '<div class="wow-item"><div class="wow-label">客单价</div><div class="wow-val">NT$'+Math.round(tAov)+'</div><div class="'+deltaCls(wowAov)+'">'+deltaIcon(wowAov)+' '+fmtDelta(wowAov)+' vs 上周</div></div>';
 
-  // Order detail (filtered by period)
+  // Order detail — 卡片式，按订单号合并显示
   var pd=_salesPeriod;
   var fromDate='';
   if(pd==='today'){fromDate=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');}
@@ -2454,19 +2454,39 @@ function renderSalesTab(){
   else if(pd==='month'){fromDate=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';}
   orders=SALES.orders||[];
   var filteredOrders=fromDate?orders.filter(function(o){return o.date>=fromDate;}):orders;
-  var rows=filteredOrders.slice().reverse().slice(0,100).map(function(o){
-    return '<tr>'+
-      '<td>'+o.date+'</td>'+
-      '<td>'+o.time+'</td>'+
-      '<td class="so-sku">'+o.orderSn+'</td>'+
-      '<td class="so-name" title="'+o.itemName.replace(/"/g,'&quot;')+'">'+o.itemName+'</td>'+
-      '<td class="so-sku">'+(o.modelSku||'-')+'</td>'+
-      '<td class="so-qty">'+o.qty+'</td>'+
-      '<td class="so-price">NT$ '+o.price+'</td>'+
-      '</tr>';
+  // 按订单号合并
+  var orderMap={},orderList=[];
+  filteredOrders.forEach(function(o){
+    var sn=o.orderSn||'';
+    if(!orderMap[sn]){orderMap[sn]={orderSn:sn,date:o.date,time:o.time,items:[],total:0};orderList.push(orderMap[sn]);}
+    orderMap[sn].items.push(o);
+    orderMap[sn].total+=o.price||0;
+  });
+  orderList.reverse();
+  var cardsHtml=orderList.slice(0,50).map(function(ord){
+    var itemRows=ord.items.map(function(g){
+      var pic=g.itemPic?('<img src="'+g.itemPic.replace('cf.shopee.tw','down-tw.img.susercontent.com').replace(/_tn$/,'@resize_w100_nl.webp')+'" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="this.style.display=\'none\'">'):'';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px">'+
+        pic+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+g.itemName.substring(0,40)+'</div>'+
+          '<div style="color:var(--muted);font-size:10px">'+(g.modelName||g.modelSku||'-')+' ×'+g.qty+'</div>'+
+        '</div>'+
+        '<span style="font-weight:600;white-space:nowrap">NT$ '+g.price+'</span>'+
+      '</div>';
+    }).join('');
+    return '<div class="order-card" style="background:var(--card-bg);border-radius:var(--radius);padding:12px;margin-bottom:8px;box-shadow:var(--shadow-sm)">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">'+
+        '<div>'+
+          '<code style="font-size:11px;color:var(--cyan);font-weight:600">'+ord.orderSn+'</code>'+
+          '<span style="font-size:10px;color:var(--muted);margin-left:8px">'+ord.date+' '+ord.time+'</span>'+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--muted)">'+ord.items.length+'件 · <b style="color:var(--text)">NT$ '+ord.total+'</b></div>'+
+      '</div>'+
+      itemRows+
+    '</div>';
   }).join('');
-  document.getElementById('salesOrders').innerHTML=
-    '<table><thead><tr><th>日期</th><th>时间</th><th>订单号</th><th>商品</th><th>规格</th><th>数量</th><th>单价</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  document.getElementById('salesOrders').innerHTML=cardsHtml||'<div style="text-align:center;color:var(--dim);padding:20px">暂无订单</div>';
 }
 
 // ====== 退件提醒 Tab v2 ======
