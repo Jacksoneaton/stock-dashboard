@@ -1098,7 +1098,7 @@ function renderStore(pid){
     });
   }
   var zsActive = _showZeroStock ? ' active' : '';
-  html += '<button class="filter-pill inv-zero-btn'+zsActive+'" onclick="toggleZeroStock(this)" style="border-color:var(--red);color:'+(_showZeroStock?'#fff':'var(--red)')+';background:'+(_showZeroStock?'var(--red)':'var(--card-bg)')+';margin-left:4px">🔴 已售罄 ('+zeroCount+')</button>';
+  html += '<button class="filter-pill inv-zero-btn'+zsActive+'" data-zeros="1" style="border-color:var(--red);color:'+(_showZeroStock?'#fff':'var(--red)')+';background:'+(_showZeroStock?'var(--red)':'var(--card-bg)')+';margin-left:4px">🔴 已售罄 ('+zeroCount+')</button>';
   html += '</div>';
   // Allocation filter buttons
   html += '<div class="filter-bar" style="margin-bottom:8px">';
@@ -1349,6 +1349,10 @@ document.addEventListener('click', function(e){
       }
       if (el.dataset.af) {
         filterAlloc(el.dataset.af);
+        return;
+      }
+      if (el.dataset.zeros) {
+        toggleZeroStock(el);
         return;
       }
       if (el.dataset.sort) {
