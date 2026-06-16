@@ -853,13 +853,21 @@ function renderStore(pid){
     html += '<div class="rs"><div class="rs-num gr">'+rd.matched+'</div><div class="rs-lbl">已匹配</div></div>';
     html += '<div class="rs"><div class="rs-num gr">'+rd.exact+'</div><div class="rs-lbl">🎯 精确匹配</div></div>';
     html += '<div class="rs"><div class="rs-num pu">'+rd.fuzzy+'</div><div class="rs-lbl">🔍 模糊匹配</div></div>';
+    html += '<div class="rs"><div class="rs-num gr">'+(rd.single_matched||0)+'</div><div class="rs-lbl">👤 单一商品</div></div>';
     html += '</div>';
-    // Filter pills
+    // Filter pills — state-driven active class
     html += '<div class="refund-filters" id="refundFilterBar">';
-    html += '<span class="rf-pill active" data-rf="all">全部 <b>'+rd.matched+'</b></span>';
-    html += '<span class="rf-pill" data-rf="exact">🎯 精确 <b>'+rd.exact+'</b></span>';
-    html += '<span class="rf-pill" data-rf="fuzzy">🔍 模糊 <b>'+rd.fuzzy+'</b></span>';
+    html += '<span class="rf-pill' + (_refundFilter==='all'&&!_refundSingle?' active':'') + '" data-rf="all">全部 <b>'+rd.matched+'</b></span>';
+    html += '<span class="rf-pill' + (_refundFilter==='exact'?' active':'') + '" data-rf="exact">🎯 精确 <b>'+rd.exact+'</b></span>';
+    html += '<span class="rf-pill' + (_refundFilter==='fuzzy'?' active':'') + '" data-rf="fuzzy">🔍 模糊 <b>'+rd.fuzzy+'</b></span>';
+    html += '<span class="rf-pill' + (_refundSingle?' active':'') + '" data-rf="single">👤 单一商品 <b>'+(rd.single_matched||0)+'</b></span>';
     html += '</div>';
+    // Apply filters
+    if (_refundSingle) {
+      refundList = refundList.filter(function(m){ return (m.order||{}).itemCount === 1; });
+    } else if (_refundFilter !== 'all') {
+      refundList = refundList.filter(function(m){ return m.match_type === _refundFilter; });
+    }
     // Date-grouped cards
     var byDate = {};
     refundList.forEach(function(m) {
