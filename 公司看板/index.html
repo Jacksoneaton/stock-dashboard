@@ -1379,10 +1379,10 @@ document.addEventListener('click', function(e){
         return;
       }
       if (el.dataset.rf) {
+        if (el.dataset.rf === 'single') { toggleSingleFilter(el); return; }
         if (el.classList.contains('rf-pill')) {
           filterRefundCards(el.dataset.rf);
         } else {
-          if (el.dataset.rf === 'single') { toggleSingleFilter(el); return; }
           filterRefund(el, el.dataset.rf);
         }
         return;
