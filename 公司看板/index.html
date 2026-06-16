@@ -691,6 +691,9 @@ function renderStore(pid){
     });
   });
   orderList.reverse();
+  // Status filter config
+  var totalAll = orderList.length;
+  var fstatuses = [{v:'READY_TO_SHIP',t:'待发货',e:'🟡'},{v:'SHIPPED',t:'已发货',e:'🟢'},{v:'COMPLETED',t:'已完成',e:'🔵'},{v:'CANCELLED',t:'已取消',e:'🔴'},{v:'all',t:'全部',e:'📋'}];
   // ── Ant Design content grid: Left 16 cols (2 modules) + Right 8 cols (pending orders) ──
   if (totalAll > 0) {
     html += '<div class="content-grid">';
