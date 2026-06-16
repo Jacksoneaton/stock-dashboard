@@ -21,9 +21,9 @@ img,svg{max-width:100%;height:auto}
 .sidebar .brand{font-size:15px;font-weight:700;padding:0 24px 24px;border-bottom:1px solid var(--border);margin-bottom:8px;color:var(--text)}
 .sidebar .brand span{color:var(--cyan)}
 .sidebar .section{font-size:10px;color:var(--muted);padding:12px 24px 4px;text-transform:uppercase;letter-spacing:.6px}
-.sidebar .shop{display:block;padding:8px 24px;font-size:13px;color:var(--muted);cursor:pointer;transition:.15s;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar .shop:hover{background:rgba(99,102,241,.04);color:var(--text)}
-.sidebar .shop.active{color:var(--cyan);font-weight:600;background:rgba(99,102,241,.06);border-right:2px solid var(--cyan)}
+.sidebar .shop{display:block;padding:8px 24px;font-size:13px;color:var(--muted);cursor:pointer;transition:.15s;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 8px;border-radius:8px}
+.sidebar .shop:hover{background:rgba(99,102,241,.08);color:var(--text)}
+.sidebar .shop.active{color:#fff;font-weight:600;background:var(--cyan);box-shadow:0 2px 8px rgba(99,102,241,.3)}
 .sidebar .shop .count{float:right;font-size:10px;color:var(--muted);margin-top:2px}
 .main{flex:1;min-width:0;padding:28px 32px 80px;overflow-y:auto}
 /* KPI row */
@@ -72,8 +72,8 @@ tr.over-alloc:hover{background:rgba(239,68,68,.12)!important}
   .sidebar::-webkit-scrollbar{height:0}
   .sidebar .brand{display:none}
   .sidebar .section{display:none}
-  .sidebar .shop{flex-shrink:0;padding:6px 10px;font-size:11px;min-height:44px;display:flex;align-items:center;border-radius:0}
-  .sidebar .shop.active{background:transparent;border-right:none;border-bottom:2px solid var(--cyan)}
+  .sidebar .shop{flex-shrink:0;padding:6px 10px;font-size:11px;min-height:44px;display:flex;align-items:center;border-radius:6px;margin:2px}
+  .sidebar .shop.active{background:var(--cyan);color:#fff;border-right:none;border-bottom:none;border-radius:6px}
   .sidebar .shop .count{display:none}
   .main{padding:12px 10px}
   .kpi-row{grid-template-columns:repeat(2,1fr);gap:8px}
@@ -94,6 +94,8 @@ body.mobile .sub-tab{padding:4px 8px!important;font-size:10px!important;flex-shr
 body.mobile .data-table{font-size:10px!important}
 body.mobile .data-table th,body.mobile .data-table td{padding:5px 6px!important}
 body.mobile .store-header h1{font-size:16px!important}
+body.mobile .sidebar .shop{border-radius:6px!important;margin:2px!important}
+body.mobile .sidebar .shop.active{background:var(--cyan)!important;color:#fff!important;border-bottom:none!important}
 body.mobile .inv-top-bar{flex-direction:column!important;align-items:flex-start!important;gap:4px!important}
 body.mobile .inv-top-bar>span:last-child{display:flex;flex-wrap:wrap;gap:4px}
 body.mobile .global-matrix-wrap th:first-child{min-width:120px!important}
