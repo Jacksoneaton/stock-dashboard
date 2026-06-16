@@ -572,12 +572,30 @@ function renderStore(pid){
     html += '<div id="sub-refund" style="display:'+(currentSubTab==='refund'?'block':'none')+'">';
     html += '<div style="font-size:10px;color:var(--muted);margin-bottom:12px">退件数据更新: '+REFUND_TIME+'</div>';
     html += '<div class="kpi-row">'
-      + '<div class="kpi-card refund-filter' + (_refundSingle ? ' active' : '') + '" data-rf="single" style="cursor:pointer;background:'+(_refundSingle?'rgba(99,102,241,.1)':'var(--card-bg)')+';color:'+(_refundSingle?'#4338ca':'var(--text)')+';border:1px solid '+(_refundSingle?'#6366f1':'var(--border)')+'"><div class="lbl">🔍 单一商品</div><div class="val">'+rd.single_matched+'</div></div>'
-      + '<div class="kpi-card blue refund-filter" data-rf="exact" style="cursor:pointer"><div class="lbl">精确匹配</div><div class="val">'+rd.exact+'</div></div>'
-      + '<div class="kpi-card purple refund-filter" data-rf="fuzzy" style="cursor:pointer"><div class="lbl">模糊匹配</div><div class="val">'+rd.fuzzy+'</div></div>'
-      + '<div class="kpi-card green refund-filter" data-rf="matched" style="cursor:pointer"><div class="lbl">已匹配</div><div class="val">'+rd.matched+'</div></div>'
-      + '<div class="kpi-card red refund-filter" data-rf="unmatched" style="cursor:pointer"><div class="lbl">未匹配</div><div class="val">'+rd.unmatched+'</div></div>'
-      + '<div class="kpi-card yellow refund-filter" data-rf="all" style="cursor:pointer"><div class="lbl">退件总数</div><div class="val">'+totalRefund+'</div></div>'
+      // Compute active states
+      + ((function(){
+        var a = {};
+        a.single = _refundSingle;
+        a.exact = !_refundSingle && _refundFilter === 'exact';
+        a.fuzzy = !_refundSingle && _refundFilter === 'fuzzy';
+        a.matched = !_refundSingle && _refundFilter === 'matched';
+        a.unmatched = !_refundSingle && _refundFilter === 'unmatched';
+        a.all = !_refundSingle && _refundFilter === 'all';
+        var cards = [
+          {rf:'single',cls:'',lbl:'🔍 单一商品',val:rd.single_matched},
+          {rf:'exact',cls:'blue',lbl:'精确匹配',val:rd.exact},
+          {rf:'fuzzy',cls:'purple',lbl:'模糊匹配',val:rd.fuzzy},
+          {rf:'matched',cls:'green',lbl:'已匹配',val:rd.matched},
+          {rf:'unmatched',cls:'red',lbl:'未匹配',val:rd.unmatched},
+          {rf:'all',cls:'yellow',lbl:'退件总数',val:totalRefund}
+        ];
+        var cardsHtml = '';
+        cards.forEach(function(c){
+          var act = a[c.rf];
+          cardsHtml += '<div class="kpi-card '+c.cls+' refund-filter'+(act?' active':'')+'" data-rf="'+c.rf+'" style="cursor:pointer;background:'+(act?'rgba(99,102,241,.1)':'var(--card-bg)')+';color:'+(act?'#4338ca':'var(--text)')+';border:1px solid '+(act?'#6366f1':'var(--border)')+'"><div class="lbl">'+c.lbl+'</div><div class="val">'+c.val+'</div></div>';
+        });
+        return cardsHtml;
+      })())
       + '</div>';
     html += '<table class="data-table"><thead><tr>'
       + '<th>类型</th><th>退件商品</th><th>规格</th><th>Qty</th><th>状态</th>'
@@ -1249,22 +1267,12 @@ var _refundSingle = false;
 function filterRefund(el, type) {
   _refundFilter = type;
   _refundSingle = false;
-  document.querySelectorAll('.refund-filter').forEach(function(f){f.classList.remove('active')});
-  el.classList.add('active');
-  document.querySelectorAll('.refund-filter').forEach(function(f){
-    f.style.opacity = f.classList.contains('active') ? '1' : '0.5';
-    f.style.transform = f.classList.contains('active') ? 'translateY(-1px)' : '';
-  });
   renderStore(currentStore);
 }
 
 function toggleSingleFilter(el) {
   _refundSingle = !_refundSingle;
-  if (_refundSingle) {
-    document.querySelectorAll('.refund-filter').forEach(function(f){f.classList.remove('active')});
-    el.classList.add('active');
-    _refundFilter = 'all';
-  }
+  if (_refundSingle) _refundFilter = 'all';
   renderStore(currentStore);
 }
 
