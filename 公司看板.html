@@ -657,18 +657,24 @@ function renderStore(pid){
     });
   });
   var topProducts = Object.values(prodStats).sort(function(a,b){return b.qty - a.qty}).slice(0,10);
-  // Low stock: use inventory data
+  // Low stock: only QTW warehouse + specs this store has reserved
   var lowStockList = [];
   if (INVENTORY && INVENTORY.products) {
     INVENTORY.products.forEach(function(p){
+      // Only QTW warehouse (skip returned goods / other warehouses)
+      var wh = (p.storeName || '');
+      if (wh !== 'QTW') return;
       (p.specs || []).forEach(function(s){
         var sk = p.title + '||' + s.spec;
         var rr = RESERVATIONS && RESERVATIONS[sk] ? RESERVATIONS[sk] : null;
+        // Only specs this store has reserved
+        var storeRes = (rr && rr.stores && rr.stores[pid]) ? rr.stores[pid] : 0;
+        if (storeRes <= 0) return;
         var rt = 0;
         if (rr && rr.stores) { for (var sp in rr.stores) { rt += rr.stores[sp]; } }
         var sh = Math.max(0, (s.qty || 0) - rt);
         if (sh > 0 && sh <= 10) {
-          lowStockList.push({product:p.title, spec:s.spec, stock:s.qty||0, reserved:rt, shared:sh, image:p.image||''});
+          lowStockList.push({product:p.title, spec:s.spec, stock:s.qty||0, reserved:rt, shared:sh, storeRes:storeRes, image:p.image||''});
         }
       });
     });
@@ -729,7 +735,7 @@ function renderStore(pid){
     html += '<div class="ad-card-head"><h3 class="ad-card-title">⚠ 库存不足预警</h3></div>';
     html += '<div class="ad-card-body">';
     html += '<table class="data-table"><thead><tr>';
-    html += '<th>商品</th><th style="width:80px" class="num">总库存</th><th style="width:80px" class="num">已分配</th><th style="width:80px" class="num">可售</th>';
+    html += '<th>商品</th><th style="width:80px" class="num">总库存</th><th style="width:80px" class="num">本店保留</th><th style="width:80px" class="num">可售</th>';
     html += '</tr></thead><tbody>';
     if (lowStockList.length === 0) {
       html += '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">✅ 暂无库存不足商品</td></tr>';
@@ -739,7 +745,7 @@ function renderStore(pid){
         html += '<tr>';
         html += '<td><div style="display:flex;align-items:center;gap:6px">'+(item.image?'<img src="'+item.image+'" style="width:28px;height:28px;object-fit:cover;border-radius:3px;flex-shrink:0" onerror="imgHide(this)">':'')+'<span>'+item.product+' · '+item.spec+'</span></div></td>';
         html += '<td class="num">'+item.stock+'</td>';
-        html += '<td class="num" style="color:var(--muted)">'+item.reserved+'</td>';
+        html += '<td class="num" style="color:var(--muted)">'+item.storeRes+'</td>';
         html += '<td class="num'+sc+'" style="font-weight:600">'+item.shared+(item.shared<=3?'<span class="stock-warn-badge">低</span>':'')+'</td>';
         html += '</tr>';
       });
