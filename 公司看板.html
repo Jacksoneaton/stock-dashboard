@@ -109,6 +109,9 @@ img,svg{max-width:100%;height:auto}
 
 /* ── Order cards in right panel ── */
 .order-card-list{display:flex;flex-direction:column}
+.order-card-list::-webkit-scrollbar{width:4px}
+.order-card-list::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
+.order-card-list::-webkit-scrollbar-track{background:transparent}
 .order-card{border-bottom:1px solid var(--border);padding:16px 24px;transition:background .2s}
 .order-card:last-child{border-bottom:none}
 .order-card:hover{background:rgba(24,144,255,.01)}
@@ -768,7 +771,7 @@ function renderStore(pid){
     if (orderList.length === 0) {
       html += '<div style="text-align:center;padding:40px 20px;color:var(--muted)">'+(totalAll===0?'暂无订单':'暂无该状态订单')+'</div>';
     } else {
-      html += '<div class="order-card-list">';
+      html += '<div class="order-card-list" style="max-height:calc(100vh - 320px);overflow-y:auto">';
       orderList.slice(0, 50).forEach(function(ord) {
         html += '<div class="order-card">';
         html += '<div class="oc-head">';
