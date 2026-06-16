@@ -21,9 +21,9 @@ img,svg{max-width:100%;height:auto}
 .sidebar .brand{font-size:15px;font-weight:700;padding:0 24px 24px;border-bottom:1px solid var(--border);margin-bottom:8px;color:var(--text)}
 .sidebar .brand span{color:var(--cyan)}
 .sidebar .section{font-size:10px;color:var(--muted);padding:12px 24px 4px;text-transform:uppercase;letter-spacing:.6px}
-.sidebar .shop{display:block;padding:8px 24px;font-size:13px;color:var(--muted);cursor:pointer;transition:.15s;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 8px;border-radius:8px}
+.sidebar .shop{display:block;padding:8px 24px;font-size:13px;color:var(--muted);cursor:pointer;transition:.15s;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar .shop:hover{background:rgba(99,102,241,.08);color:var(--text)}
-.sidebar .shop.active{color:#fff;font-weight:600;background:#6366f1;box-shadow:0 2px 8px rgba(99,102,241,.35);border-radius:8px}
+.sidebar .shop.active{color:#4338ca;font-weight:600;background:rgba(99,102,241,.1);border-left:3px solid #6366f1;border-radius:0 8px 8px 0}
 .sidebar .shop .count{float:right;font-size:10px;color:var(--muted);margin-top:2px}
 .main{flex:1;min-width:0;padding:28px 32px 80px;overflow-y:auto}
 /* KPI row */
@@ -73,7 +73,7 @@ tr.over-alloc:hover{background:rgba(239,68,68,.12)!important}
   .sidebar .brand{display:none}
   .sidebar .section{display:none}
   .sidebar .shop{flex-shrink:0;padding:6px 10px;font-size:11px;min-height:44px;display:flex;align-items:center;border-radius:6px;margin:2px}
-  .sidebar .shop.active{background:#6366f1;color:#fff;border-right:none;border-bottom:none;border-radius:6px}
+  .sidebar .shop.active{color:#4338ca;font-weight:600;background:rgba(99,102,241,.1);border-right:none;border-bottom:3px solid #6366f1;border-radius:6px 6px 0 0}
   .sidebar .shop .count{display:none}
   .main{padding:12px 10px}
   .kpi-row{grid-template-columns:repeat(2,1fr);gap:8px}
@@ -95,7 +95,7 @@ body.mobile .data-table{font-size:10px!important}
 body.mobile .data-table th,body.mobile .data-table td{padding:5px 6px!important}
 body.mobile .store-header h1{font-size:16px!important}
 body.mobile .sidebar .shop{border-radius:6px!important;margin:2px!important}
-body.mobile .sidebar .shop.active{background:#6366f1!important;color:#fff!important;border-bottom:none!important}
+body.mobile .sidebar .shop.active{color:#4338ca!important;font-weight:600!important;background:rgba(99,102,241,.1)!important;border-bottom:3px solid #6366f1!important}
 body.mobile .inv-top-bar{flex-direction:column!important;align-items:flex-start!important;gap:4px!important}
 body.mobile .inv-top-bar>span:last-child{display:flex;flex-wrap:wrap;gap:4px}
 body.mobile .global-matrix-wrap th:first-child{min-width:120px!important}
@@ -572,7 +572,7 @@ function renderStore(pid){
     html += '<div id="sub-refund" style="display:'+(currentSubTab==='refund'?'block':'none')+'">';
     html += '<div style="font-size:10px;color:var(--muted);margin-bottom:12px">退件数据更新: '+REFUND_TIME+'</div>';
     html += '<div class="kpi-row">'
-      + '<div class="kpi-card refund-filter' + (_refundSingle ? ' active' : '') + '" data-rf="single" style="cursor:pointer;background:'+(_refundSingle?'#6366f1':'var(--card-bg)')+';color:'+(_refundSingle?'#fff':'var(--text)')+'"><div class="lbl">🔍 单一商品</div><div class="val">'+rd.single_matched+'</div></div>'
+      + '<div class="kpi-card refund-filter' + (_refundSingle ? ' active' : '') + '" data-rf="single" style="cursor:pointer;background:'+(_refundSingle?'rgba(99,102,241,.1)':'var(--card-bg)')+';color:'+(_refundSingle?'#4338ca':'var(--text)')+';border:1px solid '+(_refundSingle?'#6366f1':'var(--border)')+'"><div class="lbl">🔍 单一商品</div><div class="val">'+rd.single_matched+'</div></div>'
       + '<div class="kpi-card blue refund-filter" data-rf="exact" style="cursor:pointer"><div class="lbl">精确匹配</div><div class="val">'+rd.exact+'</div></div>'
       + '<div class="kpi-card purple refund-filter" data-rf="fuzzy" style="cursor:pointer"><div class="lbl">模糊匹配</div><div class="val">'+rd.fuzzy+'</div></div>'
       + '<div class="kpi-card green refund-filter" data-rf="matched" style="cursor:pointer"><div class="lbl">已匹配</div><div class="val">'+rd.matched+'</div></div>'
