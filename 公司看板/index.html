@@ -5,74 +5,179 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>🏢 公司看板</title>
 <style>
+/* ══════ Ant Design Pro Dashboard ══════ */
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#f5f6fa;--card-bg:#fff;--border:rgba(0,0,0,.08);
-  --text:#1a1c2e;--muted:#6b7280;--dim:#d1d5db;
-  --cyan:#6366f1;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--purple:#7c3aed;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.04);--shadow:0 2px 8px rgba(0,0,0,.06);
-  --shadow-lg:0 4px 16px rgba(0,0,0,.08);--shadow-xl:0 8px 24px rgba(0,0,0,.1);
-  --radius-sm:6px;--radius:12px;--radius-lg:14px;--radius-full:20px;
+  --bg:#f0f2f5;--card-bg:#fff;--border:#f0f0f0;--border-light:#e8e8e8;
+  --text:#262626;--text-secondary:#595959;--muted:#8c8c8c;--dim:#d9d9d9;
+  --primary:#1890ff;--cyan:#1890ff;--green:#52c41a;--yellow:#faad14;--red:#ff4d4f;--purple:#722ed1;
+  --orange:#fa8c16;
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,.03),0 1px 6px -1px rgba(0,0,0,.02),0 2px 4px 0 rgba(0,0,0,.02);
+  --shadow:0 3px 6px -4px rgba(0,0,0,.12),0 6px 16px 0 rgba(0,0,0,.08),0 9px 28px 8px rgba(0,0,0,.05);
+  --shadow-lg:0 6px 16px -8px rgba(0,0,0,.08),0 9px 28px 0 rgba(0,0,0,.05),0 12px 48px 16px rgba(0,0,0,.03);
+  --radius:8px;--radius-sm:6px;--radius-lg:8px;--radius-full:20px;
+  --font-title:16px;--font-body:14px;--font-helper:12px;
+  --spacing-xs:4px;--spacing-sm:8px;--spacing-md:16px;--spacing-lg:20px;--spacing-xl:24px;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(180deg,#eef0f6 0%,#f5f6fa 30%);color:var(--text);display:flex;min-height:100vh}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:var(--font-body);line-height:1.5;-webkit-font-smoothing:antialiased}
 img,svg{max-width:100%;height:auto}
-/* sidebar */
-.sidebar{width:100%;max-width:220px;background:var(--card-bg);border-right:1px solid var(--border);padding:24px 0;flex-shrink:0;box-shadow:2px 0 16px rgba(0,0,0,.06);position:relative;z-index:2;overflow-y:auto}
-.sidebar .brand{font-size:15px;font-weight:700;padding:0 24px 24px;border-bottom:1px solid var(--border);margin-bottom:8px;color:var(--text)}
-.sidebar .brand span{color:var(--cyan)}
-.sidebar .section{font-size:10px;color:var(--muted);padding:12px 24px 4px;text-transform:uppercase;letter-spacing:.6px}
-.sidebar .shop{display:block;padding:8px 24px;font-size:13px;color:var(--muted);cursor:pointer;transition:.15s;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar .shop:hover{background:rgba(99,102,241,.08);color:var(--text)}
-.sidebar .shop.active{color:#4338ca;font-weight:600;background:rgba(99,102,241,.1);border-left:3px solid #6366f1;border-radius:0 8px 8px 0}
+
+/* ── Sidebar ── */
+.sidebar{width:100%;max-width:220px;background:var(--card-bg);border-right:1px solid var(--border);padding:20px 0;flex-shrink:0;box-shadow:var(--shadow-sm);position:relative;z-index:2;overflow-y:auto}
+.sidebar .brand{font-size:15px;font-weight:600;padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:4px;color:var(--text);letter-spacing:-.2px}
+.sidebar .brand span{color:var(--primary)}
+.sidebar .section{font-size:10px;color:var(--muted);padding:12px 20px 4px;text-transform:uppercase;letter-spacing:.6px;font-weight:500}
+.sidebar .shop{display:block;padding:7px 20px;font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all .2s;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:0;margin:0}
+.sidebar .shop:hover{background:rgba(24,144,255,.06);color:var(--primary)}
+.sidebar .shop.active{color:var(--primary);font-weight:600;background:rgba(24,144,255,.08);border-left:3px solid var(--primary);border-radius:0 4px 4px 0}
 .sidebar .shop .count{float:right;font-size:10px;color:var(--muted);margin-top:2px}
-.main{flex:1;min-width:0;padding:28px 40px 120px;overflow-y:auto;max-width:1240px}
-/* KPI row */
-.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:16px;margin-bottom:32px}
-.kpi-card{background:var(--card-bg);border-radius:var(--radius-lg);padding:20px 24px;box-shadow:var(--shadow-sm);border-top:4px solid transparent;transition:transform .15s,box-shadow .15s}
-.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
-.kpi-card .lbl{font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.3px}
-.kpi-card .val{font-size:28px;font-weight:700;line-height:1.1}
-.kpi-card.blue{border-top-color:var(--cyan)}.kpi-card.blue .val{color:var(--cyan)}
-.kpi-card.green{border-top-color:var(--green)}.kpi-card.green .val{color:var(--green)}
-.kpi-card.yellow{border-top-color:var(--yellow)}.kpi-card.yellow .val{color:var(--yellow)}
-.kpi-card.red{border-top-color:var(--red)}.kpi-card.red .val{color:var(--red)}
-.kpi-card.purple{border-top-color:var(--purple)}.kpi-card.purple .val{color:var(--purple)}
-/* date tabs */
-.date-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.date-tab{padding:6px 16px;border-radius:var(--radius-full);font-size:12px;cursor:pointer;background:var(--card-bg);border:1px solid var(--border);color:var(--muted);transition:.15s}
-.date-tab:hover{border-color:var(--cyan);color:var(--cyan)}
-.date-tab.active{background:var(--cyan);color:#fff;border-color:var(--cyan)}
-/* sub tabs */
-.sub-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
-.sub-tab{padding:5px 14px;border-radius:var(--radius-sm);font-size:11px;cursor:pointer;background:var(--bg);color:var(--muted);transition:.15s}
-.sub-tab.active{background:#6366f1;color:#fff}
-/* section card — wraps sub-tab content for breathing room */
-.section-card{background:var(--card-bg);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-sm);border:1px solid var(--border)}
-.inv-warehouse-btn.active{background:var(--cyan)!important;color:#fff!important;border-color:var(--cyan)!important}
-.refund-filter.active{box-shadow:0 0 0 2px #6366f1!important}
-/* ── 退件提醒 v2 (同库存看板) ── */
+
+/* ── Main ── */
+.main{flex:1;min-width:0;padding:24px;overflow-y:auto;max-width:1440px;margin:0 auto}
+
+/* ── Title Bar (24 cols) ── */
+.page-header{background:var(--card-bg);border-radius:var(--radius);padding:20px 24px;margin-bottom:var(--spacing-lg);box-shadow:var(--shadow-sm);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.page-header h1{font-size:20px;font-weight:600;letter-spacing:-.3px;margin:0;color:var(--text);display:flex;align-items:center;gap:8px}
+.page-header h1 .store-icon{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--primary);color:#fff;border-radius:6px;font-size:14px}
+.page-header .meta{font-size:var(--font-helper);color:var(--muted);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.page-header .meta .meta-item{display:flex;align-items:center;gap:4px}
+.page-header .meta .meta-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block}
+.page-header .meta .meta-val{color:var(--text-secondary);font-weight:500}
+
+/* ── Date tabs ── */
+.date-tabs{display:flex;gap:8px;margin-bottom:var(--spacing-lg);flex-wrap:wrap}
+.date-tab{padding:4px 15px;border-radius:2px;font-size:var(--font-body);cursor:pointer;background:transparent;border:none;color:var(--text-secondary);transition:all .3s;line-height:1.5715;height:32px;display:inline-flex;align-items:center;position:relative}
+.date-tab:hover{color:var(--primary)}
+.date-tab.active{color:var(--primary);font-weight:500}
+.date-tab.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:16px;height:2px;background:var(--primary);border-radius:1px}
+
+/* ── KPI Cards (24 cols, 5 uniform) ── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--spacing-lg);margin-bottom:var(--spacing-lg)}
+.kpi-card{background:var(--card-bg);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);text-align:center;transition:box-shadow .3s;cursor:default;border:1px solid var(--border-light);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100px}
+.kpi-card:hover{box-shadow:var(--shadow)}
+.kpi-card .val{font-size:30px;font-weight:600;line-height:1.2;color:var(--text);margin-bottom:4px}
+.kpi-card .lbl{font-size:var(--font-body);color:var(--muted);margin-top:4px}
+.kpi-card.orange .val{color:var(--orange)}
+/* All others use default text color */
+
+/* ── View switch ── */
+.view-switch{display:flex;gap:8px;margin-bottom:var(--spacing-lg)}
+.view-switch .vs-btn{padding:4px 15px;border-radius:2px;font-size:var(--font-body);cursor:pointer;background:transparent;border:1px solid var(--border);color:var(--text-secondary);transition:all .3s;font-weight:400;height:32px;display:inline-flex;align-items:center}
+.view-switch .vs-btn:hover{color:var(--primary);border-color:var(--primary)}
+.view-switch .vs-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── Sub tabs (Ant Design style top nav tabs) ── */
+.sub-tabs{display:flex;gap:0;margin-bottom:var(--spacing-lg);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sub-tab{padding:6px 16px;font-size:var(--font-body);cursor:pointer;color:var(--text-secondary);transition:all .3s;position:relative;white-space:nowrap;background:transparent;border:none;border-radius:0;display:inline-flex;align-items:center;gap:4px;height:40px}
+.sub-tab:hover{color:var(--primary)}
+.sub-tab.active{color:var(--primary);font-weight:500}
+.sub-tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--primary);border-radius:1px 1px 0 0}
+.sub-tab .count-badge{font-size:10px;background:var(--red);color:#fff;padding:0 5px;border-radius:8px;line-height:16px;height:16px;display:inline-flex;align-items:center;font-weight:400}
+
+/* ── Main Content Grid (16+8) ── */
+.content-grid{display:grid;grid-template-columns:2fr 1fr;gap:var(--spacing-lg);align-items:start}
+.content-grid.full{grid-template-columns:1fr}
+
+/* ── Ant Design Card ── */
+.ad-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:var(--spacing-lg);border:1px solid var(--border-light)}
+.ad-card:last-child{margin-bottom:0}
+.ad-card .ad-card-head{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ad-card .ad-card-head .ad-card-title{font-size:16px;font-weight:600;color:var(--text);margin:0}
+.ad-card .ad-card-body{padding:0;overflow-x:auto}
+
+/* ── Ant Design Table ── */
+.data-table{width:100%;border-collapse:collapse;font-size:var(--font-body)}
+.data-table thead th{background:#fafafa;padding:12px 16px;text-align:left;font-weight:600;color:var(--text-secondary);font-size:var(--font-body);border-bottom:1px solid var(--border);white-space:nowrap}
+.data-table tbody td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;transition:background .2s}
+.data-table tbody tr:hover td{background:rgba(24,144,255,.02)}
+.data-table tbody tr:nth-child(even) td{background:rgba(0,0,0,.005)}
+.data-table tbody tr:nth-child(even):hover td{background:rgba(24,144,255,.03)}
+.data-table .num{text-align:right;font-variant-numeric:tabular-nums}
+.data-table .text-left{text-align:left}
+
+/* Status pills */
+.status-pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;line-height:20px;white-space:nowrap}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px}
+.status-dot.shipped{background:var(--green)}.status-dot.pending{background:var(--orange)}.status-dot.completed{background:var(--primary)}.status-dot.cancelled{background:var(--red)}
+
+/* Section title (for non-card sections) */
+.sec-title{font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text)}
+
+/* Empty state */
+.empty-state{text-align:center;padding:80px 20px;color:var(--muted);font-size:var(--font-body)}
+.empty-state small{display:block;margin-top:4px;color:var(--dim)}
+
+/* ── Order cards in right panel ── */
+.order-card-list{display:flex;flex-direction:column}
+.order-card{border-bottom:1px solid var(--border);padding:16px 24px;transition:background .2s}
+.order-card:last-child{border-bottom:none}
+.order-card:hover{background:rgba(24,144,255,.01)}
+.order-card .oc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap}
+.order-card .oc-sn{font-size:var(--font-helper);color:var(--primary);font-weight:500;font-family:'SF Mono',Monaco,'Cascadia Code',monospace}
+.order-card .oc-time{font-size:var(--font-helper);color:var(--muted)}
+.order-card .oc-total{font-size:var(--font-helper);color:var(--text-secondary);white-space:nowrap;font-weight:500}
+.order-card .oc-items{display:flex;flex-direction:column;gap:6px}
+.order-card .oc-item{display:flex;align-items:center;gap:10px;font-size:var(--font-body)}
+.order-card .oc-item img{width:40px;height:40px;object-fit:cover;border-radius:4px;flex-shrink:0;background:var(--bg)}
+.order-card .oc-item-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.order-card .oc-item-meta{font-size:var(--font-helper);color:var(--muted);margin-top:1px}
+.order-card .oc-item-price{font-weight:500;color:var(--text);white-space:nowrap}
+
+/* ── Stock warning ── */
+.stock-warn{color:var(--red);font-weight:500}
+.stock-warn-badge{display:inline-block;padding:0 6px;font-size:11px;background:rgba(255,77,79,.1);color:var(--red);border-radius:4px;line-height:20px;margin-left:4px}
+
+/* ── Action buttons ── */
+.btn-primary{padding:4px 15px;font-size:var(--font-body);background:var(--primary);color:#fff;border:1px solid var(--primary);border-radius:2px;cursor:pointer;transition:all .3s;height:32px;display:inline-flex;align-items:center;gap:4px;line-height:1.5715}
+.btn-primary:hover{background:#40a9ff;border-color:#40a9ff}
+.btn-default{padding:4px 15px;font-size:var(--font-body);background:var(--card-bg);color:var(--text-secondary);border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all .3s;height:32px;display:inline-flex;align-items:center;gap:4px;line-height:1.5715}
+.btn-default:hover{color:var(--primary);border-color:var(--primary)}
+.btn-danger{padding:4px 15px;font-size:var(--font-body);background:var(--card-bg);color:var(--red);border:1px solid var(--red);border-radius:2px;cursor:pointer;transition:all .3s;height:32px;display:inline-flex;align-items:center;line-height:1.5715}
+.btn-danger:hover{background:rgba(255,77,79,.06)}
+.btn-sm{padding:2px 8px;font-size:12px;height:24px;border-radius:2px}
+.btn-link{padding:0;font-size:var(--font-body);background:transparent;border:none;color:var(--primary);cursor:pointer;transition:color .3s}
+.btn-link:hover{color:#40a9ff}
+
+/* ── Ant Design filters ── */
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-pill{padding:4px 12px;font-size:var(--font-helper);border-radius:2px;cursor:pointer;background:var(--card-bg);border:1px solid var(--border);color:var(--text-secondary);transition:all .3s;height:28px;display:inline-flex;align-items:center;gap:4px;line-height:1.5715}
+.filter-pill:hover{color:var(--primary);border-color:var(--primary)}
+.filter-pill.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── Utility: right-align ── */
+.text-right{text-align:right}
+.text-center{text-align:center}
+.mt-lg{margin-top:var(--spacing-lg)}
+.mb-lg{margin-bottom:var(--spacing-lg)}
+
+/* ── Store header (for non-Ant-Design pages like refund/trends/inventory) ── */
+.store-header{background:var(--card-bg);border-radius:var(--radius);padding:16px 24px;margin-bottom:var(--spacing-lg);box-shadow:var(--shadow-sm);border:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.store-header h1{font-size:20px;font-weight:600;margin:0}
+.store-header .meta{font-size:var(--font-helper);color:var(--muted);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+/* ── Refund (preserved from old styles) ── */
 .refund-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-.refund-summary .rs{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 12px;text-align:center}
+.refund-summary .rs{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center}
 .rs-num{font-size:22px;font-weight:700}
 .rs-lbl{font-size:10px;color:var(--muted);margin-top:2px}
-.rs-num.ac{color:#6366f1}.rs-num.gr{color:var(--green)}.rs-num.pu{color:var(--purple)}.rs-num.rd{color:var(--red)}
+.rs-num.ac{color:var(--primary)}.rs-num.gr{color:var(--green)}.rs-num.pu{color:var(--purple)}.rs-num.rd{color:var(--red)}
 .refund-filters{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;justify-content:center}
-.rf-pill{padding:10px 16px;min-height:44px;border-radius:20px;font-size:12px;cursor:pointer;color:var(--muted);background:var(--card-bg);border:1px solid var(--border);transition:all .2s;user-select:none;display:inline-flex;align-items:center}
-.rf-pill b{font-weight:700;color:var(--text);margin-left:2px}
-.rf-pill:hover{border-color:#6366f1;color:#6366f1}
-.rf-pill.active{background:#6366f1;color:#fff;border-color:#6366f1}
+.rf-pill{padding:6px 14px;min-height:36px;border-radius:var(--radius);font-size:var(--font-helper);cursor:pointer;color:var(--text-secondary);background:var(--card-bg);border:1px solid var(--border);transition:all .2s;user-select:none;display:inline-flex;align-items:center;gap:2px}
+.rf-pill b{font-weight:600;color:var(--text);margin-left:2px}
+.rf-pill:hover{border-color:var(--primary);color:var(--primary)}
+.rf-pill.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .rf-pill.active b{color:#fff}
 .refund-date-group{margin-bottom:16px}
 .refund-date-hd{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px;padding:8px 0}
-.refund-date-hd .rd-dot{width:8px;height:8px;border-radius:50%;background:#6366f1}
-.refund-date-hd .rd-label{font-size:13px;font-weight:700;color:var(--text)}
+.refund-date-hd .rd-dot{width:8px;height:8px;border-radius:50%;background:var(--primary)}
+.refund-date-hd .rd-label{font-size:13px;font-weight:600;color:var(--text)}
 .refund-date-hd .rd-count{font-size:10px;color:var(--muted)}
-.refund-card{background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:all .15s;box-shadow:var(--shadow-sm)}
-.refund-card:hover{border-color:rgba(99,102,241,.2);box-shadow:var(--shadow)}
+.refund-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;transition:all .15s;box-shadow:var(--shadow-sm)}
+.refund-card:hover{border-color:rgba(24,144,255,.3);box-shadow:var(--shadow)}
 .refund-card-hd{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.01)}
-.refund-badge{padding:2px 10px;border-radius:8px;font-size:10px;font-weight:700}
+.refund-badge{padding:2px 10px;border-radius:8px;font-size:10px;font-weight:600}
 .refund-badge.exact{background:rgba(5,150,105,.1);color:#059669}
-.refund-badge.fuzzy{background:rgba(124,58,237,.1);color:#7c3aed}
+.refund-badge.fuzzy{background:rgba(114,46,209,.1);color:#722ed1}
 .refund-score{font-size:10px;color:var(--muted);margin-left:auto}
 .refund-card-body{padding:12px 14px}
 .refund-card-body .cols{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start}
@@ -81,97 +186,109 @@ img,svg{max-width:100%;height:auto}
 .refund-match-reason{font-size:9px;color:var(--green);background:rgba(5,150,105,.05);border-radius:4px;padding:2px 8px;display:inline-flex;align-items:center;gap:3px}
 .refund-arrow{display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:18px;flex-shrink:0;padding-top:12px}
 .refund-title{cursor:pointer;font-size:12px;font-weight:600;color:var(--text);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.refund-title:hover{color:#6366f1}
+.refund-title:hover{color:var(--primary)}
 .refund-title.expanded{-webkit-line-clamp:unset;display:block}
 .refund-spec{font-size:11px;color:var(--muted);line-height:1.3}
 .refund-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:10px;color:var(--muted)}
-.refund-meta code{font-family:monospace;font-size:10px;color:#6366f1;background:rgba(99,102,241,.06);padding:1px 6px;border-radius:4px}
+.refund-meta code{font-family:monospace;font-size:10px;color:var(--primary);background:rgba(24,144,255,.06);padding:1px 6px;border-radius:4px}
 .refund-empty{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px}
-body.mobile .refund-summary{grid-template-columns:repeat(2,1fr)}
-body.mobile .refund-card-body .cols{grid-template-columns:1fr;gap:8px}
-body.mobile .refund-arrow{display:none}
-@media(max-width:768px){.refund-summary{grid-template-columns:repeat(2,1fr)}.refund-card-body .cols{grid-template-columns:1fr;gap:8px}.refund-arrow{display:none}}
-tr.over-alloc{background:rgba(239,68,68,.06)!important}
-tr.over-alloc:hover{background:rgba(239,68,68,.12)!important}
+
+/* ── Inventory styles ── */
+.section-card{background:var(--card-bg);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);border:1px solid var(--border-light)}
+.inv-warehouse-btn.active{background:var(--primary)!important;color:#fff!important;border-color:var(--primary)!important}
+.refund-filter.active{box-shadow:0 0 0 2px var(--primary)!important}
+tr.over-alloc{background:rgba(255,77,79,.06)!important}
+tr.over-alloc:hover{background:rgba(255,77,79,.12)!important}
 .export-picker-btn:hover{background:var(--bg)!important}
-/* table */
-.data-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--card-bg);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
-.data-table th{background:var(--bg);padding:8px 12px;text-align:left;font-weight:600;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.3px}
-.data-table td{padding:8px 12px;border-bottom:1px solid var(--border)}
-.data-table tr:hover{background:rgba(99,102,241,.02)}
-.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px}
-.status-dot.shipped{background:var(--green)}.status-dot.pending{background:var(--yellow)}.status-dot.completed{background:var(--cyan)}.status-dot.cancelled{background:var(--red)}
-.status-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
-/* section title */
-.sec-title{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)}
-.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
-/* store header */
-.store-header{background:var(--card-bg);border-radius:var(--radius-lg);padding:20px 28px;margin-bottom:28px;box-shadow:var(--shadow-sm);border:1px solid var(--border)}
-.store-header h1{font-size:24px;font-weight:700;letter-spacing:-.3px;margin:0}
-.store-header .meta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-/* mobile */
-@media(max-width:768px){
-  body{display:block}
-  .sidebar{width:100%;max-width:none;display:flex;flex-direction:row;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch;gap:2px}
-  .sidebar::-webkit-scrollbar{height:0}
-  .sidebar .brand{display:none}
-  .sidebar .section{display:none}
-  .sidebar .shop{flex-shrink:0;padding:6px 10px;font-size:11px;min-height:44px;display:flex;align-items:center;border-radius:6px;margin:2px}
-  .sidebar .shop.active{color:#4338ca;font-weight:600;background:rgba(99,102,241,.1);border-right:none;border-bottom:3px solid #6366f1;border-radius:6px 6px 0 0}
-  .sidebar .shop .count{display:none}
-  .main{padding:12px 10px}
-  .kpi-row{grid-template-columns:repeat(2,1fr);gap:10px}
-  .kpi-card{padding:16px 14px;border-radius:var(--radius)}
-  .kpi-card .val{font-size:22px}
-}
-/* JS-driven mobile class (more reliable in Feishu WebView) */
-body.mobile .main{padding:12px 12px 80px!important}
-body.mobile .kpi-row{grid-template-columns:repeat(2,1fr)!important;gap:10px!important;margin-bottom:24px!important}
-body.mobile .kpi-card{padding:16px 14px!important;border-radius:var(--radius)!important}
-body.mobile .kpi-card .val{font-size:22px!important}
-body.mobile .view-switch{gap:4px!important;margin-bottom:14px!important}
-body.mobile .view-switch .vs-btn{padding:5px 12px!important;font-size:11px!important}
-body.mobile .date-tabs{gap:3px!important;overflow-x:auto!important;flex-wrap:nowrap!important;-webkit-overflow-scrolling:touch}
-body.mobile .date-tab{padding:4px 10px!important;font-size:10px!important;flex-shrink:0!important;white-space:nowrap!important}
-body.mobile .sub-tabs{margin-bottom:14px!important;overflow-x:auto!important;flex-wrap:nowrap!important;-webkit-overflow-scrolling:touch;gap:4px!important}
-body.mobile .sub-tab{padding:4px 8px!important;font-size:10px!important;flex-shrink:0!important;white-space:nowrap!important}
-body.mobile .section-card{padding:12px!important;border-radius:var(--radius)!important}
-body.mobile .data-table{font-size:10px!important}
-body.mobile .data-table th,body.mobile .data-table td{padding:5px 6px!important}
-body.mobile .store-header h1{font-size:20px!important}
-body.mobile .store-header{margin-bottom:20px!important;padding:14px 16px!important;border-radius:var(--radius)!important}
-body.mobile .sidebar .shop{border-radius:6px!important;margin:2px!important}
-body.mobile .sidebar .shop.active{color:#4338ca!important;font-weight:600!important;background:rgba(99,102,241,.1)!important;border-bottom:3px solid #6366f1!important}
-body.mobile .inv-top-bar{flex-direction:column!important;align-items:flex-start!important;gap:4px!important}
-body.mobile .inv-top-bar>span:last-child{display:flex;flex-wrap:wrap;gap:4px}
-body.mobile .global-matrix-wrap th:first-child{min-width:120px!important}
-/* ── 全局分配视图 ── */
-.view-switch{display:flex;gap:8px;margin-bottom:20px}
-.view-switch .vs-btn{padding:7px 20px;border-radius:var(--radius-full);font-size:13px;cursor:pointer;background:var(--card-bg);border:1px solid var(--border);color:var(--muted);transition:.15s;font-weight:500}
-.view-switch .vs-btn:hover{border-color:var(--cyan);color:var(--cyan)}
-.view-switch .vs-btn.active{background:var(--cyan);color:#fff;border-color:var(--cyan);box-shadow:0 2px 8px rgba(99,102,241,.25)}
+
+/* ── Global view ── */
 .global-matrix-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .global-matrix-wrap table{border-collapse:collapse;font-size:11px;background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow-sm);width:max-content;min-width:100%}
 .global-matrix-wrap th{background:var(--bg);padding:8px 6px;text-align:center;font-weight:600;color:var(--muted);font-size:10px;position:sticky;top:0;z-index:1;white-space:nowrap}
 .global-matrix-wrap th:first-child{text-align:left;min-width:200px;position:sticky;left:0;z-index:2;background:var(--bg)}
 .global-matrix-wrap td{padding:6px 4px;text-align:center;border-bottom:1px solid var(--border);cursor:pointer;transition:.1s;min-width:44px;font-size:11px;user-select:none}
 .global-matrix-wrap td:first-child{text-align:left;font-size:10px;white-space:nowrap;position:sticky;left:0;background:var(--card-bg);z-index:1;font-weight:500;cursor:default}
-.global-matrix-wrap tr:hover td{background:rgba(99,102,241,.04)}
-.global-matrix-wrap tr:hover td:first-child{background:rgba(99,102,241,.04)}
-.global-matrix-wrap .cell-has{color:var(--cyan);font-weight:600}
+.global-matrix-wrap tr:hover td{background:rgba(24,144,255,.04)}
+.global-matrix-wrap tr:hover td:first-child{background:rgba(24,144,255,.04)}
+.global-matrix-wrap .cell-has{color:var(--primary);font-weight:600}
 .global-matrix-wrap .cell-none{color:var(--dim)}
-.global-matrix-wrap .cell-has:hover{background:rgba(99,102,241,.15)!important;border-radius:3px}
-.global-matrix-wrap .cell-none:hover{background:rgba(99,102,241,.06)!important;border-radius:3px;color:var(--cyan)}
+.global-matrix-wrap .cell-has:hover{background:rgba(24,144,255,.15)!important;border-radius:3px}
+.global-matrix-wrap .cell-none:hover{background:rgba(24,144,255,.06)!important;border-radius:3px;color:var(--primary)}
 .global-matrix-wrap .row-total{font-weight:700;color:var(--text);cursor:default}
-.global-search{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px}
+.global-search{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:var(--font-helper)}
 .global-pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px;font-size:11px}
 .global-pagination button{padding:4px 12px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer;font-size:11px}
 .global-pagination button:disabled{opacity:.4;cursor:default}
+
+/* ── Trends bar chart ── */
+.trends-bar-wrap{display:flex;flex-direction:column;gap:6px;padding:4px 0}
+.trends-bar-row{display:flex;align-items:center;gap:8px}
+.trends-bar-row .rank{width:24px;text-align:right;font-size:10px;color:var(--muted);flex-shrink:0}
+.trends-bar-row .kw{width:90px;font-size:var(--font-helper);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.trends-bar-row .bar-track{flex:1;height:16px;background:var(--bg);border-radius:3px;overflow:hidden;min-width:40px}
+.trends-bar-row .bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--purple));border-radius:3px;transition:width .6s ease}
+.trends-bar-row .vol{font-size:10px;font-weight:500;min-width:50px;text-align:right;flex-shrink:0}
+
+/* ── Pagination ── */
+.data-table-pagi{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:12px 24px;border-top:1px solid var(--border);font-size:var(--font-body)}
+.data-table-pagi button{padding:2px 8px;border:1px solid var(--border);background:var(--card-bg);border-radius:2px;cursor:pointer;font-size:var(--font-helper);height:28px;min-width:28px;display:inline-flex;align-items:center;justify-content:center;transition:all .3s}
+.data-table-pagi button:hover{color:var(--primary);border-color:var(--primary)}
+.data-table-pagi button:disabled{opacity:.4;cursor:default}
+.data-table-pagi .pagi-info{color:var(--muted);font-size:var(--font-helper)}
+
+/* ── Mobile ── */
 @media(max-width:768px){
-  .global-matrix-wrap th:first-child{min-width:140px}
-  .global-matrix-wrap td{min-width:32px;font-size:10px;padding:4px 2px}
-  .view-switch .vs-btn{padding:6px 14px;font-size:12px}
+  body{display:block}
+  .sidebar{width:100%;max-width:none;display:flex;flex-direction:row;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch;gap:0}
+  .sidebar::-webkit-scrollbar{height:0}
+  .sidebar .brand{display:none}
+  .sidebar .section{display:none}
+  .sidebar .shop{flex-shrink:0;padding:6px 10px;font-size:11px;min-height:40px;display:flex;align-items:center;border-radius:0;margin:0}
+  .sidebar .shop.active{color:var(--primary);font-weight:600;background:rgba(24,144,255,.08);border-bottom:2px solid var(--primary);border-left:none;border-radius:0}
+  .sidebar .shop .count{display:none}
+  .main{padding:16px 12px;max-width:none}
+  .page-header{padding:14px 16px;flex-direction:column;align-items:flex-start}
+  .page-header h1{font-size:18px}
+  .kpi-row{grid-template-columns:repeat(2,1fr);gap:8px}
+  .kpi-card{padding:14px 12px;min-height:80px}
+  .kpi-card .val{font-size:24px}
+  .content-grid{grid-template-columns:1fr}
+  .ad-card .ad-card-head{padding:12px 16px}
+  .data-table thead th,.data-table tbody td{padding:8px 10px;font-size:12px}
+  .date-tabs{gap:4px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .date-tab{padding:4px 10px;font-size:12px;flex-shrink:0;white-space:nowrap}
+  .sub-tabs{margin-bottom:12px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .sub-tab{padding:6px 10px;font-size:12px;flex-shrink:0;white-space:nowrap;height:36px}
+  .order-card{padding:12px 16px}
+  .store-header{padding:14px 16px}
 }
+
+/* JS-driven mobile class */
+body.mobile .main{padding:16px 12px 80px!important;max-width:none!important}
+body.mobile .kpi-row{grid-template-columns:repeat(2,1fr)!important;gap:8px!important;margin-bottom:16px!important}
+body.mobile .kpi-card{padding:14px 12px!important;min-height:80px!important}
+body.mobile .kpi-card .val{font-size:24px!important}
+body.mobile .content-grid{grid-template-columns:1fr!important}
+body.mobile .ad-card .ad-card-head{padding:12px 16px!important}
+body.mobile .data-table thead th,body.mobile .data-table tbody td{padding:8px 10px!important;font-size:11px!important}
+body.mobile .date-tabs{gap:3px!important;overflow-x:auto!important;flex-wrap:nowrap!important;-webkit-overflow-scrolling:touch}
+body.mobile .date-tab{padding:3px 8px!important;font-size:11px!important;flex-shrink:0!important;white-space:nowrap!important;height:28px!important}
+body.mobile .sub-tabs{margin-bottom:12px!important;overflow-x:auto!important;flex-wrap:nowrap!important;-webkit-overflow-scrolling:touch;gap:0!important}
+body.mobile .sub-tab{padding:5px 8px!important;font-size:11px!important;flex-shrink:0!important;white-space:nowrap!important;height:32px!important}
+body.mobile .page-header{padding:14px 16px!important;flex-direction:column!important;align-items:flex-start!important}
+body.mobile .page-header h1{font-size:18px!important}
+body.mobile .order-card{padding:12px 16px!important}
+body.mobile .store-header{padding:14px 16px!important;margin-bottom:16px!important}
+body.mobile .store-header h1{font-size:18px!important}
+body.mobile .view-switch{gap:4px!important;margin-bottom:12px!important}
+body.mobile .view-switch .vs-btn{padding:3px 10px!important;font-size:12px!important;height:28px!important}
+body.mobile .inv-top-bar{flex-direction:column!important;align-items:flex-start!important;gap:4px!important}
+body.mobile .inv-top-bar>span:last-child{display:flex;flex-wrap:wrap;gap:4px}
+body.mobile .sidebar .shop{border-radius:0!important;margin:0!important}
+body.mobile .sidebar .shop.active{color:var(--primary)!important;font-weight:600!important;background:rgba(24,144,255,.08)!important;border-bottom:2px solid var(--primary)!important}
+body.mobile .global-matrix-wrap th:first-child{min-width:140px!important}
+body.mobile .refund-summary{grid-template-columns:repeat(2,1fr)}body.mobile .refund-card-body .cols{grid-template-columns:1fr;gap:8px}body.mobile .refund-arrow{display:none}
+@media(max-width:768px){.refund-summary{grid-template-columns:repeat(2,1fr)}.refund-card-body .cols{grid-template-columns:1fr;gap:8px}.refund-arrow{display:none}.global-matrix-wrap th:first-child{min-width:140px}.global-matrix-wrap td{min-width:32px;font-size:10px;padding:4px 2px}.view-switch .vs-btn{padding:4px 12px;font-size:12px}}
 </style>
 </head>
 <body>
@@ -514,8 +631,41 @@ function renderStore(pid){
   html += '<span class="sub-tab'+(currentSubTab==='inventory'?' active':'')+'" data-sub="inventory">📦 库存管理</span>';
   html += '</div>';
   
-  // Orders — card-based (同库存看板「最近订单」风格)
+  // ── Layer 3: Main Content Grid (16+8) for orders tab ──
   html += '<div id="sub-orders" style="display:'+(currentSubTab==='orders'?'block':'none')+'">';
+  // Compute product stats for left panel (sales top 10 + low stock)
+  var prodStats = {};
+  orders.forEach(function(o){
+    var goods = o.shopOrderGoods || [];
+    goods.forEach(function(g){
+      var key = g.itemName || '?';
+      if(!prodStats[key]) prodStats[key] = {name:key, qty:0, revenue:0, spec:g.modelName||'', pic:(g.itemPic||''), modelSku:g.modelSku||''};
+      var qty = g.modelQuantityPurchased || 1;
+      prodStats[key].qty += qty;
+      prodStats[key].revenue += (g.modelDiscountedPrice||0) * qty;
+    });
+  });
+  var topProducts = Object.values(prodStats).sort(function(a,b){return b.qty - a.qty}).slice(0,10);
+  // Low stock: use inventory data
+  var lowStockList = [];
+  if (INVENTORY && INVENTORY.products) {
+    INVENTORY.products.forEach(function(p){
+      (p.specs || []).forEach(function(s){
+        var sk = p.title + '||' + s.spec;
+        var rr = RESERVATIONS && RESERVATIONS[sk] ? RESERVATIONS[sk] : null;
+        var rt = 0;
+        if (rr && rr.stores) { for (var sp in rr.stores) { rt += rr.stores[sp]; } }
+        var sh = Math.max(0, (s.qty || 0) - rt);
+        if (sh > 0 && sh <= 10) {
+          lowStockList.push({product:p.title, spec:s.spec, stock:s.qty||0, reserved:rt, shared:sh, image:p.image||''});
+        }
+      });
+    });
+  }
+  lowStockList.sort(function(a,b){return a.shared - b.shared});
+  lowStockList = lowStockList.slice(0, 10);
+
+  // Order cards for right panel
   // Group by order number
   var orderMap = {}, orderList = [];
   var statusCount = {READY_TO_SHIP:0,SHIPPED:0,COMPLETED:0,CANCELLED:0};
@@ -534,81 +684,141 @@ function renderStore(pid){
     });
   });
   orderList.reverse();
-  // Status filter buttons
-  var totalAll = orderList.length;
-  var fstatuses = [{v:'READY_TO_SHIP',t:'待发货',e:'🟡'},{v:'SHIPPED',t:'已发货',e:'🟢'},{v:'COMPLETED',t:'已完成',e:'🔵'},{v:'CANCELLED',t:'已取消',e:'🔴'},{v:'all',t:'全部',e:'📋'}];
+  // ── Ant Design content grid: Left 16 cols (2 modules) + Right 8 cols (pending orders) ──
   if (totalAll > 0) {
-    html += '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">';
+    html += '<div class="content-grid">';
+    
+    // LEFT COLUMN
+    html += '<div>';
+    
+    // Module 1: Sales Top 10
+    html += '<div class="ad-card">';
+    html += '<div class="ad-card-head"><h3 class="ad-card-title">🔥 销售 Top 10</h3></div>';
+    html += '<div class="ad-card-body">';
+    html += '<table class="data-table"><thead><tr>';
+    html += '<th style="width:40px">#</th><th>商品</th><th style="width:80px" class="num">销量</th><th style="width:100px" class="num">营收</th>';
+    html += '</tr></thead><tbody>';
+    topProducts.forEach(function(p,i){
+      var escName = (p.name||'').replace(/\"/g,'&quot;');
+      html += '<tr>';
+      html += '<td style="font-weight:500">'+(i+1)+'</td>';
+      html += '<td><div style="display:flex;align-items:center;gap:8px">'+(p.pic?'<img src="'+p.pic+'" style="width:32px;height:32px;object-fit:cover;border-radius:4px;flex-shrink:0" onerror="imgHide(this)">':'')+'<div><div style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+escName+'">'+escName+'</div><div style="font-size:12px;color:var(--muted)">'+p.spec+'</div></div></div></td>';
+      html += '<td class="num" style="font-weight:600">'+p.qty+'</td>';
+      html += '<td class="num" style="font-family:monospace">$'+p.revenue.toLocaleString()+'</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    html += '</div></div>';
+    
+    // Module 2: Low Stock Warning
+    html += '<div class="ad-card">';
+    html += '<div class="ad-card-head"><h3 class="ad-card-title">⚠ 库存不足预警</h3></div>';
+    html += '<div class="ad-card-body">';
+    html += '<table class="data-table"><thead><tr>';
+    html += '<th>商品</th><th style="width:80px" class="num">总库存</th><th style="width:80px" class="num">已分配</th><th style="width:80px" class="num">可售</th>';
+    html += '</tr></thead><tbody>';
+    if (lowStockList.length === 0) {
+      html += '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">✅ 暂无库存不足商品</td></tr>';
+    } else {
+      lowStockList.forEach(function(item){
+        var sc = item.shared <= 3 ? ' stock-warn' : '';
+        html += '<tr>';
+        html += '<td><div style="display:flex;align-items:center;gap:6px">'+(item.image?'<img src="'+item.image+'" style="width:28px;height:28px;object-fit:cover;border-radius:3px;flex-shrink:0" onerror="imgHide(this)">':'')+'<span>'+item.product+' · '+item.spec+'</span></div></td>';
+        html += '<td class="num">'+item.stock+'</td>';
+        html += '<td class="num" style="color:var(--muted)">'+item.reserved+'</td>';
+        html += '<td class="num'+sc+'" style="font-weight:600">'+item.shared+(item.shared<=3?'<span class="stock-warn-badge">低</span>':'')+'</td>';
+        html += '</tr>';
+      });
+    }
+    html += '</tbody></table>';
+    html += '</div></div>';
+    
+    html += '</div>'; // close left column
+    
+    // RIGHT COLUMN — Pending Orders
+    html += '<div>';
+    html += '<div class="ad-card">';
+    html += '<div class="ad-card-head"><h3 class="ad-card-title">📋 今日待发货</h3>';
+    // Status filter pills
+    html += '<div class="filter-bar" style="margin:0">';
     fstatuses.forEach(function(f){
       var cnt = f.v==='all'?totalAll:(statusCount[f.v]||0);
       var act = _orderStatusFilter===f.v;
-      html += '<button data-order-filter="'+f.v+'" style="padding:3px 10px;font-size:10px;border:1px solid '+(act?'var(--cyan)':'var(--border)')+';background:'+(act?'var(--cyan)':'var(--card-bg)')+';color:'+(act?'#fff':'var(--muted)')+';border-radius:10px;cursor:pointer">'+f.e+' '+f.t+' ('+cnt+')</button>';
+      html += '<button data-order-filter="'+f.v+'" class="filter-pill'+(act?' active':'')+'">'+f.e+' '+f.t+' ('+cnt+')</button>';
     });
     html += '</div>';
-  }
-  // Filter by status
-  if (_orderStatusFilter !== 'all') {
-    orderList = orderList.filter(function(ord){ return ord.orderStatus === _orderStatusFilter; });
-  }
-  if (orderList.length === 0) {
-    html += '<div class="empty-state" style="padding:20px">'+(totalAll===0?'暂无订单':'暂无该状态订单')+'</div>';
-  } else {
-    orderList.slice(0, 50).forEach(function(ord) {
-      // Card header
-      html += '<div class="order-card" style="background:var(--card-bg);border-radius:var(--radius);padding:12px;margin-bottom:8px;box-shadow:var(--shadow-sm)">';
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">';
-      html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
-      html += '<code style="font-size:11px;color:var(--cyan);font-weight:600">'+ord.orderSn+'</code>';
-      html += '<span style="font-size:10px;color:var(--muted)">'+fmtTimeInline(ord.createTime)+'</span>';
-      html += fmtStatus(ord.orderStatus);
-      html += '</div>';
-      html += '<div style="font-size:11px;color:var(--muted);white-space:nowrap">'+ord.items.length+'件 · <b style="color:var(--text)">$'+ord.total.toLocaleString()+'</b></div>';
-      html += '</div>';
-      // Item rows
-      ord.items.forEach(function(g) {
-        var escItem = (g.itemName||'').replace(/"/g,'&quot;').substring(0,40);
-        var escPic = (g.itemPic||'').replace(/"/g,'&quot;');
-        html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px">';
-        html += (g.itemPic?'<img src="'+escPic+'" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="imgHide(this)">':'');
-        html += '<div style="flex:1;min-width:0">';
-        html += '<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escItem+'</div>';
-        html += '<div style="color:var(--muted);font-size:10px">'+(g.modelName||'-')+' ×'+(g.modelQuantityPurchased||1)+'</div>';
+    html += '</div>';
+    
+    // Filter by status  
+    if (_orderStatusFilter !== 'all') {
+      orderList = orderList.filter(function(ord){ return ord.orderStatus === _orderStatusFilter; });
+    }
+    
+    html += '<div class="ad-card-body">';
+    if (orderList.length === 0) {
+      html += '<div style="text-align:center;padding:40px 20px;color:var(--muted)">'+(totalAll===0?'暂无订单':'暂无该状态订单')+'</div>';
+    } else {
+      html += '<div class="order-card-list">';
+      orderList.slice(0, 50).forEach(function(ord) {
+        html += '<div class="order-card">';
+        html += '<div class="oc-head">';
+        html += '<span class="oc-sn">'+ord.orderSn+'</span>';
+        html += '<span class="oc-time">'+fmtTimeInline(ord.createTime)+'</span>';
+        html += fmtStatus(ord.orderStatus);
+        html += '<span class="oc-total">'+ord.items.length+'件 · $'+ord.total.toLocaleString()+'</span>';
         html += '</div>';
-        html += '<span style="font-weight:600;white-space:nowrap">$'+(g.modelDiscountedPrice||0)+'</span>';
-        html += '</div>';
+        html += '<div class="oc-items">';
+        ord.items.forEach(function(g) {
+          var escItem = (g.itemName||'').replace(/\"/g,'&quot;').substring(0,40);
+          var escPic = (g.itemPic||'').replace(/\"/g,'&quot;');
+          html += '<div class="oc-item">';
+          html += (g.itemPic?'<img src="'+escPic+'" onerror="imgHide(this)">':'');
+          html += '<div class="oc-item-name">'+escItem+'<div class="oc-item-meta">'+(g.modelName||'-')+' ×'+(g.modelQuantityPurchased||1)+'</div></div>';
+          html += '<span class="oc-item-price">$'+(g.modelDiscountedPrice||0)+'</span>';
+          html += '</div>';
+        });
+        html += '</div></div>';
       });
-      html += '</div>'; // close card
-    });
+      html += '</div>';
+    }
+    html += '</div></div></div>'; // close right column + ad-card-body + ad-card
+    
+    html += '</div>'; // close content-grid
+  } else {
+    html += '<div class="empty-state">📭 暂无订单</div>';
   }
   html += '</div>'; // close sub-orders
   
-  // Ranking table
-  html += '<div id="sub-ranking" style="display:'+(currentSubTab==='ranking'?'block':'none')+'"><table class="data-table"><thead><tr>'
-    + '<th>#</th><th style="text-align:center">商品</th><th>规格</th><th>销量</th><th>营收</th>'
+  // Ranking table (Ant Design style)
+  html += '<div id="sub-ranking" style="display:'+(currentSubTab==='ranking'?'block':'none')+'">';
+  html += '<div class="ad-card"><div class="ad-card-head"><h3 class="ad-card-title">🔥 销售 Top 10</h3></div><div class="ad-card-body">';
+  html += '<table class="data-table"><thead><tr>'
+    + '<th style="width:40px">#</th><th>商品</th><th style="width:80px" class="num">销量</th><th style="width:100px" class="num">营收</th>'
     + '</tr></thead><tbody>';
   topProducts.forEach(function(p,i){
     html += '<tr>'
-      + '<td>'+(i+1)+'</td>'
-      + '<td style="text-align:center">'+fmtImg(p.pic, p.name)+'</td>'
-      + '<td style="font-size:11px;color:var(--muted)">'+p.spec+'</td>'
-      + '<td style="font-weight:600">'+p.qty+'</td>'
-      + '<td style="font-family:monospace;font-size:11px">$'+p.revenue.toLocaleString()+'</td>'
+      + '<td style="font-weight:500">'+(i+1)+'</td>'
+      + '<td><div style="display:flex;align-items:center;gap:8px">'+fmtImg(p.pic, p.name)+'<div><div style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</div><div style="font-size:12px;color:var(--muted)">'+p.spec+'</div></div></div></td>'
+      + '<td class="num" style="font-weight:600">'+p.qty+'</td>'
+      + '<td class="num" style="font-family:monospace">$'+p.revenue.toLocaleString()+'</td>'
       + '</tr>';
   });
-  html += '</tbody></table></div>';
+  html += '</tbody></table></div></div></div>';
   
   // Status distribution
   var allStatuses = orders.map(function(o){return o.orderStatus});
-  var statusCount = {};
-  allStatuses.forEach(function(s){statusCount[s]=(statusCount[s]||0)+1});
+  var statusCount2 = {};
+  allStatuses.forEach(function(s){statusCount2[s]=(statusCount2[s]||0)+1});
   html += '<div id="sub-status" style="display:'+(currentSubTab==='status'?'block':'none')+'">';
-  html += '<div class="kpi-row">'
-    + '<div class="kpi-card yellow"><div class="lbl">待发货</div><div class="val">'+(statusCount['READY_TO_SHIP']||0)+'</div></div>'
-    + '<div class="kpi-card green"><div class="lbl">已发货</div><div class="val">'+(statusCount['SHIPPED']||0)+'</div></div>'
-    + '<div class="kpi-card blue"><div class="lbl">已完成</div><div class="val">'+(statusCount['COMPLETED']||0)+'</div></div>'
-    + '<div class="kpi-card red"><div class="lbl">已取消</div><div class="val">'+(statusCount['CANCELLED']||0)+'</div></div>'
+  html += '<div class="ad-card"><div class="ad-card-head"><h3 class="ad-card-title">📊 状态分布</h3></div><div class="ad-card-body">';
+  html += '<div class="kpi-row" style="margin-bottom:0;padding:20px 24px">'
+    + '<div class="kpi-card orange"><div class="val">'+(statusCount2['READY_TO_SHIP']||0)+'</div><div class="lbl">待发货</div></div>'
+    + '<div class="kpi-card"><div class="val">'+(statusCount2['SHIPPED']||0)+'</div><div class="lbl">已发货</div></div>'
+    + '<div class="kpi-card"><div class="val">'+(statusCount2['COMPLETED']||0)+'</div><div class="lbl">已完成</div></div>'
+    + '<div class="kpi-card"><div class="val">'+(statusCount2['CANCELLED']||0)+'</div><div class="lbl">已取消</div></div>'
+    + '<div class="kpi-card"><div class="val">'+(statusCount2['TO_CONFIRM_RECEIVE']||0)+'</div><div class="lbl">待确认</div></div>'
     + '</div>';
-  html += '</div>';
+  html += '</div></div></div>';
   
   // Refund section (同库存看板风格)
   if (hasRefund) {
@@ -616,7 +826,7 @@ function renderStore(pid){
     var refundList = rd.matched_list || [];
     var totalRefund = rd.total_refund || 0;
     html += '<div id="sub-refund" style="display:'+(currentSubTab==='refund'?'block':'none')+'">';
-    html += '<div style="font-size:10px;color:var(--muted);margin-bottom:12px">退件数据更新: '+REFUND_TIME+'</div>';
+    html += '<div class="ad-card"><div class="ad-card-head"><h3 class="ad-card-title">📋 退件提醒</h3><span style="font-size:12px;color:var(--muted)">退件数据更新: '+REFUND_TIME+'</span></div><div class="ad-card-body" style="padding:16px 24px">';
     // Summary
     html += '<div class="refund-summary">';
     html += '<div class="rs"><div class="rs-num ac">'+totalRefund+'</div><div class="rs-lbl">总退件</div></div>';
@@ -672,7 +882,7 @@ function renderStore(pid){
       cardsHtml += '</div>';
     });
     html += '<div id="refundGrid">'+(cardsHtml || '<div class="refund-empty">暂无匹配的退件数据</div>')+'</div>';
-    html += '</div>';
+    html += '</div></div></div>';
   }
   // Trends section (per-store category keywords)
   if (hasTrends) {
@@ -684,23 +894,24 @@ function renderStore(pid){
     var maxVol = topN.length>0 ? (topN[0].search_volume||1) : 1;
     
     html += '<div id="sub-trends" style="display:'+(currentSubTab==='trends'?'block':'none')+'">';
-    html += '<div class="kpi-row">'
-      + '<div class="kpi-card blue"><div class="lbl">关键词数</div><div class="val">'+yentries.length+'</div></div>'
-      + '<div class="kpi-card green"><div class="lbl">最高搜索量</div><div class="val">'+(topN.length>0?topN[0].search_volume.toLocaleString():'-')+'</div></div>'
-      + '<div class="kpi-card purple"><div class="lbl">总搜索量</div><div class="val">'+yentries.reduce(function(a,b){return a+(b.search_volume||0)},0).toLocaleString()+'</div></div>'
+    html += '<div class="ad-card"><div class="ad-card-head"><h3 class="ad-card-title">📈 市场趋势</h3></div><div class="ad-card-body">';
+    html += '<div class="kpi-row" style="margin-bottom:0;padding:20px 24px">'
+      + '<div class="kpi-card"><div class="val">'+yentries.length+'</div><div class="lbl">关键词数</div></div>'
+      + '<div class="kpi-card"><div class="val">'+(topN.length>0?topN[0].search_volume.toLocaleString():'-')+'</div><div class="lbl">最高搜索量</div></div>'
+      + '<div class="kpi-card"><div class="val">'+yentries.reduce(function(a,b){return a+(b.search_volume||0)},0).toLocaleString()+'</div><div class="lbl">总搜索量</div></div>'
       + '</div>';
-    html += '<div style="background:var(--card-bg);border-radius:var(--radius);padding:12px 16px;box-shadow:var(--shadow-sm)">';
+    html += '<div style="padding:0 24px 20px"><div class="trends-bar-wrap">';
     topN.forEach(function(item,i){
       var vol = item.search_volume||0;
       var pct = Math.round(vol/maxVol*100);
-      html += '<div style="display:flex;align-items:center;margin-bottom:6px;gap:8px">';
-      html += '<span style="width:20px;text-align:right;font-size:10px;color:var(--muted)">'+(i+1)+'</span>';
-      html += '<span style="width:80px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+item.keyword+'</span>';
-      html += '<div style="flex:1;height:14px;background:var(--bg);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:3px"></div></div>';
-      html += '<span style="font-size:10px;font-weight:600;min-width:45px;text-align:right">'+vol.toLocaleString()+'</span>';
+      html += '<div class="trends-bar-row">';
+      html += '<span class="rank">'+(i+1)+'</span>';
+      html += '<span class="kw" title="'+item.keyword+'">'+item.keyword+'</span>';
+      html += '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div>';
+      html += '<span class="vol">'+vol.toLocaleString()+'</span>';
       html += '</div>';
     });
-    html += '</div></div>';
+    html += '</div></div></div></div></div>';
   }
   
   // Inventory management section
@@ -716,21 +927,22 @@ function renderStore(pid){
   }
   
   html += '<div id="sub-inventory" style="display:'+(currentSubTab==='inventory'?'block':'none')+'">';
-  html += '<div class="inv-top-bar" style="font-size:10px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:nowrap;gap:8px">';
-  html += '<span>库存数据更新: '+INVENTORY_TIME+'</span>';
-  html += '<span><span style="position:relative;display:inline-block">';
-  html += '<button data-action="showExportPicker" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📥 导出</button>';
-  html += '<div id="exportPicker" style="display:none;position:absolute;top:100%;left:0;z-index:50;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;box-shadow:var(--shadow-lg);padding:4px;min-width:120px;margin-top:2px">';
-  html += '<button data-action="exportJSON" class="export-picker-btn" style="display:block;width:100%;padding:5px 10px;font-size:11px;border:none;background:transparent;cursor:pointer;text-align:left;border-radius:3px">📄 JSON</button>';
-  html += '<button data-action="exportCSV" class="export-picker-btn" style="display:block;width:100%;padding:5px 10px;font-size:11px;border:none;background:transparent;cursor:pointer;text-align:left;border-radius:3px">📊 CSV (Excel)</button>';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px;flex-wrap:wrap">';
+  html += '<span style="font-size:12px;color:var(--muted)">库存数据更新: '+INVENTORY_TIME+'</span>';
+  html += '<div style="display:flex;gap:8px;align-items:center">';
+  html += '<span style="position:relative;display:inline-block">';
+  html += '<button data-action="showExportPicker" class="btn-default btn-sm">📥 导出</button>';
+  html += '<div id="exportPicker" style="display:none;position:absolute;top:100%;right:0;z-index:50;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:4px;min-width:120px;margin-top:4px">';
+  html += '<button data-action="exportJSON" class="export-picker-btn" style="display:block;width:100%;padding:5px 12px;font-size:12px;border:none;background:transparent;cursor:pointer;text-align:left;border-radius:4px">📄 JSON</button>';
+  html += '<button data-action="exportCSV" class="export-picker-btn" style="display:block;width:100%;padding:5px 12px;font-size:12px;border:none;background:transparent;cursor:pointer;text-align:left;border-radius:4px">📊 CSV (Excel)</button>';
   html += '</div></span> ';
-  html += '<button data-action="importRes" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer">📤 导入</button> ';
-  html += '<button data-action="showChangeLog" style="padding:3px 12px;font-size:10px;border:1px dashed var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer;color:var(--muted)">📝 变更日志 ('+_reservationLog.length+'条)</button></span>';
+  html += '<button data-action="importRes" class="btn-default btn-sm">📤 导入</button> ';
+  html += '<button data-action="showChangeLog" class="btn-default btn-sm" style="border-style:dashed">📝 变更日志 ('+_reservationLog.length+'条)</button></div>';
   html += '</div>';
   
   // This store's reserved specs
   var reservedKeys = Object.keys(storeReserved);
-  html += '<div class="sec-title">📦 ' + s.name + ' 已保留规格</div>';
+  html += '<div class="ad-card"><div class="ad-card-head"><h3 class="ad-card-title">📦 ' + s.name + ' 已保留规格</h3></div><div class="ad-card-body">';
   if (reservedKeys.length === 0) {
     html += '<div class="empty-state" style="padding:20px">暂无保留规格，前往公共池分配</div>';
   } else {
@@ -764,7 +976,7 @@ function renderStore(pid){
 
   // ── All-store reservation matrix ──
   html += '<div style="margin-top:24px">';
-  html += '<div class="sec-title">📊 全部店铺保留概览</div>';
+  html += '<div class="ad-card"><div class="ad-card-head"><h3 class="ad-card-title">📊 全部店铺保留概览</h3></div><div class="ad-card-body">';
   
   var allSpecKeys = [];
   if (RESERVATIONS) { for (var k in RESERVATIONS) { allSpecKeys.push(k); } }
@@ -800,6 +1012,7 @@ function renderStore(pid){
     if (allSpecKeys.length > 100) html += '<div style="font-size:10px;color:var(--muted);margin-top:4px">仅显示前 100 条，共 '+allSpecKeys.length+' 条</div>';
   }
   html += '</div>';
+  html += '</div></div>';  // close ad-card for matrix
 
   // Public pool
   // Count low-stock / critical-stock specs
@@ -817,17 +1030,17 @@ function renderStore(pid){
       });
     });
   }
-  html += '<div class="sec-title" style="margin-top:24px">🌐 公共池';
+  html += '<div class="ad-card" style="margin-top:24px"><div class="ad-card-head"><h3 class="ad-card-title">🌐 公共池';
   if (critCount > 0 || lowCount > 0) {
     html += ' <span style="font-size:11px;font-weight:400">';
     if (critCount > 0) html += '<span style="color:var(--red)">⚠ '+critCount+' 库存不足</span> ';
     if (lowCount > 0) html += '<span style="color:var(--yellow)">'+lowCount+' 偏低</span>';
     html += '</span>';
   }
-  html += '</div>';
-  html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center">';
+  html += '</h3></div><div class="ad-card-body" style="padding:16px 24px">';
+  html += '<div class="filter-bar" style="margin-bottom:12px">';
   html += '<span style="font-size:11px;color:var(--muted)">仓库:</span>';
-  html += '<button class="inv-warehouse-btn' + (_currentWarehouse === 'all' ? ' active' : '') + '" data-wh="all" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:10px;cursor:pointer">全部</button>';
+  html += '<button class="filter-pill inv-warehouse-btn' + (_currentWarehouse === 'all' ? ' active' : '') + '" data-wh="all">全部</button>';
   if (INVENTORY && INVENTORY.products) {
     var whCounts = {};
     INVENTORY.products.forEach(function(p) {
@@ -837,7 +1050,7 @@ function renderStore(pid){
     var whList = Object.keys(whCounts).sort(function(a,b){return whCounts[b]-whCounts[a]});
     whList.forEach(function(wh) {
       var isActive = _currentWarehouse === wh ? ' active' : '';
-      html += '<button class="inv-warehouse-btn'+isActive+'" data-wh="'+wh+'" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:var(--card-bg);border-radius:10px;cursor:pointer">'+wh+' ('+whCounts[wh]+')</button>';
+      html += '<button class="filter-pill inv-warehouse-btn'+isActive+'" data-wh="'+wh+'">'+wh+' ('+whCounts[wh]+')</button>';
     });
   }
   // Count zero-stock specs for this warehouse filter
@@ -857,17 +1070,17 @@ function renderStore(pid){
     });
   }
   var zsActive = _showZeroStock ? ' active' : '';
-  html += '<button class="inv-zero-btn'+zsActive+'" onclick="toggleZeroStock(this)" style="padding:3px 10px;font-size:10px;border:1px solid var(--red);background:'+(_showZeroStock?'var(--red)':'var(--card-bg)')+';color:'+(_showZeroStock?'#fff':'var(--red)')+';border-radius:10px;cursor:pointer;margin-left:4px">🔴 已售罄 ('+zeroCount+')</button>';
+  html += '<button class="filter-pill inv-zero-btn'+zsActive+'" onclick="toggleZeroStock(this)" style="border-color:var(--red);color:'+(_showZeroStock?'#fff':'var(--red)')+';background:'+(_showZeroStock?'var(--red)':'var(--card-bg)')+';margin-left:4px">🔴 已售罄 ('+zeroCount+')</button>';
   html += '</div>';
   // Allocation filter buttons
-  html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center">';
-  html += '<span style="font-size:11px;color:var(--muted)">分配:</span>';
+  html += '<div class="filter-bar" style="margin-bottom:8px">';
+  html += '<span style="font-size:12px;color:var(--muted);line-height:28px;margin-right:4px">分配:</span>';
   var afs = [{v:'all',t:'全部'},{v:'unallocated',t:'未分配'},{v:'partial',t:'部分分配'},{v:'full',t:'全部分配'}];
   afs.forEach(function(af){
-    html += '<button class="inv-alloc-btn'+(af.v===_allocFilter?' active':'')+'" data-af="'+af.v+'" style="padding:3px 10px;font-size:10px;border:1px solid var(--border);background:'+(af.v===_allocFilter?'var(--cyan)':'var(--card-bg)')+';color:'+(af.v===_allocFilter?'#fff':'var(--muted)')+';border-radius:10px;cursor:pointer">'+af.t+'</button>';
+    html += '<button class="filter-pill inv-alloc-btn'+(af.v===_allocFilter?' active':'')+'" data-af="'+af.v+'">'+af.t+'</button>';
   });
   html += '</div>';
-  html += '<input type="text" id="invSearch" placeholder="搜索产品、规格或编码..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px" oninput="filterInventory()">';
+  html += '<input type="text" id="invSearch" placeholder="搜索产品、规格或编码..." style="width:100%;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;font-size:var(--font-body);outline:none;transition:border-color .3s" onfocus="this.style.borderColor=\'var(--primary)\'" onblur="this.style.borderColor=\'var(--border)\'" oninput="filterInventory()">';
   
   var showInv = currentSubTab === 'inventory';
   if (!INVENTORY || !INVENTORY.products) {
@@ -974,7 +1187,7 @@ function renderStore(pid){
       seenProducts[pt] = true;
       var batchBtn = '';
       if (isFirstOfProduct && !_showZeroStock && productTotals[pt] && productTotals[pt].total > 0) {
-        batchBtn = ' <button data-batch="'+escProduct+'" data-bpid="'+pid+'" style="padding:3px 8px;font-size:10px;background:var(--green);color:#fff;border:none;border-radius:4px;cursor:pointer" title="一键认领该产品所有可售规格（共'+productTotals[pt].total+'件）">📦整批</button>';
+        batchBtn = ' <button data-batch="'+escProduct+'" data-bpid="'+pid+'" class="btn-primary btn-sm" style="background:var(--green);border-color:var(--green)" title="一键认领该产品所有可售规格（共'+productTotals[pt].total+'件）">📦整批</button>';
       }
       html += '<tr class="inv-row' + (isOverAlloc ? ' over-alloc' : '') + '" data-title="'+pt.replace(/"/g,'&quot;')+'" data-spec="'+row.spec.replace(/"/g,'&quot;')+'" data-code="'+(row.code||'').replace(/"/g,'&quot;')+'" data-subcode="'+(row.subCode||'').replace(/"/g,'&quot;')+'" data-wh="'+row.storeName+'">'
         + '<td style="text-align:center">'+(row.image?'<img src="'+row.image+'" style="width:36px;height:36px;object-fit:cover;border-radius:3px;vertical-align:middle" onerror="imgHide(this)" data-fb="1">':'')+'</td>'
@@ -985,7 +1198,7 @@ function renderStore(pid){
         + '<td style="min-width:75px">'+(row.specQty>0?'<div style="display:flex;align-items:center;gap:5px"><div style="flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.min(100,Math.round(row.reservedTotal/row.specQty*100))+'%;background:'+getOccRateColor(row.reservedTotal,row.specQty)+';border-radius:3px;min-width:0;transition:width .3s"></div></div><span style="font-size:10px;color:var(--muted);white-space:nowrap">'+Math.round(row.reservedTotal/row.specQty*100)+'%</span></div>':'-')+'</td>'
         + '<td style="font-weight:600;color:'+(row.shared<=0?'var(--red)':row.shared<=3?'var(--red)':row.shared<=10?'var(--yellow)':'var(--green)')+'">'+row.shared+(row.shared>0&&row.shared<=3?' <span style="font-size:9px;background:var(--red);color:#fff;padding:1px 4px;border-radius:3px">库存不足</span>':row.shared>3&&row.shared<=10?' <span style="font-size:9px;color:var(--yellow)">低</span>':'')+'</td>'
         + '<td>'
-        + '<button data-assign="'+escProduct+'||'+escSpec+'" data-apid="'+pid+'" data-aqty="'+specQty+'" data-asres="'+row.storeRes+'" style="padding:3px 10px;font-size:10px;background:var(--cyan);color:#fff;border:none;border-radius:4px;cursor:pointer">'+(row.storeRes>0?'修改':'+分配')+'</button>'
+        + '<button data-assign="'+escProduct+'||'+escSpec+'" data-apid="'+pid+'" data-aqty="'+specQty+'" data-asres="'+row.storeRes+'" class="btn-primary btn-sm">'+(row.storeRes>0?'修改':'+分配')+'</button>'
         + batchBtn
         + '</td>'
         + '</tr>';
@@ -994,9 +1207,11 @@ function renderStore(pid){
     html += '</tbody></table>';
     html += '<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px;font-size:11px">';
     _invTotalPages = totalPages;
-    html += '<button data-inv-page="prev"' + (_invPage <= 1 ? ' disabled style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;opacity:.4;cursor:default"' : ' style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer"') + '>◀ 上一页</button>';
-    html += '<span style="color:var(--muted)">第 <span id="invPageNum">'+_invPage+'</span>/'+totalPages+' 页 · '+allSpecs.length+' 个规格</span>';
-    html += '<button data-inv-page="next"' + (_invPage >= totalPages ? ' disabled style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;opacity:.4;cursor:default"' : ' style="padding:3px 10px;border:1px solid var(--border);background:var(--card-bg);border-radius:4px;cursor:pointer"') + '>下一页 ▶</button>';
+    html += '<div class="data-table-pagi">';
+    html += '<button data-inv-page="prev"' + (_invPage <= 1 ? ' disabled' : '') + '>◀</button>';
+    html += '<span class="pagi-info">第 '+_invPage+'/'+totalPages+' 页 · '+allSpecs.length+' 个规格</span>';
+    html += '<button data-inv-page="next"' + (_invPage >= totalPages ? ' disabled' : '') + '>▶</button>';
+    html += '</div>';
     html += '</div></div>';
   }
   
@@ -1010,13 +1225,13 @@ function renderStore(pid){
     + '<label style="font-size:12px;font-weight:600">保留数量:</label>'
     + '<input type="number" id="assignQty" min="0" value="0" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;margin:4px 0 12px;font-size:14px">'
     + '<div style="display:flex;gap:8px;justify-content:flex-end">'
-    + '<button onclick="closeAssignModal()" style="padding:6px 16px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-size:12px">取消</button>'
-    + '<button onclick="saveReservation()" style="padding:6px 16px;background:var(--cyan);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">保存</button>'
+    + '<button data-action="closeAssign" class="btn-default">取消</button>'
+    + '<button data-action="saveAssign" class="btn-primary">保存</button>'
   html += '</div></div>';  // close assign modal
   
   // Reservation change log — now as popup button
   html += '<div style="margin-top:24px;text-align:center">';
-  html += '<button data-action="showChangeLog" style="padding:8px 20px;font-size:12px;border:1px dashed var(--border);background:var(--card-bg);border-radius:var(--radius-full);cursor:pointer;color:var(--muted);transition:.15s" onmouseover="this.style.borderColor=\'var(--cyan)\';this.style.color=\'var(--cyan)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--muted)\'">📝 变更日志 ('+_reservationLog.length+'条)</button>';
+  html += '<div style="text-align:center;margin-top:16px"><button data-action="showChangeLog" class="btn-default" style="border-style:dashed">📝 变更日志 ('+_reservationLog.length+'条)</button></div>';
   html += '</div>';
   
   // ── Change log popup modal ──
@@ -1024,7 +1239,7 @@ function renderStore(pid){
   html += '<div style="background:#fff;border-radius:14px;padding:24px;max-width:700px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-xl)">';
   html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">';
   html += '<h3 style="margin:0;font-size:16px">📝 保留变更日志 ('+_reservationLog.length+'条)</h3>';
-  html += '<button data-action="closeChangeLog" style="padding:4px 12px;border:1px solid var(--border);background:var(--card-bg);border-radius:6px;cursor:pointer;font-size:12px">✕ 关闭</button>';
+  html += '<button data-action="closeChangeLog" class="btn-default btn-sm">✕ 关闭</button>';
   html += '</div>';
   if (_reservationLog.length === 0) {
     html += '<div class="empty-state" style="padding:20px;color:var(--muted)">暂无变更记录</div>';
