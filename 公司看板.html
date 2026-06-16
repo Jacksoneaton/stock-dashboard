@@ -108,10 +108,11 @@ img,svg{max-width:100%;height:auto}
 .empty-state small{display:block;margin-top:4px;color:var(--dim)}
 
 /* ── Order cards in right panel ── */
-.order-card-list{display:flex;flex-direction:column}
-.order-card-list::-webkit-scrollbar{width:4px}
-.order-card-list::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
-.order-card-list::-webkit-scrollbar-track{background:transparent}
+.order-card-list{display:flex;flex-direction:column;overflow-y:scroll!important;scrollbar-width:thin;scrollbar-color:var(--dim) transparent}
+.order-card-list::-webkit-scrollbar{width:6px}
+.order-card-list::-webkit-scrollbar-thumb{background:#bfbfbf;border-radius:3px}
+.order-card-list::-webkit-scrollbar-thumb:hover{background:#8c8c8c}
+.order-card-list::-webkit-scrollbar-track{background:rgba(0,0,0,.04);border-radius:3px}
 .order-card{border-bottom:1px solid var(--border);padding:16px 24px;transition:background .2s}
 .order-card:last-child{border-bottom:none}
 .order-card:hover{background:rgba(24,144,255,.01)}
