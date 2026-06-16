@@ -599,7 +599,14 @@ function renderStore(pid){
     + '<button class="vs-btn active" data-view="store">🏪 单店视图</button>'
     + '<button class="vs-btn" data-view="global">📊 全局视图</button>'
     + '</div>'
-    + '<div class="store-header"><h1>'+s.name+'</h1><div class="meta">共 '+s.total+' 条订单 · 平台ID: '+s.platformShopId+' · '+(isFallbackAll?'今天暂无新单，显示全部订单 · ':'')+'数据更新: '+DATA_TIME+'</div></div>';
+    + '<div class="page-header">'
+    + '<h1><span class="store-icon">🏪</span>'+s.name+'</h1>'
+    + '<div class="meta">'
+    + '<span class="meta-item"><span class="meta-dot"></span> 总订单 <span class="meta-val">'+s.total+'</span></span>'
+    + '<span class="meta-item">平台ID <span class="meta-val">'+s.platformShopId+'</span></span>'
+    + (isFallbackAll?'<span class="meta-item" style="color:var(--orange)">今天暂无新单，显示全部订单</span>':'')
+    + '<span class="meta-item">数据更新 <span class="meta-val">'+DATA_TIME+'</span></span>'
+    + '</div></div>';
   
   // date tabs
   html += '<div class="date-tabs">'+pHtml+'</div>';
