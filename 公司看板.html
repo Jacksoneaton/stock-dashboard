@@ -649,6 +649,7 @@ function renderStore(pid){
         var escOSpec = (o.modelName || '').replace(/"/g,'&quot;');
         var escRCode = (r.subCode || '').replace(/"/g,'&quot;');
         var escOSku = (o.modelSku || '').replace(/"/g,'&quot;');
+        var skuHtml = (o.modelSku && o.modelSku !== '0' && !/^0+$/.test(String(o.modelSku))) ? '<code>'+escOSku+'</code>' : '';
         var escOSn = (o.orderSn || '').replace(/"/g,'&quot;');
         cardsHtml += '<div class="refund-card" data-match="'+mt+'">';
         cardsHtml += '<div class="refund-card-hd">';
@@ -659,7 +660,7 @@ function renderStore(pid){
         cardsHtml += '<div class="refund-card-body"><div class="cols">';
         cardsHtml += '<div class="refund-col"><span class="label">📦 退件 · '+statusDot+' '+(r.statusLabel||'')+'</span><div class="refund-title" data-expand="r'+idx+'_'+dt.replace(/-/g,'')+'">'+escRTitle+'</div><div class="refund-spec">'+escRSpec+'</div><div class="refund-meta"><code>'+escRCode+'</code><span>📍 '+(r.warehouse||'')+'</span><span>×'+(r.qty||0)+'</span></div></div>';
         cardsHtml += '<div class="refund-arrow">→</div>';
-        cardsHtml += '<div class="refund-col"><span class="label">🛒 待发订单</span><div class="refund-title" data-expand="o'+idx+'_'+dt.replace(/-/g,'')+'">'+escOTitle+'</div><div class="refund-spec">'+escOSpec+'</div><div class="refund-meta"><code>'+escOSku+'</code><span>×'+(o.quantity||0)+'</span></div></div>';
+        cardsHtml += '<div class="refund-col"><span class="label">🛒 待发订单</span><div class="refund-title" data-expand="o'+idx+'_'+dt.replace(/-/g,'')+'">'+escOTitle+'</div><div class="refund-spec">'+escOSpec+'</div><div class="refund-meta">'+skuHtml+'<span>×'+(o.quantity||0)+'</span></div></div>';
         cardsHtml += '</div></div>';
         cardsHtml += '</div>';
       });
