@@ -1150,7 +1150,7 @@ var _ghToken='ghp_muuP2slnS728DaZw' + 'oAkPsakitY9QeX0Uwi5X';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='317695d_202606180452';
+  var ver='317695d_202606180454';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -2268,8 +2268,8 @@ function refreshAll(){
 
 // ====== 一键生成在途包裹 ======
 function generateTransitFromReplen(){
-  // 从原始 REPLENISH 读取建议（不依赖 _replenItems 的扣减状态）
-  var allNeed=[], alreadyCovered=[];
+  // 从原始 REPLENISH 读建议，自己扣在途（与 renderReplenTab 扣减逻辑一致）
+  var allNeed=[];
   var transitBySku={};
   if(_transitData&&_transitData.length){
     _transitData.forEach(function(pkg){
@@ -2281,22 +2281,14 @@ function generateTransitFromReplen(){
   }
   DATA.forEach(function(d){
     var rep=REPLENISH[d.sku]||{};
-    var rawSuggest=rep.suggest||0;
-    if(rawSuggest<=0) return;
+    var suggest=rep.suggest||0;
+    if(suggest<=0) return;
     var t=transitBySku[d.sku]||0;
-    if(rawSuggest>t){
-      allNeed.push({sku:d.sku,qty:rawSuggest-t});
-    }else{
-      alreadyCovered.push({sku:d.sku});
-    }
+    if(suggest<=t) return;
+    allNeed.push({sku:d.sku,qty:suggest-t});
   });
-  if(allNeed.length===0){
-    showToast(alreadyCovered.length>0?'所有 '+alreadyCovered.length+' 个待补货SKU已有在途覆盖':'没有需要补货的 SKU');
-    return;
-  }
-  var msg='将为 '+allNeed.length+' 个SKU创建在途包裹（共'+allNeed.reduce(function(s,x){return s+x.qty},0)+'件）';
-  if(alreadyCovered.length) msg+='，已有在途的 '+alreadyCovered.length+' 个自动跳过';
-  if(!confirm(msg+'，确认？')) return;
+  if(allNeed.length===0){showToast('没有需要补货的 SKU');return}
+  if(!confirm('将为 '+allNeed.length+' 个SKU创建在途包裹（共'+allNeed.reduce(function(s,x){return s+x.qty},0)+'件），确认？')) return;
   var d=new Date();
   var today=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   var pkgId=uuid();
