@@ -1150,7 +1150,7 @@ var _ghToken='ghp_muuP2slnS728DaZw' + 'oAkPsakitY9QeX0Uwi5X';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='317695d_202606180444';
+  var ver='317695d_202606180448';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -2268,50 +2268,24 @@ function refreshAll(){
 
 // ====== 一键生成在途包裹 ======
 function generateTransitFromReplen(){
-  // 重建在途汇总（transitBySku 是 renderReplenTab 的局部变量）
-  var transitBySku={};
-  if(_transitData&&_transitData.length){
-    _transitData.forEach(function(pkg){
-      if(!pkg||!pkg.items)return;
-      Object.keys(pkg.items).forEach(function(sku){
-        transitBySku[sku]=(transitBySku[sku]||0)+(pkg.items[sku]||0);
-      });
-    });
-  }
-  // 回查原始 REPLENISH 建议（不扣在途），区分：已覆盖 vs 还需补
-  var allNeed=[], alreadyCovered=[];
-  DATA.forEach(function(d){
-    var rep=REPLENISH[d.sku]||{};
-    var rawSuggest=rep.suggest||0;
-    if(rawSuggest<=0) return;
-    var transitQty=transitBySku&&transitBySku[d.sku]||0;
-    if(rawSuggest>transitQty){
-      allNeed.push({sku:d.sku,qty:rawSuggest-transitQty,rawSuggest:rawSuggest,transitQty:transitQty});
-    }else{
-      alreadyCovered.push({sku:d.sku,qty:rawSuggest,transitQty:transitQty});
-    }
+  var items=[];
+  _replenItems.forEach(function(i){
+    if(i.suggest>0) items.push({sku:i.sku,qty:i.suggest});
   });
-  if(allNeed.length===0){
-    if(alreadyCovered.length>0){
-      showToast('所有 '+alreadyCovered.length+' 个待补货SKU已有在途覆盖，无需重复生成');
-    }else{
-      showToast('没有需要补货的 SKU');
-    }
-    return;
-  }
-  if(!confirm('将为 '+allNeed.length+' 个SKU创建在途包裹（共'+allNeed.reduce(function(s,x){return s+x.qty},0)+'件），已有在途的 '+alreadyCovered.length+' 个已自动跳过，确认？')) return;
+  if(items.length===0){showToast('没有需要补货的 SKU');return}
+  if(!confirm('将为 '+items.length+' 个SKU创建在途包裹，确认？')) return;
   var d=new Date();
   var today=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   var pkgId=uuid();
   var pkgItems={};
-  allNeed.forEach(function(it){pkgItems[it.sku]=it.qty;});
+  items.forEach(function(it){pkgItems[it.sku]=it.qty;});
   var pkg={id:pkgId,name:today+' 补货',date:today,items:pkgItems};
   var data=JSON.parse(JSON.stringify(_transitData));
   data.push(pkg);
   _transitData=data;
   saveTransitToGitHub(data);
   renderTransitTab();
-  showToast('已生成在途包裹: '+allNeed.length+'个SKU · '+allNeed.reduce(function(s,x){return s+x.qty},0)+'件');
+  showToast('已生成在途包裹: '+items.length+'个SKU · '+items.reduce(function(s,x){return s+x.qty},0)+'件');
 }
 
 // ====== 数据看板 Tab ======
