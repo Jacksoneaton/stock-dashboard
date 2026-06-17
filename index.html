@@ -1377,8 +1377,44 @@ function fetchShaAndRetry(data,cb){
   x.open('GET',TRANSIT_API+'?ref=gh-pages');x.timeout=8000;
   x.setRequestHeader('Authorization','token '+_ghToken);
   x.setRequestHeader('Accept','application/vnd.github.v3+json');
-  x.onload=function(){if(x.status===200){_transitSha=JSON.parse(x.responseText).sha;saveTransitToGitHub(data,cb)}else{if(cb) cb(false)}};
-  x.onerror=function(){if(cb) cb(false)};
+  x.onload=function(){
+    if(x.status===200){
+      try{
+        _transitSha=JSON.parse(x.responseText).sha;
+        saveTransitToGitHub(data,cb);
+      }catch(e){
+        _pushFailCount++;
+        var delay=Math.min(_pushFailCount*10,120)*1000;
+        setSyncStatus('error','SHA获取失败 · '+delay/1000+'s后重试');
+        if(_pushRetryTimer) clearTimeout(_pushRetryTimer);
+        _pushRetryTimer=setTimeout(function(){saveTransitToGitHub(data,cb);},delay);
+        if(cb) cb(false);
+      }
+    }else{
+      _pushFailCount++;
+      var delay=Math.min(_pushFailCount*10,120)*1000;
+      setSyncStatus('error','API异常('+x.status+') · '+delay/1000+'s后重试');
+      if(_pushRetryTimer) clearTimeout(_pushRetryTimer);
+      _pushRetryTimer=setTimeout(function(){saveTransitToGitHub(data,cb);},delay);
+      if(cb) cb(false);
+    }
+  };
+  x.onerror=function(){
+    _pushFailCount++;
+    var delay=Math.min(_pushFailCount*10,120)*1000;
+    setSyncStatus('error','网络异常 · '+delay/1000+'s后重试');
+    if(_pushRetryTimer) clearTimeout(_pushRetryTimer);
+    _pushRetryTimer=setTimeout(function(){saveTransitToGitHub(data,cb);},delay);
+    if(cb) cb(false);
+  };
+  x.ontimeout=function(){
+    _pushFailCount++;
+    var delay=Math.min(_pushFailCount*10,120)*1000;
+    setSyncStatus('error','请求超时 · '+delay/1000+'s后重试');
+    if(_pushRetryTimer) clearTimeout(_pushRetryTimer);
+    _pushRetryTimer=setTimeout(function(){saveTransitToGitHub(data,cb);},delay);
+    if(cb) cb(false);
+  };
   x.send();
 }
 
