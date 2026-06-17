@@ -1150,7 +1150,7 @@ var _ghToken='ghp_muuP2slnS728DaZw' + 'oAkPsakitY9QeX0Uwi5X';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='317695d_202606180459';
+  var ver='317695d_202606180501';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -1195,9 +1195,16 @@ function loadTransit(cb){
           var remoteJson=JSON.stringify(remote);
           var localJson=JSON.stringify(localCopy);
           if(remoteJson!==localJson){
-            _transitData=remote;
-            localStorage.setItem('hermes_transit',JSON.stringify(remote));
-            setSyncStatus('synced','已同步 · GitHub');
+            // 本地包裹数比GitHub多 → 有未同步的新增 → 保留本地
+            if(localCopy.length > remote.length){
+              _transitData=localCopy;
+              setSyncStatus('synced','已同步 · 本地(待推送)');
+              saveTransitToGitHub(localCopy);
+            }else{
+              _transitData=remote;
+              localStorage.setItem('hermes_transit',JSON.stringify(remote));
+              setSyncStatus('synced','已同步 · GitHub');
+            }
             refreshAll();
           }else{
             setSyncStatus('synced','已同步 · 一致');
@@ -1230,8 +1237,7 @@ setInterval(function(){
       var remote=raw.packages;
       var remoteJson=JSON.stringify(remote);
       var localJson=JSON.stringify(_transitData);
-      if(remoteJson!==localJson){
-        _transitData=remote;
+      if(remoteJson!==localJson){\n        // 本地包裹数比GitHub多 → 说明有本地新增还没同步成功 → 保留本地，主动推GitHub\n        if(_transitData.length > remote.length){\n          console.log('[同步] 本地'+_transitData.length+'包 > GitHub'+remote.length+'包，保留本地并推送');\n          saveTransitToGitHub(_transitData);\n          return;\n        }\n        _transitData=remote;
         try{localStorage.setItem('hermes_transit',JSON.stringify(remote));}catch(e){}
         setSyncStatus('synced','已同步 · GitHub');
         // 在途数据变了→只更新统计数字和在途标记，不重建卡片（避免图片闪烁）
