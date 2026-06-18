@@ -474,6 +474,22 @@ var currentPeriod = 'today';
 var currentSubTab = 'orders';
 var _currentView = 'store';  // 'store' | 'global'
 var _orderStatusFilter = 'READY_TO_SHIP';  // default: show pending only
+var _rtFilterMode = 'include';
+var _rtSelected = {};
+function showRealtime(){
+  _currentView = 'realtime';
+  document.querySelectorAll('.sidebar .shop').forEach(function(el){el.classList.remove('active');});
+  var rtEl = document.querySelector('.realtime-nav');
+  if(rtEl) rtEl.classList.add('active');
+  var main = document.getElementById('main');
+  main.innerHTML = '';
+  var d = document.createElement('div'); d.id = 'sub-realtime'; main.appendChild(d);
+  var storeBtn = document.createElement('button');
+  storeBtn.className = 'vs-btn'; storeBtn.textContent = '🏪 返回店铺'; storeBtn.style.marginBottom='16px';
+  storeBtn.onclick = function(){ _currentView='store'; if(currentStore)selectStore(currentStore); else document.getElementById('main').innerHTML='<div class=\"view-switch\"><button class=\"vs-btn active\" data-view=\"store\">🏪 单店视图</button><button class=\"vs-btn\" data-view=\"global\">📊 全局视图</button></div><div class=\"empty-state\">👈 选择一家店铺查看数据</div>'; };
+  main.insertBefore(storeBtn, d);
+  setTimeout(function(){ renderRealtime(); }, 10);
+}
 
 function buildSidebar(){
   var html = '<div class="brand"><span>◈</span> 公司看板</div>';
@@ -496,6 +512,8 @@ function buildSidebar(){
 
 function selectStore(pid){
   _currentView = 'store';
+  var rtEl = document.querySelector('.realtime-nav');
+  if(rtEl) rtEl.classList.remove('active');
   var storeChanged = (currentStore !== pid);
   currentStore = pid;
   currentPeriod = 'today';
@@ -677,7 +695,6 @@ function renderStore(pid){
     html += '<span class="sub-tab'+(currentSubTab==='refund'?' active':'')+'" data-sub="refund">📋 退件提醒 <span style="font-size:9px;background:var(--red);color:#fff;padding:1px 5px;border-radius:8px">'+rd.matched+'</span></span>';
   }
   html += '<span class="sub-tab'+(currentSubTab==='inventory'?' active':'')+'" data-sub="inventory">📦 库存管理</span>';
-  html += '<span class="sub-tab'+(currentSubTab==='realtime'?' active':'')+'" data-sub="realtime">⚡ 实时数据</span>';
   html += '</div>';
   
   // ── Layer 3: Main Content Grid (16+8) for orders tab ──
