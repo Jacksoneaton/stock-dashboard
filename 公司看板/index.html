@@ -31,6 +31,9 @@ img,svg{max-width:100%;height:auto}
 .sidebar .shop:hover{background:rgba(24,144,255,.06);color:var(--primary)}
 .sidebar .shop.active{color:var(--primary);font-weight:600;background:rgba(24,144,255,.08);border-left:3px solid var(--primary);border-radius:0 4px 4px 0}
 .sidebar .shop .count{float:right;font-size:10px;color:var(--muted);margin-top:2px}
+.sidebar .realtime-nav{display:block;padding:9px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;border-bottom:1px solid var(--border);margin-bottom:6px;color:var(--purple);background:linear-gradient(135deg,rgba(114,46,209,.04),transparent)}
+.sidebar .realtime-nav:hover{background:rgba(114,46,209,.08);color:var(--purple)}
+.sidebar .realtime-nav.active{color:var(--purple);font-weight:700;background:rgba(114,46,209,.1);border-left:3px solid var(--purple);border-radius:0 4px 4px 0}
 
 /* ── Main ── */
 .main{flex:1;min-width:0;padding:24px;overflow-y:auto;max-width:1440px;margin:0 auto}
@@ -287,6 +290,8 @@ tr.over-alloc:hover{background:rgba(255,77,79,.12)!important}
   .sidebar .shop{flex-shrink:0;padding:6px 10px;font-size:11px;min-height:40px;display:flex;align-items:center;border-radius:0;margin:0}
   .sidebar .shop.active{color:var(--primary);font-weight:600;background:rgba(24,144,255,.08);border-bottom:2px solid var(--primary);border-left:none;border-radius:0}
   .sidebar .shop .count{display:none}
+  .sidebar .realtime-nav{flex-shrink:0;padding:6px 10px;font-size:12px;font-weight:600;min-height:40px;display:flex;align-items:center;border-radius:0;margin:0;color:var(--purple);border-bottom:none}
+  .sidebar .realtime-nav.active{color:var(--purple);font-weight:700;background:rgba(114,46,209,.1);border-bottom:2px solid var(--purple);border-left:none;border-radius:0}
   .main{padding:16px 12px;max-width:none}
   .page-header{padding:14px 16px;flex-direction:column;align-items:flex-start}
   .page-header h1{font-size:18px}
@@ -478,6 +483,7 @@ var _rtFilterMode = 'include';
 var _rtSelected = {};
 function showRealtime(){
   _currentView = 'realtime';
+  currentSubTab = 'realtime';
   document.querySelectorAll('.sidebar .shop').forEach(function(el){el.classList.remove('active');});
   var rtEl = document.querySelector('.realtime-nav');
   if(rtEl) rtEl.classList.add('active');
@@ -486,13 +492,14 @@ function showRealtime(){
   var d = document.createElement('div'); d.id = 'sub-realtime'; main.appendChild(d);
   var storeBtn = document.createElement('button');
   storeBtn.className = 'vs-btn'; storeBtn.textContent = '🏪 返回店铺'; storeBtn.style.marginBottom='16px';
-  storeBtn.onclick = function(){ _currentView='store'; if(currentStore)selectStore(currentStore); else document.getElementById('main').innerHTML='<div class=\"view-switch\"><button class=\"vs-btn active\" data-view=\"store\">🏪 单店视图</button><button class=\"vs-btn\" data-view=\"global\">📊 全局视图</button></div><div class=\"empty-state\">👈 选择一家店铺查看数据</div>'; };
+  storeBtn.onclick = function(){ _currentView='store'; currentSubTab='orders'; if(currentStore)selectStore(currentStore); else document.getElementById('main').innerHTML='<div class=\"view-switch\"><button class=\"vs-btn active\" data-view=\"store\">🏪 单店视图</button><button class=\"vs-btn\" data-view=\"global\">📊 全局视图</button></div><div class=\"empty-state\">👈 选择一家店铺查看数据</div>'; };
   main.insertBefore(storeBtn, d);
   setTimeout(function(){ renderRealtime(); }, 10);
 }
 
 function buildSidebar(){
   var html = '<div class="brand"><span>◈</span> 公司看板</div>';
+  html += '<a class="realtime-nav" onclick="showRealtime()">⚡ 实时数据</a>';
   html += '<div class="section">店铺</div>';
   STORE_GROUPS.forEach(function(g){
     html += '<div class="section">'+g.name+'</div>';
