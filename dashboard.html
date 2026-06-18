@@ -1210,6 +1210,12 @@ function loadTransit(cb){
               setSyncStatus('local','本地有未同步修改 · 保留本地');
               cb();return;
             }
+            // 检查是否刚推送成功（2分钟内CDN可能未同步）
+            var lastPush=localStorage.getItem('hermes_transit_last_push_time');
+            if(lastPush && Date.now()-parseInt(lastPush)<120000){
+              setSyncStatus('synced','已同步 · 等待CDN');
+              cb();return;
+            }
             _transitData=remote;
             localStorage.setItem('hermes_transit',JSON.stringify(remote));
             setSyncStatus('synced','已同步 · GitHub');
@@ -1237,10 +1243,12 @@ setInterval(function(){
   if(lock) try{localStorage.removeItem('hermes_push_lock');}catch(e){}
   // 本地有未推送修改，不覆盖（等推送成功后 dirty 标记会被清除）
   if(localStorage.getItem('hermes_transit_dirty')){
-    // 如果有失败次数，说明推送在重试中，不打扰
     if(!_pushFailCount) setSyncStatus('local','本地有未同步修改');
     return;
   }
+  // 刚推送成功，2分钟内CDN可能未同步，不覆盖
+  var lastPush=localStorage.getItem('hermes_transit_last_push_time');
+  if(lastPush && Date.now()-parseInt(lastPush)<120000) return;
   var x=new XMLHttpRequest();
   x.open('GET',TRANSIT_RAW+'?t='+Date.now());x.timeout=8000;
   x.onload=function(){
@@ -1337,7 +1345,9 @@ function saveTransitToGitHub(data,cb){
       _lastPushedData=JSON.stringify(data);
       try{localStorage.setItem('hermes_transit_last_pushed',_lastPushedData);}catch(e){}
       try{localStorage.removeItem('hermes_transit_dirty');}catch(e){}
-      if(_pushId===thisPushId) try{localStorage.removeItem('hermes_push_lock');}catch(e){}
+      // 记录推送时间：2分钟内刷新不覆盖本地（等CDN追上）
+      try{localStorage.setItem('hermes_transit_last_push_time',Date.now());}catch(e){}
+      if(_pushId===thisPushId) try{localStorage.removeItem('hermes_push_lock');}catch(e){}      
       setSyncStatus('synced','已同步 · GitHub');
       showToast('✅ 已同步到云端');
       if(cb) cb(true);
