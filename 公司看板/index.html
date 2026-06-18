@@ -484,15 +484,39 @@ var _rtSelected = {};
 function showRealtime(){
   _currentView = 'realtime';
   currentSubTab = 'realtime';
+  try { sessionStorage.setItem('hermes_co_view', 'realtime'); } catch(e) {}
   document.querySelectorAll('.sidebar .shop').forEach(function(el){el.classList.remove('active');});
   var rtEl = document.querySelector('.realtime-nav');
   if(rtEl) rtEl.classList.add('active');
   var main = document.getElementById('main');
   main.innerHTML = '';
+  
+  // Countdown timer bar
+  var timerBar = document.createElement('div');
+  timerBar.id = 'rt-refresh-timer';
+  timerBar.style.cssText = 'background:rgba(114,46,209,.06);border:1px solid rgba(114,46,209,.15);border-radius:8px;padding:6px 14px;margin-bottom:12px;font-size:11px;color:var(--purple);display:flex;align-items:center;gap:6px';
+  timerBar.innerHTML = '<span>⏱</span> <span id="rt-countdown-text">下次自动刷新: 计算中...</span>';
+  main.appendChild(timerBar);
+  
+  var _rtRefreshAt = Date.now() + 15*60*1000;
+  if (window._rtTimerInterval) clearInterval(window._rtTimerInterval);
+  window._rtTimerInterval = setInterval(function(){
+    var remain = Math.max(0, Math.ceil((_rtRefreshAt - Date.now()) / 1000));
+    var m = Math.floor(remain/60), s = remain%60;
+    var txt = document.getElementById('rt-countdown-text');
+    if (txt) txt.textContent = '下次自动刷新: ' + m + '分' + (s<10?'0':'') + s + '秒';
+  }, 1000);
+  
   var d = document.createElement('div'); d.id = 'sub-realtime'; main.appendChild(d);
   var storeBtn = document.createElement('button');
   storeBtn.className = 'vs-btn'; storeBtn.textContent = '🏪 返回店铺'; storeBtn.style.marginBottom='16px';
-  storeBtn.onclick = function(){ _currentView='store'; currentSubTab='orders'; if(currentStore)selectStore(currentStore); else document.getElementById('main').innerHTML='<div class=\"view-switch\"><button class=\"vs-btn active\" data-view=\"store\">🏪 单店视图</button><button class=\"vs-btn\" data-view=\"global\">📊 全局视图</button></div><div class=\"empty-state\">👈 选择一家店铺查看数据</div>'; };
+  storeBtn.onclick = function(){ 
+    clearInterval(window._rtTimerInterval);
+    _currentView='store'; currentSubTab='orders'; 
+    try { sessionStorage.setItem('hermes_co_view', 'store'); } catch(e) {}
+    if(currentStore) selectStore(currentStore); 
+    else document.getElementById('main').innerHTML='<div class="view-switch"><button class="vs-btn active" data-view="store">🏪 单店视图</button><button class="vs-btn" data-view="global">📊 全局视图</button></div><div class="empty-state">👈 选择一家店铺查看数据</div>'; 
+  };
   main.insertBefore(storeBtn, d);
   setTimeout(function(){ renderRealtime(); }, 10);
 }
@@ -519,6 +543,7 @@ function buildSidebar(){
 
 function selectStore(pid){
   _currentView = 'store';
+  try { sessionStorage.setItem('hermes_co_view', 'store'); } catch(e) {}
   var rtEl = document.querySelector('.realtime-nav');
   if(rtEl) rtEl.classList.remove('active');
   var storeChanged = (currentStore !== pid);
@@ -2286,7 +2311,14 @@ STORE_GROUPS.forEach(function(g){
 var startPid = null;
 try { startPid = sessionStorage.getItem('hermes_co_store'); } catch(e) {}
 if (!startPid || !STORE_DATA[startPid]) startPid = firstPid;
-if(startPid) selectStore(startPid);
+// Restore view mode (realtime or store)
+var savedView = null;
+try { savedView = sessionStorage.getItem('hermes_co_view'); } catch(e) {}
+if (savedView === 'realtime' && typeof showRealtime === 'function') {
+  setTimeout(function(){ showRealtime(); }, 50);
+} else if(startPid) {
+  selectStore(startPid);
+}
 
 // Sync reservations from GitHub in background (doesn't block rendering)
 loadReservationsFromGitHub();
