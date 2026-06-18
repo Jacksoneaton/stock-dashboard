@@ -2118,6 +2118,8 @@ loadChangeLogFromGitHub();
   setMobile();
   window.addEventListener('resize', setMobile);
 })();
+// Auto-refresh every 15 minutes
+setInterval(function(){ location.reload(); }, 15*60*1000);
 </script>
 </body>
 </html>
