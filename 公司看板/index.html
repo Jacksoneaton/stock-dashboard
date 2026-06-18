@@ -66,6 +66,43 @@ img,svg{max-width:100%;height:auto}
 .view-switch .vs-btn:hover{color:var(--primary);border-color:var(--primary)}
 .view-switch .vs-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 
+
+/* ── Real-time Dashboard ── */
+.rt-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.rt-kpi{background:var(--card-bg);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);border-left:3px solid var(--primary)}
+.rt-kpi .rt-lbl{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px}
+.rt-kpi .rt-val{font-size:22px;font-weight:700;color:var(--text)}
+.rt-kpi .rt-sub{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.rt-kpi.green{border-left-color:var(--green)}
+.rt-kpi.red{border-left-color:var(--red)}
+.rt-kpi.yellow{border-left-color:var(--yellow)}
+.rt-kpi.purple{border-left-color:var(--purple)}
+.store-filter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;align-items:center}
+.store-filter .sf-label{font-size:12px;color:var(--muted);margin-right:4px}
+.store-filter .sf-pill{padding:4px 12px;border-radius:16px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--card-bg);color:var(--text-secondary);transition:all .2s;white-space:nowrap}
+.store-filter .sf-pill.selected{background:var(--primary);color:#fff;border-color:var(--primary)}
+.store-filter .sf-pill.excluded{background:var(--red);color:#fff;border-color:var(--red);text-decoration:line-through}
+.store-filter .sf-quick{font-size:11px;color:var(--primary);cursor:pointer;margin-left:4px;padding:2px 8px;border-radius:4px;border:1px solid var(--primary);background:transparent}
+.store-filter .sf-quick:hover{background:var(--primary);color:#fff}
+.rt-chart-bar{display:flex;align-items:center;margin-bottom:6px;gap:8px}
+.rt-chart-bar .rt-bar-name{width:140px;font-size:12px;color:var(--text-secondary);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.rt-chart-bar .rt-bar-track{flex:1;background:var(--border);border-radius:4px;height:20px;overflow:hidden;position:relative;min-width:40px}
+.rt-chart-bar .rt-bar-fill{height:100%;background:var(--primary);border-radius:4px;transition:width .4s ease}
+.rt-chart-bar .rt-bar-val{width:80px;font-size:11px;color:var(--text);flex-shrink:0;white-space:nowrap}
+.rt-orders-table{width:100%;border-collapse:collapse;font-size:12px}
+.rt-orders-table th{text-align:left;padding:8px 10px;background:var(--bg);color:var(--text-secondary);font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap}
+.rt-orders-table td{padding:8px 10px;border-bottom:1px solid var(--border-light)}
+.rt-orders-table tr:hover{background:rgba(24,144,255,.03)}
+@media(max-width:768px){
+  .rt-kpi-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .rt-kpi{padding:12px}
+  .rt-kpi .rt-val{font-size:18px}
+  .rt-chart-bar .rt-bar-name{width:90px;font-size:11px}
+  .rt-chart-bar .rt-bar-val{width:60px;font-size:10px}
+  .rt-orders-table{font-size:11px}
+  .rt-orders-table th,.rt-orders-table td{padding:6px}
+}
+
 /* ── Sub tabs (Ant Design style top nav tabs) ── */
 .sub-tabs{display:flex;gap:0;margin-bottom:var(--spacing-lg);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .sub-tab{padding:6px 16px;font-size:var(--font-body);cursor:pointer;color:var(--text-secondary);transition:all .3s;position:relative;white-space:nowrap;background:transparent;border:none;border-radius:0;display:inline-flex;align-items:center;gap:4px;height:40px}
@@ -640,6 +677,7 @@ function renderStore(pid){
     html += '<span class="sub-tab'+(currentSubTab==='refund'?' active':'')+'" data-sub="refund">📋 退件提醒 <span style="font-size:9px;background:var(--red);color:#fff;padding:1px 5px;border-radius:8px">'+rd.matched+'</span></span>';
   }
   html += '<span class="sub-tab'+(currentSubTab==='inventory'?' active':'')+'" data-sub="inventory">📦 库存管理</span>';
+  html += '<span class="sub-tab'+(currentSubTab==='realtime'?' active':'')+'" data-sub="realtime">⚡ 实时数据</span>';
   html += '</div>';
   
   // ── Layer 3: Main Content Grid (16+8) for orders tab ──
@@ -1310,7 +1348,7 @@ function toggleSubTab(el,id){
   try { sessionStorage.setItem('hermes_co_tab', id); } catch(e) {}
   document.querySelectorAll('.sub-tab').forEach(function(t){t.classList.remove('active')});
   el.classList.add('active');
-  var ids = ['orders','ranking','status','refund','trends','inventory'];
+  var ids = ['orders','ranking','status','refund','trends','inventory','realtime'];
   ids.forEach(function(sid){
     var el2 = document.getElementById('sub-'+sid);
     if (el2) el2.style.display = sid===id?'block':'none';
@@ -1318,6 +1356,7 @@ function toggleSubTab(el,id){
   if (id === 'inventory' && (!INVENTORY || !INVENTORY.products)) {
     loadInventory(currentStore);
   }
+  setTimeout(function(){ renderRealtime(); }, 10);
 }
 
 // Event delegation: sub-tabs, date-tabs, and store sidebar (manually walk up DOM for max compatibility)
@@ -1528,6 +1567,111 @@ function openAssignModal(product, spec, pid, total, current) {
 }
 
 var _inventoryLoading = false;
+
+
+function renderRealtime() {
+  var el = document.getElementById('sub-realtime');
+  if (!el || currentSubTab !== 'realtime') return;
+  if (el.dataset.rendered === '1') return;
+  
+  var allStoreData = STORE_DATA || {};
+  var storeList = [];
+  for (var sid in allStoreData) {
+    var sd = allStoreData[sid];
+    if (!sd || !sd.orders) continue;
+    storeList.push({id: sid, name: sd.name || sid, orders: sd.orders, total: sd.total || 0});
+  }
+  if (!storeList.length) { el.innerHTML = '<div class="empty-state">暂无数据</div>'; el.dataset.rendered='1'; return; }
+  
+  var filterMode = 'all';
+  var selectedStores = {};
+  storeList.forEach(function(s){ selectedStores[s.id] = true; });
+  
+  function getOrders() {
+    var out = [];
+    storeList.forEach(function(s) {
+      var ok = filterMode === 'all' || (filterMode === 'include' && selectedStores[s.id]) || (filterMode === 'exclude' && !selectedStores[s.id]);
+      if (ok) (s.orders||[]).forEach(function(o){ out.push({store:s.name, sid:s.id, order:o}); });
+    });
+    return out;
+  }
+  
+  function agg() {
+    var oo = getOrders(), rev=0, it=0, st={};
+    oo.forEach(function(o){
+      (o.order.shopOrderGoods||[]).forEach(function(g){
+        rev += (g.modelDiscountedPrice||0)*(g.modelQuantityPurchased||1);
+        it += g.modelQuantityPurchased||1;
+      });
+      st[o.sid] = 1;
+    });
+    return {n:oo.length, rev:rev, it:it, sc:Object.keys(st).length, avg:oo.length?Math.round(rev/oo.length):0};
+  }
+  
+  function build() {
+    var a = agg(), h = '';
+    h += '<div class="rt-kpi-grid">';
+    h += '<div class="rt-kpi"><div class="rt-lbl">📦 订单数</div><div class="rt-val">'+a.n+'</div><div class="rt-sub">'+a.sc+' 家店</div></div>';
+    h += '<div class="rt-kpi green"><div class="rt-lbl">💰 营收 (TWD)</div><div class="rt-val">$'+a.rev.toLocaleString()+'</div></div>';
+    h += '<div class="rt-kpi purple"><div class="rt-lbl">📦 件数</div><div class="rt-val">'+a.it+'</div></div>';
+    h += '<div class="rt-kpi yellow"><div class="rt-lbl">📊 客单价</div><div class="rt-val">$'+a.avg.toLocaleString()+'</div></div>';
+    h += '</div>';
+    
+    h += '<div class="store-filter"><span class="sf-label">店铺：</span>';
+    h += '<span class="sf-quick" onclick="window._ra()">全选</span><span class="sf-quick" onclick="window._rc()" style="color:var(--red);border-color:var(--red)">清空</span>';
+    storeList.forEach(function(s){
+      var cls = 'sf-pill';
+      if (filterMode==='exclude' && selectedStores[s.id]) cls += ' excluded';
+      else cls += ' selected';
+      h += '<span class="'+cls+'" data-sid="'+s.id+'" onclick="window._rt('+s.id+')">'+s.name+'</span>';
+    });
+    h += '</div>';
+    
+    var srev = [];
+    storeList.forEach(function(s){
+      var r=0; (s.orders||[]).forEach(function(o){(o.shopOrderGoods||[]).forEach(function(g){r+=(g.modelDiscountedPrice||0)*(g.modelQuantityPurchased||1);});});
+      srev.push({name:s.name, rev:r});
+    });
+    srev.sort(function(a,b){return b.rev-a.rev;});
+    var mx = srev[0]?srev[0].rev:1;
+    h += '<div style="background:var(--card-bg);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);margin-bottom:12px">';
+    h += '<div style="font-size:13px;font-weight:600;margin-bottom:12px">📊 各店营收</div>';
+    srev.forEach(function(r){
+      var p = mx>0?Math.round(r.rev/mx*100):0;
+      h += '<div class="rt-chart-bar"><div class="rt-bar-name">'+r.name+'</div><div class="rt-bar-track"><div class="rt-bar-fill" style="width:'+p+'%"></div></div><div class="rt-bar-val">$'+r.rev.toLocaleString()+'</div></div>';
+    });
+    h += '</div>';
+    
+    var all = getOrders();
+    all.sort(function(a,b){return (b.order.createTime||'').localeCompare(a.order.createTime||'');});
+    var rec = all.slice(0,30);
+    h += '<div style="background:var(--card-bg);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm)">';
+    h += '<div style="font-size:13px;font-weight:600;margin-bottom:12px">🕐 最近订单 ('+rec.length+'/'+all.length+')</div>';
+    if (rec.length) {
+      h += '<div style="overflow-x:auto"><table class="rt-orders-table"><thead><tr><th>店铺</th><th>商品</th><th>数量</th><th>金额</th><th>状态</th><th>时间</th></tr></thead><tbody>';
+      rec.forEach(function(ro){
+        var o=ro.order, gs=o.shopOrderGoods||[], g=gs[0]||{};
+        var amt=gs.reduce(function(s,g2){return s+(g2.modelDiscountedPrice||0)*(g2.modelQuantityPurchased||1);},0);
+        var st=o.orderStatus||'', lb=st==='READY_TO_SHIP'?'待发货':st==='SHIPPED'?'已发货':st==='COMPLETED'?'已完成':st==='CANCELLED'?'已取消':st;
+        var cl=st==='CANCELLED'?'var(--red)':st==='READY_TO_SHIP'?'var(--orange)':'var(--green)';
+        var tm=(o.createTime||'').substring(11,16);
+        h += '<tr><td>'+ro.store+'</td><td>'+((g.itemName||g.modelName||'?').substring(0,40))+'</td><td>'+gs.reduce(function(s,g3){return s+(g3.modelQuantityPurchased||1);},0)+'</td><td>$'+amt.toLocaleString()+'</td><td style="color:'+cl+'">'+lb+'</td><td>'+tm+'</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    } else { h += '<div class="empty-state">暂无订单</div>'; }
+    h += '</div>';
+    el.innerHTML = h; el.dataset.rendered = '1';
+  }
+  
+  window._rt = function(id) {
+    if (filterMode==='all') { filterMode='include'; storeList.forEach(function(s){selectedStores[s.id]=false;}); selectedStores[id]=true; }
+    else { selectedStores[id]=!selectedStores[id]; }
+    el.dataset.rendered=''; build();
+  };
+  window._ra = function(){ filterMode='all'; storeList.forEach(function(s){selectedStores[s.id]=true;}); el.dataset.rendered=''; build(); };
+  window._rc = function(){ filterMode='include'; storeList.forEach(function(s){selectedStores[s.id]=false;}); el.dataset.rendered=''; build(); };
+  build();
+}
 
 function loadInventory(pid) {
   if (_inventoryLoading) return;
