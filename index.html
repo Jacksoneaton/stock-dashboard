@@ -176,6 +176,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .refresh-line{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* ── 销售实时 KPI (顶部) ── */
+.sales-top-kpi{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.sales-top-kpi .skpi{flex:1;min-width:100px;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;text-align:center;box-shadow:var(--shadow-sm);transition:all .2s}
+.sales-top-kpi .skpi:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.sales-top-kpi .skpi .sk-num{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.sales-top-kpi .skpi .sk-lbl{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.3px}
+.sales-top-kpi .skpi .sk-sub{font-size:10px;margin-top:2px}
+.sales-top-kpi .skpi .sk-sub.up{color:var(--green)}
+.sales-top-kpi .skpi .sk-sub.down{color:var(--red)}
+.sales-top-kpi .skpi.rev{border-left:3px solid var(--green)}
+.sales-top-kpi .skpi.ord{border-left:3px solid var(--cyan)}
+.sales-top-kpi .skpi.itm{border-left:3px solid var(--purple)}
+.sales-top-kpi .skpi.avg{border-left:3px solid var(--yellow)}
 .transit-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
 .transit-head h2{font-size:14px;font-weight:700;color:var(--cyan);letter-spacing:1px}
 .btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:8px;font-size:11px;cursor:pointer;border:none;font-weight:600;transition:all .2s;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;letter-spacing:.5px}
@@ -841,6 +854,7 @@ footer a{color:var(--dim);text-decoration:none}
       </div>
       <div class="user"><div class="avatar">J</div>Jackson</div>
     </div>
+    <div class="sales-top-kpi" id="salesTopKpi" style="display:none"></div>
     <div class="sub-tabs" id="dashSubTabs">
       <div class="sub-tab active" data-sub="inventory" onclick="switchDashSub('inventory')">📦 库存</div>
       <div class="sub-tab" data-sub="estimate" onclick="switchDashSub('estimate')">📊 预估</div>
@@ -1121,6 +1135,22 @@ document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click',function(){switchTab(t.dataset.page);});
 });
 var _salesPeriod=(SALES.periods.today&&SALES.periods.today.orders>0)?'today':'yesterday';
+// ── 顶部销售实时 KPI ──
+function renderSalesTopKpi(){
+  var el=document.getElementById('salesTopKpi');
+  if(!el) return;
+  var t=SALES.periods.today||{orders:0,revenue:0,items:0};
+  var y=SALES.periods.yesterday||{orders:0,revenue:0,items:0};
+  var avg=t.orders>0?Math.round(t.revenue/t.orders):0;
+  var dod=t.orders-y.orders, dodCls=dod>=0?'up':'down';
+  var h='';
+  h+='<div class=\"skpi ord\"><div class=\"sk-num\">'+t.orders+'</div><div class=\"sk-lbl\">📦 今日订单</div><div class=\"sk-sub '+dodCls+'\">'+(dod>=0?'+':'')+dod+' vs 昨天</div></div>';
+  h+='<div class=\"skpi rev\"><div class=\"sk-num\">$'+Number(t.revenue).toLocaleString()+'</div><div class=\"sk-lbl\">💰 今日营收</div><div class=\"sk-sub\">TWD</div></div>';
+  h+='<div class=\"skpi itm\"><div class=\"sk-num\">'+t.items+'</div><div class=\"sk-lbl\">📦 今日件数</div></div>';
+  h+='<div class=\"skpi avg\"><div class=\"sk-num\">$'+Number(avg).toLocaleString()+'</div><div class=\"sk-lbl\">📊 客单价</div></div>';
+  el.innerHTML=h; el.style.display='flex';
+}
+renderSalesTopKpi();
 // Restore saved tab
 var saved=localStorage.getItem(_tabKey)||'dash';
 switchTab(saved);
@@ -1153,7 +1183,7 @@ var _lastPushedData=null;   // 最后一次成功推送的 data JSON 串，用�
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='edaaa1c_202606192236';
+  var ver='edaaa1c_202606192237';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -3124,7 +3154,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-19 17:00:44", "友鹰热搜": "2026-06-19 09:01:45", "销售数据": "2026-06-19 22:34:08", "看板部署": "2026-06-19 22:34:25", "货憨憨订单": "2026-06-18 23:31:59", "tasks": {"货憨憨订单": {"last_success": "2026-06-18 20:32:14", "records_pulled": "1161", "new_added": 2, "total_after": 1161}}, "货憨憨订单_新增": 2};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-19 17:00:44", "友鹰热搜": "2026-06-19 09:01:45", "销售数据": "2026-06-19 22:34:08", "看板部署": "2026-06-19 22:36:26", "货憨憨订单": "2026-06-18 23:31:59", "tasks": {"货憨憨订单": {"last_success": "2026-06-18 20:32:14", "records_pulled": "1161", "new_added": 2, "total_after": 1161}}, "货憨憨订单_新增": 2};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
