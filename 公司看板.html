@@ -1699,7 +1699,7 @@ function renderRealtime() {
     });
     var srev = storeList.map(function(s){return {name:s.name, rev:revMap[s.id]||0};});
     srev.sort(function(a,b){return b.rev-a.rev;});
-    var mx = srev[0]?srev[0].rev:1;
+    var mx = srev[0] ? (srev[0].rev || 1) : 1;
     h += '<div style="background:var(--card-bg);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);margin-bottom:12px">';
     h += '<div style="font-size:13px;font-weight:600;margin-bottom:12px">📊 各店营收</div>';
     srev.forEach(function(r){
