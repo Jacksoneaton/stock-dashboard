@@ -878,6 +878,7 @@ footer a{color:var(--dim);text-decoration:none}
           <div id="donutChart" style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;min-height:180px"></div>
         </div>
       </div>
+      <div class="decline-section" id="declineSection" style="display:none;margin-bottom:16px"></div>
       <div class="filter-bar" id="filterBar"></div>
       <div class="card-grid" id="cardGrid"></div>
       <footer>数据自动同步</footer>
@@ -1182,7 +1183,7 @@ var _lastPushedData=null;   // 最后一次成功推送的 data JSON 串，用�
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='bb2444e_202606200734';
+  var ver='bb2444e_202606200747';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -1508,6 +1509,7 @@ function renderDashboard(groups){
     '<div class="search-box"><input type="text" placeholder="搜索 SKU / 商品名称..." oninput="applyFilter(this.value)"></div>';
   renderCards(groups,'all','');
   renderCharts();
+  renderDeclineWarnings();
 }
 
 function renderCharts(){
@@ -1580,6 +1582,24 @@ function renderCharts(){
   document.getElementById('donutChart').innerHTML=donutSvg+'<div style="display:flex;flex-direction:column;gap:4px">'+legendHtml+'</div>';
 }
 var _lastChartsKey='';
+
+function renderDeclineWarnings(){
+  var el = document.getElementById('declineSection');
+  if(!el || !DECLINE || !DECLINE.length){ if(el)el.style.display='none'; return; }
+  el.style.display='block';
+  var h = '<div class="chart-card" style="border-left:3px solid var(--red)"><h3>📉 衰退预警 <span style="font-weight:400;font-size:11px;color:var(--dim)">近7天销量大幅下降</span></h3>';
+  DECLINE.forEach(function(d){
+    var stockWarn = d.stock > 5 ? '库存积压 ' + d.stock + ' 件' : '库存 ' + d.stock + ' 件';
+    var cls = d.stock > 5 ? 'var(--red)' : 'var(--yellow)';
+    h += '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;margin-top:8px;background:rgba(239,68,68,.04);border-radius:8px">'
+      + '<div style="flex:1"><div style="font-weight:600;font-size:13px">' + (d.title || d.code) + '</div>'
+      + '<div style="font-size:11px;color:var(--dim);margin-top:2px">' + d.code + (d.specs ? ' · ' + d.specs : '') + ' · 30天' + d.sales_30d + '件 → 近7天' + d.sales_7d + '件</div></div>'
+      + '<div style="text-align:right"><div style="font-size:12px;color:' + cls + ';font-weight:600">' + stockWarn + '</div>'
+      + '<div style="font-size:10px;color:var(--dim)">建议观望或清仓</div></div></div>';
+  });
+  h += '</div>';
+  el.innerHTML = h;
+}
 
 function renderCards(groups,filter,search){
   var html='';
@@ -3154,7 +3174,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-19 17:00:44", "友鹰热搜": "2026-06-19 09:01:45", "销售数据": "2026-06-20 07:34:16", "看板部署": "2026-06-20 07:19:26", "货憨憨订单": "2026-06-18 23:31:59", "tasks": {"货憨憨订单": {"last_success": "2026-06-18 20:32:14", "records_pulled": "1161", "new_added": 2, "total_after": 1161}}, "货憨憨订单_新增": 2};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-19 17:00:44", "友鹰热搜": "2026-06-19 09:01:45", "销售数据": "2026-06-20 07:34:16", "看板部署": "2026-06-20 07:34:32", "货憨憨订单": "2026-06-18 23:31:59", "tasks": {"货憨憨订单": {"last_success": "2026-06-18 20:32:14", "records_pulled": "1161", "new_added": 2, "total_after": 1161}}, "货憨憨订单_新增": 2};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
