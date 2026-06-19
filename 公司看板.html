@@ -31,6 +31,9 @@ img,svg{max-width:100%;height:auto}
 .sidebar .shop:hover{background:rgba(24,144,255,.06);color:var(--primary)}
 .sidebar .shop.active{color:var(--primary);font-weight:600;background:rgba(24,144,255,.08);border-left:3px solid var(--primary);border-radius:0 4px 4px 0}
 .sidebar .shop .count{float:right;font-size:10px;color:var(--muted);margin-top:2px}
+.sidebar .realtime-nav{display:block;padding:9px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;border-bottom:1px solid var(--border);margin-bottom:6px;color:var(--purple);background:linear-gradient(135deg,rgba(114,46,209,.04),transparent)}
+.sidebar .realtime-nav:hover{background:rgba(114,46,209,.08);color:var(--purple)}
+.sidebar .realtime-nav.active{color:var(--purple);font-weight:700;background:rgba(114,46,209,.1);border-left:3px solid var(--purple);border-radius:0 4px 4px 0}
 
 /* ── Main ── */
 .main{flex:1;min-width:0;padding:24px;overflow-y:auto;max-width:1440px;margin:0 auto}
@@ -287,6 +290,8 @@ tr.over-alloc:hover{background:rgba(255,77,79,.12)!important}
   .sidebar .shop{flex-shrink:0;padding:6px 10px;font-size:11px;min-height:40px;display:flex;align-items:center;border-radius:0;margin:0}
   .sidebar .shop.active{color:var(--primary);font-weight:600;background:rgba(24,144,255,.08);border-bottom:2px solid var(--primary);border-left:none;border-radius:0}
   .sidebar .shop .count{display:none}
+  .sidebar .realtime-nav{flex-shrink:0;padding:6px 10px;font-size:12px;font-weight:600;min-height:40px;display:flex;align-items:center;border-radius:0;margin:0;color:var(--purple);border-bottom:none}
+  .sidebar .realtime-nav.active{color:var(--purple);font-weight:700;background:rgba(114,46,209,.1);border-bottom:2px solid var(--purple);border-left:none;border-radius:0}
   .main{padding:16px 12px;max-width:none}
   .page-header{padding:14px 16px;flex-direction:column;align-items:flex-start}
   .page-header h1{font-size:18px}
@@ -478,21 +483,47 @@ var _rtFilterMode = 'include';
 var _rtSelected = {};
 function showRealtime(){
   _currentView = 'realtime';
+  currentSubTab = 'realtime';
+  try { sessionStorage.setItem('hermes_co_view', 'realtime'); } catch(e) {}
   document.querySelectorAll('.sidebar .shop').forEach(function(el){el.classList.remove('active');});
   var rtEl = document.querySelector('.realtime-nav');
   if(rtEl) rtEl.classList.add('active');
   var main = document.getElementById('main');
   main.innerHTML = '';
+  
+  // Countdown timer bar
+  var timerBar = document.createElement('div');
+  timerBar.id = 'rt-refresh-timer';
+  timerBar.style.cssText = 'background:rgba(114,46,209,.06);border:1px solid rgba(114,46,209,.15);border-radius:8px;padding:6px 14px;margin-bottom:12px;font-size:11px;color:var(--purple);display:flex;align-items:center;gap:6px';
+  timerBar.innerHTML = '<span>⏱</span> <span id="rt-countdown-text">下次自动刷新: 计算中...</span>';
+  main.appendChild(timerBar);
+  
+  var _rtRefreshAt = Date.now() + 15*60*1000;
+  if (window._rtTimerInterval) clearInterval(window._rtTimerInterval);
+  window._rtTimerInterval = setInterval(function(){
+    var remain = Math.max(0, Math.ceil((_rtRefreshAt - Date.now()) / 1000));
+    var m = Math.floor(remain/60), s = remain%60;
+    var txt = document.getElementById('rt-countdown-text');
+    if (txt) txt.textContent = '下次自动刷新: ' + m + '分' + (s<10?'0':'') + s + '秒';
+  }, 1000);
+  
   var d = document.createElement('div'); d.id = 'sub-realtime'; main.appendChild(d);
   var storeBtn = document.createElement('button');
   storeBtn.className = 'vs-btn'; storeBtn.textContent = '🏪 返回店铺'; storeBtn.style.marginBottom='16px';
-  storeBtn.onclick = function(){ _currentView='store'; if(currentStore)selectStore(currentStore); else document.getElementById('main').innerHTML='<div class=\"view-switch\"><button class=\"vs-btn active\" data-view=\"store\">🏪 单店视图</button><button class=\"vs-btn\" data-view=\"global\">📊 全局视图</button></div><div class=\"empty-state\">👈 选择一家店铺查看数据</div>'; };
+  storeBtn.onclick = function(){ 
+    clearInterval(window._rtTimerInterval);
+    _currentView='store'; currentSubTab='orders'; 
+    try { sessionStorage.setItem('hermes_co_view', 'store'); } catch(e) {}
+    if(currentStore) selectStore(currentStore); 
+    else document.getElementById('main').innerHTML='<div class="view-switch"><button class="vs-btn active" data-view="store">🏪 单店视图</button><button class="vs-btn" data-view="global">📊 全局视图</button></div><div class="empty-state">👈 选择一家店铺查看数据</div>'; 
+  };
   main.insertBefore(storeBtn, d);
   setTimeout(function(){ renderRealtime(); }, 10);
 }
 
 function buildSidebar(){
   var html = '<div class="brand"><span>◈</span> 公司看板</div>';
+  html += '<a class="realtime-nav" onclick="showRealtime()">⚡ 实时数据</a>';
   html += '<div class="section">店铺</div>';
   STORE_GROUPS.forEach(function(g){
     html += '<div class="section">'+g.name+'</div>';
@@ -512,6 +543,7 @@ function buildSidebar(){
 
 function selectStore(pid){
   _currentView = 'store';
+  try { sessionStorage.setItem('hermes_co_view', 'store'); } catch(e) {}
   var rtEl = document.querySelector('.realtime-nav');
   if(rtEl) rtEl.classList.remove('active');
   var storeChanged = (currentStore !== pid);
@@ -1589,7 +1621,8 @@ var _inventoryLoading = false;
 function renderRealtime() {
   var el = document.getElementById('sub-realtime');
   if (!el || currentSubTab !== 'realtime') return;
-  if (el.dataset.rendered === '1') return;
+  
+  var _rtPeriod = 'today';
   
   var allStoreData = STORE_DATA || {};
   var storeList = [];
@@ -1610,6 +1643,13 @@ function renderRealtime() {
       var ok = filterMode === 'all' || (filterMode === 'include' && selectedStores[s.id]) || (filterMode === 'exclude' && !selectedStores[s.id]);
       if (ok) (s.orders||[]).forEach(function(o){ out.push({store:s.name, sid:s.id, order:o}); });
     });
+    // Time filter
+    var range = getDateRange(_rtPeriod);
+    out = out.filter(function(ro){
+      var t = ro.order.createTime || '';
+      if (!t) return true;
+      try { var ts = new Date(t.replace(' ','T')).getTime(); return ts >= range.start.getTime() && ts < range.end.getTime(); } catch(e) { return true; }
+    });
     return out;
   }
   
@@ -1627,6 +1667,14 @@ function renderRealtime() {
   
   function build() {
     var a = agg(), h = '';
+    // Date tabs
+    h += '<div class="date-tabs" style="margin-bottom:16px">';
+    var periods = {today:'今天',yesterday:'昨天','7days':'7天','30days':'30天',all:'全部'};
+    for (var pk in periods) {
+      h += '<span class="date-tab' + (_rtPeriod===pk?' active':'') + '" onclick="window._rtp(\''+pk+'\')">'+periods[pk]+'</span>';
+    }
+    h += '</div>';
+    
     h += '<div class="rt-kpi-grid">';
     h += '<div class="rt-kpi"><div class="rt-lbl">📦 订单数</div><div class="rt-val">'+a.n+'</div><div class="rt-sub">'+a.sc+' 家店</div></div>';
     h += '<div class="rt-kpi green"><div class="rt-lbl">💰 营收 (TWD)</div><div class="rt-val">$'+a.rev.toLocaleString()+'</div></div>';
@@ -1644,11 +1692,12 @@ function renderRealtime() {
     });
     h += '</div>';
     
-    var srev = [];
-    storeList.forEach(function(s){
-      var r=0; (s.orders||[]).forEach(function(o){(o.shopOrderGoods||[]).forEach(function(g){r+=(g.modelDiscountedPrice||0)*(g.modelQuantityPurchased||1);});});
-      srev.push({name:s.name, rev:r});
+    // Revenue chart (time-filtered)
+    var revMap = {};
+    getOrders().forEach(function(ro){
+      revMap[ro.sid] = (revMap[ro.sid]||0) + (ro.order.shopOrderGoods||[]).reduce(function(s,g){return s+(g.modelDiscountedPrice||0)*(g.modelQuantityPurchased||1);},0);
     });
+    var srev = storeList.map(function(s){return {name:s.name, rev:revMap[s.id]||0};});
     srev.sort(function(a,b){return b.rev-a.rev;});
     var mx = srev[0]?srev[0].rev:1;
     h += '<div style="background:var(--card-bg);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);margin-bottom:12px">';
@@ -1687,6 +1736,7 @@ function renderRealtime() {
   };
   window._ra = function(){ filterMode='all'; storeList.forEach(function(s){selectedStores[s.id]=true;}); el.dataset.rendered=''; build(); };
   window._rc = function(){ filterMode='include'; storeList.forEach(function(s){selectedStores[s.id]=false;}); el.dataset.rendered=''; build(); };
+  window._rtp = function(period){ _rtPeriod = period; el.dataset.rendered=''; build(); };
   build();
 }
 
@@ -2261,7 +2311,14 @@ STORE_GROUPS.forEach(function(g){
 var startPid = null;
 try { startPid = sessionStorage.getItem('hermes_co_store'); } catch(e) {}
 if (!startPid || !STORE_DATA[startPid]) startPid = firstPid;
-if(startPid) selectStore(startPid);
+// Restore view mode (realtime or store)
+var savedView = null;
+try { savedView = sessionStorage.getItem('hermes_co_view'); } catch(e) {}
+if (savedView === 'realtime' && typeof showRealtime === 'function') {
+  setTimeout(function(){ showRealtime(); }, 50);
+} else if(startPid) {
+  selectStore(startPid);
+}
 
 // Sync reservations from GitHub in background (doesn't block rendering)
 loadReservationsFromGitHub();
