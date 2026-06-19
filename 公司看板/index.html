@@ -1708,6 +1708,20 @@ function renderRealtime() {
     });
     h += '</div>';
     
+    // Order count ranking (time-filtered)
+    var cntMap = {};
+    getOrders().forEach(function(ro){ cntMap[ro.sid] = (cntMap[ro.sid]||0) + 1; });
+    var scnt = storeList.map(function(s){return {name:s.name, cnt:cntMap[s.id]||0};});
+    scnt.sort(function(a,b){return b.cnt-a.cnt;});
+    var mxCnt = scnt[0] ? (scnt[0].cnt || 1) : 1;
+    h += '<div style="background:var(--card-bg);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);margin-bottom:12px">';
+    h += '<div style="font-size:13px;font-weight:600;margin-bottom:12px">📋 各店订单数</div>';
+    scnt.forEach(function(r){
+      var p = mxCnt>0?Math.round(r.cnt/mxCnt*100):0;
+      h += '<div class="rt-chart-bar"><div class="rt-bar-name">'+r.name+'</div><div class="rt-bar-track"><div class="rt-bar-fill" style="width:'+p+'%;background:var(--green)"></div></div><div class="rt-bar-val">'+r.cnt+' 单</div></div>';
+    });
+    h += '</div>';
+    
     var all = getOrders();
     all.sort(function(a,b){return (b.order.createTime||'').localeCompare(a.order.createTime||'');});
     var rec = all.slice(0,30);
