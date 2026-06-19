@@ -817,7 +817,7 @@ footer a{color:var(--dim);text-decoration:none}
 
 <nav class="sidebar">
   <div class="brand"><span>◈</span> Jackson看板</div>
-  <a class="tab active" data-page="dash"><span class="dot"></span> 📦 Jackson看板</a>
+  <a class="tab active" data-page="dash"><span class="dot"></span> 📦 库存看板</a>
   <a class="tab" data-page="replen"><span class="dot"></span> 📋 补货预测<span class="badge-alert" id="replenBadge" style="display:none">0</span></a>
   <a class="tab" data-page="transit"><span class="dot"></span> 🚚 在途管理<span class="badge" id="transitBadge">0</span></a>
   <div class="section">数据</div>
@@ -840,7 +840,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">edaaa1c</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">bb2444e</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -849,7 +849,7 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="page active" id="page-dash">
     <div class="dash-topbar">
       <div>
-        <h1>📦 Jackson看板</h1>
+        <h1>📦 库存看板</h1>
         <div class="refresh-line"><span class="live-dot"></span><span class="ut-text" id="utDash">加载中...</span></div>
       </div>
       <div class="user"><div class="avatar">J</div>Jackson</div>
@@ -1182,7 +1182,7 @@ var _lastPushedData=null;   // 最后一次成功推送的 data JSON 串，用�
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='edaaa1c_202606192306';
+  var ver='bb2444e_202606192307';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -3154,7 +3154,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-19 17:00:44", "友鹰热搜": "2026-06-19 09:01:45", "销售数据": "2026-06-19 23:04:06", "看板部署": "2026-06-19 23:04:22", "货憨憨订单": "2026-06-18 23:31:59", "tasks": {"货憨憨订单": {"last_success": "2026-06-18 20:32:14", "records_pulled": "1161", "new_added": 2, "total_after": 1161}}, "货憨憨订单_新增": 2};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-19 17:00:44", "友鹰热搜": "2026-06-19 09:01:45", "销售数据": "2026-06-19 23:04:06", "看板部署": "2026-06-19 23:06:36", "货憨憨订单": "2026-06-18 23:31:59", "tasks": {"货憨憨订单": {"last_success": "2026-06-18 20:32:14", "records_pulled": "1161", "new_added": 2, "total_after": 1161}}, "货憨憨订单_新增": 2};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3275,7 +3275,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='edaaa1c';
+  var VER='bb2444e';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
