@@ -1196,7 +1196,7 @@ var _lastPushedData=null;   // 最后一次成功推送的 data JSON 串，用�
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='bb2444e_202606230433';
+  var ver='bb2444e_202606230435';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -1514,20 +1514,24 @@ function parseSpec(spec){
     }
   }
   // 单个值：判断是颜色、尺码还是其他
-  // 尝试从末尾提取尺码（支持空格分隔和连写）："花灰色 XL" 和 "花灰色S" 都能解析
+  // 从末尾提取尺码：支持 "XL", " XL", "S码", " S码", "軍綠色S" 等格式
   for(var si=0;si<SIZE_ORDER.length;si++){
     var sz=SIZE_ORDER[si];
-    if(s.endsWith(' '+sz)){
-      return {color:s.substring(0,s.length-sz.length-1),size:sz,raw:spec};
-    }
+    // 空格分隔: "颜色 XL" 或 "颜色 XL码"
+    if(s.endsWith(' '+sz)){return {color:s.slice(0,-sz.length-1),size:sz,raw:spec};}
+    if(s.endsWith(' '+sz+'码')){return {color:s.slice(0,-sz.length-2),size:sz,raw:spec};}
   }
-  // 连写情况——注意先匹配长的（XXL在XL前面），避免XL误匹配XXL的尾部
-  // 但如果 s 本身就是已知尺码（如 "XL"），不要拆
-  if(SIZE_ORDER.indexOf(s)===-1){
+  // 连写: "颜色XL", "颜色S码" (但不要拆 "XL"→"X"+"L")
+  if(SIZE_ORDER.indexOf(s)===-1 && SIZE_ORDER.indexOf(s.replace(/码$/,''))===-1){
     for(var si=0;si<SIZE_ORDER.length;si++){
       var sz=SIZE_ORDER[si];
-      if(sz.length>0 && s!==sz && s.endsWith(sz) && !/\d/.test(s[s.length-sz.length-1]||'')){
-        return {color:s.substring(0,s.length-sz.length),size:sz,raw:spec};
+      if(!sz) continue;
+      if(s!==sz && s!==sz+'码' && s.endsWith(sz)){
+        var pre=s[s.length-sz.length-1]||'';
+        if(!/\d/.test(pre)) return {color:s.slice(0,-sz.length),size:sz,raw:spec};
+      }
+      if(s!==sz && s!==sz+'码' && s.endsWith(sz+'码')){
+        return {color:s.slice(0,-sz.length-1),size:sz,raw:spec};
       }
     }
   }
@@ -3363,7 +3367,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-23 03:39:18", "友鹰热搜": "2026-06-23 03:40:27", "销售数据": "2026-06-23 04:33:19", "看板部署": "2026-06-23 04:33:37", "货憨憨订单": "2026-06-22 15:04:04", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-06-21 14:46:20"};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-23 03:39:18", "友鹰热搜": "2026-06-23 03:40:27", "销售数据": "2026-06-23 04:33:19", "看板部署": "2026-06-23 04:33:51", "货憨憨订单": "2026-06-22 15:04:04", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-06-21 14:46:20"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
