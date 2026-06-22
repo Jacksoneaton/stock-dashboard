@@ -1196,7 +1196,7 @@ var _lastPushedData=null;   // 最后一次成功推送的 data JSON 串，用�
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='bb2444e_202606230318';
+  var ver='bb2444e_202606230319';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -1477,6 +1477,74 @@ function fetchShaAndRetry(data,cb){
   x.send();
 }
 
+// ====== 规格排序：颜色分组 → 组内尺码排序 ======
+var COLOR_ORDER=['黑','白','灰','银','米','杏','卡其','驼','棕','咖','燕麥','奶白','奶茶','象牙白','膚','裸','粉','桃','红','玫红','酒紅','橘','橙','黄','绿','軍綠','墨綠','蓝','藏青','深藍','淺藍','寶藍','天藍','水藍','霧藍','淡紫','紫','青','炭灰','淺灰','深灰','煙灰'];
+var SIZE_ORDER=['XS','S','M','L','XL','XXL','2XL','XXXL','3XL','4XL','5XL','FREE','均码','均碼'];
+
+function parseSpec(spec){
+  // 解析 spec 字符串，提取颜色和尺码
+  // 支持格式: QTW00232-白色-XL, 白色=M, XL, 黑色, QTW00267-05
+  if(!spec) return {color:'',size:'',raw:spec};
+  // 去掉 QTW 前缀编号
+  var s=spec.replace(/^QTW\d+\-?/i,'');
+  // 尝试从 modelSku 格式解析: 颜色=尺码
+  var eq=s.indexOf('=');
+  if(eq>-1){
+    var color=s.substring(0,eq).trim();
+    var size=s.substring(eq+1).trim();
+    return {color:color,size:size,raw:spec};
+  }
+  // 尝试从 - 分割格式解析: 颜色-尺码 或 尺码 或 颜色
+  var parts=s.split('-').filter(function(p){return p;});
+  if(parts.length>=2){
+    // 尝试匹配颜色+尺码
+    var last=parts[parts.length-1];
+    var rest=parts.slice(0,-1).join('-');
+    // 判断最后一段是不是尺码
+    var isSize=SIZE_ORDER.indexOf(last)>-1 || /^\d+$/.test(last);
+    if(isSize){
+      return {color:rest,size:last,raw:spec};
+    }
+    // 判断第一段是不是颜色
+    var firstIsColor=COLOR_ORDER.some(function(c){return parts[0].indexOf(c)>-1;});
+    if(firstIsColor){
+      return {color:parts[0],size:parts.slice(1).join('-'),raw:spec};
+    }
+  }
+  // 单个值：判断是颜色、尺码还是其他
+  if(COLOR_ORDER.some(function(c){return s.indexOf(c)>-1;})) return {color:s,size:'',raw:spec};
+  if(SIZE_ORDER.indexOf(s)>-1 || /^\d+$/.test(s)) return {color:'',size:s,raw:spec};
+  return {color:'',size:'',raw:spec};
+}
+
+function getColorRank(color){
+  // 在颜色白名单里找匹配
+  for(var i=0;i<COLOR_ORDER.length;i++){
+    if(color.indexOf(COLOR_ORDER[i])>-1) return i;
+  }
+  return COLOR_ORDER.length; // 不在白名单 → 放最后
+}
+
+function getSizeRank(size){
+  if(!size) return SIZE_ORDER.length;
+  var idx=SIZE_ORDER.indexOf(size);
+  if(idx>-1) return idx;
+  if(/^\d+$/.test(size)) return parseFloat(size); // 纯数字按数值排
+  return SIZE_ORDER.length+10; // 未知格式放最后
+}
+
+function sortSpecs(specs){
+  specs.sort(function(a,b){
+    var pa=parseSpec(a.spec), pb=parseSpec(b.spec);
+    var ca=getColorRank(pa.color), cb=getColorRank(pb.color);
+    if(ca!==cb) return ca-cb;
+    var sa=getSizeRank(pa.size), sb=getSizeRank(pb.size);
+    if(sa!==sb) return sa-sb;
+    // 同颜色同尺码 → 保持原顺序
+    return 0;
+  });
+}
+
 // ====== 看板渲染 ======
 function groupByInv(){
   var groups={},order=[];
@@ -1488,6 +1556,8 @@ function groupByInv(){
     groups[key].specs.push(d);
     groups[key].stock+=d.stock;
   });
+  // 每组内按颜色+尺码排序
+  order.forEach(function(k){sortSpecs(groups[k].specs);});
   return order.map(function(k){return groups[k]});
 }
 
@@ -3271,7 +3341,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-22 17:00:16", "友鹰热搜": "2026-06-22 09:01:15", "销售数据": "2026-06-23 03:18:24", "看板部署": "2026-06-23 03:03:51", "货憨憨订单": "2026-06-22 15:04:04", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-06-21 14:46:20"};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-22 17:00:16", "友鹰热搜": "2026-06-22 09:01:15", "销售数据": "2026-06-23 03:18:24", "看板部署": "2026-06-23 03:18:42", "货憨憨订单": "2026-06-22 15:04:04", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-06-21 14:46:20"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
