@@ -1196,13 +1196,17 @@ var _lastPushedData=null;   // 最后一次成功推送的 data JSON 串，用�
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='bb2444e_202606230418';
+  var ver='bb2444e_202606230430';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
     localStorage.setItem('hermes_data_ver',ver);
   }
 })();
+
+// ====== 规格排序：颜色分组 → 组内尺码排序 (must be before IIFE that calls refreshAll) ======
+var COLOR_ORDER=['黑','白','灰','银','米','杏','卡其','驼','棕','咖','燕麥','奶白','奶茶','象牙白','膚','裸','粉','桃','红','玫红','酒紅','橘','橙','黄','绿','軍綠','墨綠','蓝','藏青','深藍','淺藍','寶藍','天藍','水藍','霧藍','淡紫','紫','青','炭灰','淺灰','深灰','煙灰'];
+var SIZE_ORDER=['XS','S','M','L','XL','XXL','2XL','XXXL','3XL','4XL','5XL','FREE','均码','均碼'];
 
 (function(){
   _ghToken=localStorage.getItem(TOKEN_KEY)||_ghToken;
@@ -1477,9 +1481,7 @@ function fetchShaAndRetry(data,cb){
   x.send();
 }
 
-// ====== 规格排序：颜色分组 → 组内尺码排序 ======
-var COLOR_ORDER=['黑','白','灰','银','米','杏','卡其','驼','棕','咖','燕麥','奶白','奶茶','象牙白','膚','裸','粉','桃','红','玫红','酒紅','橘','橙','黄','绿','軍綠','墨綠','蓝','藏青','深藍','淺藍','寶藍','天藍','水藍','霧藍','淡紫','紫','青','炭灰','淺灰','深灰','煙灰'];
-var SIZE_ORDER=['XS','S','M','L','XL','XXL','2XL','XXXL','3XL','4XL','5XL','FREE','均码','均碼'];
+
 
 function parseSpec(spec){
   // 解析 spec 字符串，提取颜色和尺码
@@ -3341,7 +3343,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-23 03:39:18", "友鹰热搜": "2026-06-23 03:40:27", "销售数据": "2026-06-23 04:18:21", "看板部署": "2026-06-23 04:03:37", "货憨憨订单": "2026-06-22 15:04:04", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-06-21 14:46:20"};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-23 03:39:18", "友鹰热搜": "2026-06-23 03:40:27", "销售数据": "2026-06-23 04:18:21", "看板部署": "2026-06-23 04:18:37", "货憨憨订单": "2026-06-22 15:04:04", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-06-21 14:46:20"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
