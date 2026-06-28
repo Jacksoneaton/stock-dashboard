@@ -842,7 +842,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步">同步</span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步">同步</span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">b3d2e37</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">743dfa0</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1186,7 +1186,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='b3d2e37_202606290526';
+  var ver='743dfa0_202606290528';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit','hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -3080,7 +3080,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-06-29 05:26:48", "友鹰热搜": "2026-06-28 09:01:58", "销售数据": "2026-06-29 05:18:18", "看板部署": "2026-06-29 05:18:35", "货憨憨订单": "2026-06-29 05:15:11", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-06-29 05:15:11"};
+var DATA_SOURCES = {"顺运宝库存": "2026-06-29 05:26:48", "友鹰热搜": "2026-06-28 09:01:58", "销售数据": "2026-06-29 05:18:18", "看板部署": "2026-06-29 05:27:07", "货憨憨订单": "2026-06-29 05:15:11", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-06-29 05:15:11"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3091,16 +3091,18 @@ var HEALTH_MAP = {
 function triggerSync(source){
   var btn=document.querySelector('.health-sync[onclick*=\"'+source+'\"]');
   if(!btn||btn.classList.contains('spinning')) return;
-  btn.classList.add('spinning');btn.textContent='⟳';
+  var all=document.querySelectorAll('.health-sync');
+  all.forEach(function(b){b.style.pointerEvents='none';b.style.opacity='0.3'});
+  btn.classList.add('spinning');btn.textContent='⟳';btn.style.opacity='1';
   fetch('https://hermes-jackson.loca.lt/api/sync',{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({source:source})
   }).then(function(r){return r.json()}).then(function(d){
     btn.classList.remove('spinning');btn.textContent='✓';
-    setTimeout(function(){btn.textContent='同步';},2000);
+    setTimeout(function(){btn.textContent='同步';all.forEach(function(b){b.style.pointerEvents='';b.style.opacity=''});},2000);
   }).catch(function(){
     btn.classList.remove('spinning');btn.textContent='✗';
-    setTimeout(function(){btn.textContent='同步';},2000);
+    setTimeout(function(){btn.textContent='同步';all.forEach(function(b){b.style.pointerEvents='';b.style.opacity=''});},2000);
   });
 }
 function updateAlertBadges(){
@@ -3216,7 +3218,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='b3d2e37';
+  var VER='743dfa0';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
