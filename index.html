@@ -134,10 +134,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .replenish-tag{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700}
 .replenish-tag.need{background:rgba(217,119,6,.08);color:var(--yellow);border:1px solid rgba(217,119,6,.2)}
 .replenish-tag.ok{background:rgba(5,150,105,.05);color:var(--green);border:1px solid rgba(5,150,105,.12)}
-.pool-info{font-size:10px;font-weight:500;padding:2px 6px;border-radius:8px;background:rgba(5,150,105,.06);color:var(--green);border:1px solid rgba(5,150,105,.12)}
-.pool-alert{background:rgba(220,38,38,.06);color:var(--red);border-color:rgba(220,38,38,.2);animation:pulse-dot 2s infinite}
-
-
+.thresh-set:hover{background:rgba(99,102,241,.12)}
+/* 库存来源标签 */
 /* Charts */
 .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 @media(min-width:900px){.chart-row{grid-template-columns:1fr 1fr}}
@@ -894,7 +892,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">cd132b69</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">10037a97</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1314,7 +1312,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='cd132b69_202607021754';
+  var ver='10037a97_202607021755';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -3230,7 +3228,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-01 17:00:35", "友鹰热搜": "2026-07-02 09:02:01", "销售数据": "2026-07-02 17:48:34", "看板部署": "2026-07-02 17:49:02", "货憨憨订单": "2026-07-02 17:45:21", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-02 17:45:21"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-01 17:00:35", "友鹰热搜": "2026-07-02 09:02:01", "销售数据": "2026-07-02 17:48:34", "看板部署": "2026-07-02 17:54:43", "货憨憨订单": "2026-07-02 17:45:21", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-02 17:45:21"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3366,7 +3364,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='cd132b69';
+  var VER='10037a97';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
