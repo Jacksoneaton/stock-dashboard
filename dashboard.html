@@ -177,6 +177,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 .health-sync.done{opacity:1;color:#059669;background:rgba(5,150,105,.1)}
 .health-sync.error{opacity:1;color:#dc2626;background:rgba(220,38,38,.1)}
+.health-sync.locked{opacity:0.25;pointer-events:none}
 .health-summary.warn{color:#d97706}
 .health-summary.crit{color:#dc2626}
 /* Update banner */
@@ -893,7 +894,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">d4e08cd7</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">dd63d8cc</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1313,7 +1314,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='d4e08cd7_202607021841';
+  var ver='dd63d8cc_202607021847';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -3229,7 +3230,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-01 17:00:35", "友鹰热搜": "2026-07-02 09:02:01", "销售数据": "2026-07-02 18:33:33", "看板部署": "2026-07-02 18:40:34", "货憨憨订单": "2026-07-02 18:30:34", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-02 18:30:34"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-01 17:00:35", "友鹰热搜": "2026-07-02 09:02:01", "销售数据": "2026-07-02 18:33:33", "看板部署": "2026-07-02 18:41:55", "货憨憨订单": "2026-07-02 18:45:23", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 1, "orders_pull": "2026-07-02 18:45:23"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3240,6 +3241,9 @@ var HEALTH_MAP = {
 function triggerSync(source){
   var btn=document.querySelector('.health-sync[onclick*="'+source+'"]');
   if(!btn||btn.classList.contains('spinning')) return;
+  // 锁定全部同步按钮
+  var allBtns=document.querySelectorAll('.health-sync');
+  allBtns.forEach(function(b){b.classList.add('locked');});
   btn.classList.add('spinning');
   fetch('https://hermes-jackson.loca.lt/api/sync',{
     method:'POST',headers:{'Content-Type':'application/json'},
@@ -3247,9 +3251,11 @@ function triggerSync(source){
   }).then(function(r){return r.json()}).then(function(d){
     btn.classList.remove('spinning');btn.classList.add('done');
     setTimeout(function(){btn.classList.remove('done');},2000);
+    allBtns.forEach(function(b){b.classList.remove('locked');});
   }).catch(function(){
     btn.classList.remove('spinning');btn.classList.add('error');
     setTimeout(function(){btn.classList.remove('error');},2000);
+    allBtns.forEach(function(b){b.classList.remove('locked');});
   });
 }
 function updateAlertBadges(){
@@ -3365,7 +3371,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='d4e08cd7';
+  var VER='dd63d8cc';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
