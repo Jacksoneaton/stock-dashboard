@@ -896,7 +896,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">aee34c74</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">2398696d</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1316,7 +1316,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='aee34c74_202607041634';
+  var ver='2398696d_202607041635';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -2420,10 +2420,8 @@ function renderDecisionTab(){
       html+='<div class="expand-card">'+
         decImgHtml+
         '<div class="expand-body">'+
-          '<div class="expand-hd">'+
-            '<span class="expand-code">'+(x.code||'')+'</span>'+
-            '<span class="expand-title">'+(x.title||'').substring(0,48)+'</span>'+
-          '</div>'+
+          '<div style="margin-bottom:2px"><span class="expand-code">'+(x.code||'')+'</span></div>'+
+          '<div class="expand-title" style="margin-bottom:4px">'+(x.title||'').substring(0,48)+'</div>'+
           '<div class="expand-meta">'+
             '<span class="dstat">30天'+x.sales_total+'件</span>'+
             '<span class="dstat">近7天≈'+x.sales_7d_est+'件</span>'+
@@ -2513,10 +2511,8 @@ function renderDecisionTab(){
       html+='<div class="expand-card">'+
         oosImgHtml+
         '<div class="expand-body">'+
-          '<div class="expand-hd">'+
-            '<span class="expand-code">'+(x.code||'')+'</span>'+
-            '<span class="expand-title">'+(x.title||'').substring(0,48)+'</span>'+
-          '</div>'+
+          '<div style="margin-bottom:2px"><span class="expand-code">'+(x.code||'')+'</span></div>'+
+          '<div class="expand-title" style="margin-bottom:4px">'+(x.title||'').substring(0,48)+'</div>'+
           '<div class="expand-meta">'+
             '<span class="dstat">库存'+x.stock+'</span>'+
             '<span class="dstat">日均'+x.daily_avg+'</span>'+
@@ -3266,7 +3262,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-04 12:00:38", "友鹰热搜": "2026-07-04 09:01:40", "销售数据": "2026-07-04 16:33:57", "看板部署": "2026-07-04 16:19:17", "货憨憨订单": "2026-07-04 16:30:47", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 1, "orders_pull": "2026-07-04 16:30:47"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-04 12:00:38", "友鹰热搜": "2026-07-04 09:01:40", "销售数据": "2026-07-04 16:33:57", "看板部署": "2026-07-04 16:34:16", "货憨憨订单": "2026-07-04 16:30:47", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 1, "orders_pull": "2026-07-04 16:30:47"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3407,7 +3403,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='aee34c74';
+  var VER='2398696d';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
