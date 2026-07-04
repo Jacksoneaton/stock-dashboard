@@ -585,10 +585,10 @@ footer a{color:var(--dim);text-decoration:none}
 .dkpi-num{font-size:28px;font-weight:800;font-family:monospace;margin-bottom:4px}
 .dkpi-lbl{font-size:11px;color:var(--muted)}
 /* ── 建议扩规格卡片 ── */
-.expand-card{display:flex;gap:10px;padding:10px 12px;background:var(--dim);border:1px solid var(--border);border-radius:8px;align-items:flex-start;flex:1 1 280px;min-width:0}
-.expand-img{width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--dim)}
+.expand-card{display:flex;flex-direction:column;gap:0;background:var(--dim);border:1px solid var(--border);border-radius:8px;flex:1 1 280px;min-width:0;overflow:hidden}
+.expand-img{width:100%;height:120px;border-radius:0;object-fit:cover;flex-shrink:0;background:var(--dim)}
 .expand-img[src=""],.expand-img:not([src]){display:none}
-.expand-body{flex:1;min-width:0}
+.expand-body{flex:1;min-width:0;padding:8px 10px}
 .expand-hd{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .expand-title{font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
 .expand-code{font-family:monospace;font-size:10px;color:var(--cyan);background:rgba(99,102,241,.08);padding:1px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0}
@@ -601,7 +601,7 @@ footer a{color:var(--dim);text-decoration:none}
 .expand-meta{display:flex;gap:10px;margin-top:2px}
 .expand-meta .dstat{font-size:10px}
 @media(max-width:768px){
-  .expand-img{width:40px;height:40px}
+  .expand-img{height:100px}
   .expand-card{flex:1 1 100%}
 }
 
@@ -896,7 +896,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">2398696d</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">687a0f59</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1316,7 +1316,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='2398696d_202607041635';
+  var ver='687a0f59_202607041644';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -3262,7 +3262,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-04 12:00:38", "友鹰热搜": "2026-07-04 09:01:40", "销售数据": "2026-07-04 16:33:57", "看板部署": "2026-07-04 16:34:16", "货憨憨订单": "2026-07-04 16:30:47", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 1, "orders_pull": "2026-07-04 16:30:47"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-04 12:00:38", "友鹰热搜": "2026-07-04 09:01:40", "销售数据": "2026-07-04 16:33:57", "看板部署": "2026-07-04 16:35:55", "货憨憨订单": "2026-07-04 16:30:47", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 1, "orders_pull": "2026-07-04 16:30:47"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3403,7 +3403,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='2398696d';
+  var VER='687a0f59';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
