@@ -895,7 +895,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">e39d04fc</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">f4d5a223</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1323,7 +1323,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='e39d04fc_202607080449';
+  var ver='f4d5a223_202607080450';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -1452,14 +1452,23 @@ function updateTransitUI(){
   });
 }
 
+// ====== 在途保存队列 —— 串行化，防并发 SHA 冲突 ======
+var _transitQueue=[],_transitSaving=false;
+function _nextTransit(){
+  if(_transitQueue.length===0){_transitSaving=false;try{localStorage.removeItem('hermes_push_lock');}catch(e){}return}
+  _transitSaving=true;
+  var t=_transitQueue.shift();
+  _doSaveTransit(t.data,t.cb,t.retries||0);
+}
 function saveTransitToGitHub(data,cb){
-  // 先存localStorage，保证刷新不丢
   try{localStorage.setItem('hermes_transit',JSON.stringify(data));}catch(e){}
-  // 加推送锁：防止刷新时GitHub拉取覆盖未完成的推送
   try{localStorage.setItem('hermes_push_lock',Date.now());}catch(e){}
-  _pushId++;var thisPushId=_pushId;  // 记录本次推送编号，防止快速连点时旧推送解锁
-  
-  if(!_ghToken){setSyncStatus('local','未配置Token');try{localStorage.removeItem('hermes_push_lock');}catch(e){}if(cb)cb(false);return}
+  _pushId++;  // 记录推送编号
+  _transitQueue.push({data:data,cb:cb,retries:0});
+  if(!_transitSaving) _nextTransit();
+}
+function _doSaveTransit(data,cb,retries){
+  if(!_ghToken){setSyncStatus('local','未配置Token');if(cb)cb(false);_nextTransit();return}
   setSyncStatus('syncing','同步中...');
   var c=JSON.stringify({packages:data});
   var p={message:'Update in_transit.json',content:btoa(unescape(encodeURIComponent(c))),branch:'gh-pages'};
@@ -1470,26 +1479,50 @@ function saveTransitToGitHub(data,cb){
   x.setRequestHeader('Accept','application/vnd.github.v3+json');
   x.setRequestHeader('Content-Type','application/json');
   x.onload=function(){
-    if(_pushId===thisPushId) try{localStorage.removeItem('hermes_push_lock');}catch(e){}
     if(x.status===200||x.status===201){
       var r=JSON.parse(x.responseText);_transitSha=r.content.sha;
       setSyncStatus('synced','已同步 · GitHub');
       if(cb) cb(true);
-    }else if(x.status===422){fetchShaAndRetry(data,cb)}
-    else{setSyncStatus('error','同步失败 · 仅本地保存');if(cb)cb(false)}
+      _nextTransit();
+    }else if((x.status===422||x.status===409)&&retries<5){
+      // SHA冲突：拉新 SHA 后立即重试，不释放锁
+      var x2=new XMLHttpRequest();
+      x2.open('GET',TRANSIT_API+'?ref=gh-pages&t='+Date.now());x2.timeout=8000;
+      x2.setRequestHeader('Authorization','token '+_ghToken);
+      x2.setRequestHeader('Accept','application/vnd.github.v3+json');
+      x2.onload=function(){
+        if(x2.status===200){
+          _transitSha=JSON.parse(x2.responseText).sha;
+          var p2={message:'Update in_transit.json',content:p.content,branch:'gh-pages',sha:_transitSha};
+          var x3=new XMLHttpRequest();
+          x3.open('PUT',TRANSIT_API);x3.timeout=15000;
+          x3.setRequestHeader('Authorization','token '+_ghToken);
+          x3.setRequestHeader('Accept','application/vnd.github.v3+json');
+          x3.setRequestHeader('Content-Type','application/json');
+          x3.onload=function(){
+            if(x3.status===200||x3.status===201){
+              var r=JSON.parse(x3.responseText);_transitSha=r.content.sha;
+              setSyncStatus('synced','已同步 · GitHub');
+              if(cb) cb(true);
+              _nextTransit();
+            }else if((x3.status===422||x3.status===409)&&retries+1<5){
+              _doSaveTransit(data,cb,retries+1);  // 递归，锁不释放
+            }else{
+              setSyncStatus('error','同步失败 · 仅本地保存');if(cb)cb(false);_nextTransit();
+            }
+          };
+          x3.onerror=function(){setSyncStatus('error','网络异常 · 仅本地保存');if(cb)cb(false);_nextTransit()};
+          x3.ontimeout=function(){setSyncStatus('error','同步超时 · 仅本地保存');if(cb)cb(false);_nextTransit()};
+          x3.send(JSON.stringify(p2));
+        }else{setSyncStatus('error','同步失败 · 仅本地保存');if(cb)cb(false);_nextTransit()}
+      };
+      x2.onerror=function(){setSyncStatus('error','网络异常 · 仅本地保存');if(cb)cb(false);_nextTransit()};
+      x2.send();
+    }else{setSyncStatus('error','同步失败 · 仅本地保存');if(cb)cb(false);_nextTransit()}
   };
-  x.onerror=function(){setSyncStatus('error','网络异常 · 仅本地保存');if(cb)cb(false)};
-  x.ontimeout=function(){setSyncStatus('error','同步超时 · 仅本地保存');if(cb)cb(false)};
+  x.onerror=function(){setSyncStatus('error','网络异常 · 仅本地保存');if(cb)cb(false);_nextTransit()};
+  x.ontimeout=function(){setSyncStatus('error','同步超时 · 仅本地保存');if(cb)cb(false);_nextTransit()};
   x.send(JSON.stringify(p));
-}
-function fetchShaAndRetry(data,cb){
-  var x=new XMLHttpRequest();
-  x.open('GET',TRANSIT_API+'?ref=gh-pages');x.timeout=8000;
-  x.setRequestHeader('Authorization','token '+_ghToken);
-  x.setRequestHeader('Accept','application/vnd.github.v3+json');
-  x.onload=function(){if(x.status===200){_transitSha=JSON.parse(x.responseText).sha;saveTransitToGitHub(data,cb)}else{if(cb) cb(false)}};
-  x.onerror=function(){if(cb) cb(false)};
-  x.send();
 }
 
 // ====== 看板渲染 ======
@@ -3269,7 +3302,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-08 03:44:03", "友鹰热搜": "2026-07-07 09:01:07", "销售数据": "2026-07-08 04:48:57", "看板部署": "2026-07-08 04:42:51", "货憨憨订单": "2026-07-08 04:45:46", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-08 04:45:46"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-08 03:44:03", "友鹰热搜": "2026-07-07 09:01:07", "销售数据": "2026-07-08 04:48:57", "看板部署": "2026-07-08 04:49:19", "货憨憨订单": "2026-07-08 04:45:46", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-08 04:45:46"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3410,7 +3443,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='e39d04fc';
+  var VER='f4d5a223';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
