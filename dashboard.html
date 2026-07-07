@@ -910,7 +910,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">4853e185</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">2604a8d4</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1340,7 +1340,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='4853e185_202607080536';
+  var ver='2604a8d4_202607080542';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -2218,8 +2218,10 @@ function buildMatrix(invs,query){
     html+='<div class="matrix-card">';
     html+='<div class="matrix-header">'+(img?'<img class="matrix-img" src="'+img+'" onerror="this.style.display=\'none\'">':'')+'<div class="matrix-title">'+title.substr(0,32)+'</div></div>';
     html+='<div class="matrix-specs">';
+    var tokens=query.split(/\s+/).filter(function(p){return p.length>0});
     items.forEach(function(d){
-      var match=d.spec.toLowerCase().indexOf(query)>=0||d.sku.toLowerCase().indexOf(query)>=0;
+      var match=d.spec.toLowerCase().indexOf(query)>=0||d.sku.toLowerCase().indexOf(query)>=0
+            ||tokens.some(function(t){return t.length>0&&(d.spec.toLowerCase().indexOf(t)>=0||d.sku.toLowerCase().indexOf(t)>=0)});
       html+='<label class="matrix-spec'+(match?' checked':'')+'"><input type="checkbox" data-sku="'+d.sku+'" '+(match?'checked':'')+'><span>'+d.spec+'</span><input type="number" value="1" min="1" class="matrix-qty" onclick="event.stopPropagation()"></label>';
     });
     html+='</div></div>';
@@ -3377,7 +3379,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-08 03:44:03", "友鹰热搜": "2026-07-07 09:01:07", "销售数据": "2026-07-08 05:34:06", "看板部署": "2026-07-08 05:34:36", "货憨憨订单": "2026-07-08 05:30:50", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-08 05:30:50"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-08 03:44:03", "友鹰热搜": "2026-07-07 09:01:07", "销售数据": "2026-07-08 05:34:06", "看板部署": "2026-07-08 05:36:21", "货憨憨订单": "2026-07-08 05:30:50", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-08 05:30:50"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3518,7 +3520,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='4853e185';
+  var VER='2604a8d4';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
