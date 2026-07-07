@@ -912,7 +912,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">1d652814</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">eddaacfe</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1029,6 +1029,7 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="modal-box">
     <h3>+ 添加在途</h3>
     <input class="search" placeholder="搜索 SKU / 商品名..." oninput="filterModal(this.value)">
+    <button class="matrix-selall-global" id="matrixSelAllBtn" style="display:none" onclick="selectMatrixAll()">全选</button>
     <div class="results" id="modalResults"></div>
     <div class="matrix-grid" id="modalMatrix" style="display:none"></div>
     <button class="matrix-add-btn" id="matrixAddBtn" style="display:none;margin-bottom:6px" onclick="addMatrixSelected()">✓ 添加选中规格</button>
@@ -1342,7 +1343,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='1d652814_202607080606';
+  var ver='eddaacfe_202607080616';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -2203,12 +2204,12 @@ function filterModal(q){
     if(Object.keys(invs).length>=1&&Object.keys(invs).length<=3){
       results.style.display='none';
       buildMatrix(invs,lo);
-      matrix.style.display=''; btn.style.display='';
+      matrix.style.display=''; btn.style.display=''; document.getElementById('matrixSelAllBtn').style.display='';
       return;
     }
   }
   // 默认：平铺列表
-  results.style.display=''; matrix.style.display='none'; btn.style.display='none';
+  results.style.display=''; matrix.style.display='none'; btn.style.display='none'; document.getElementById('matrixSelAllBtn').style.display='none';
 }
 function buildMatrix(invs,query){
   var html='';
@@ -2223,25 +2224,28 @@ function buildMatrix(invs,query){
     var filterWord=spaceIdx>=0?qlo.substring(spaceIdx+1).trim():'';
     html+='<div class="matrix-card" data-inv="'+inv+'">';
     html+='<div class="matrix-header">'+(img?'<img class="matrix-img" src="'+img+'" onerror="this.style.display=\\'none\\'">':'')+'<div class="matrix-title">'+title.substr(0,32)+'</div>';
-    html+='<button class="matrix-selall" onclick="toggleMatrixAll(this)" data-inv="'+inv+'">全选</button>';
     html+='</div><div class="matrix-specs">';
     items.forEach(function(d){
-      // 有二级过滤词：spec/SKU 必须包含它
-      if(filterWord&&d.spec.toLowerCase().indexOf(filterWord)<0&&d.sku.toLowerCase().indexOf(filterWord)<0) return;
-      var chk=filterWord?' checked':'';  // 只勾选匹配过滤词的
-      html+='<label class="matrix-spec'+(filterWord?' checked':'')+'"><input type="checkbox" data-sku="'+d.sku+'"'+chk+'><span>'+d.spec+'</span><input type="number" value="1" min="1" class="matrix-qty" onclick="event.stopPropagation()"></label>';
+      // 有二级过滤词：按单词精确匹配（"L" 不匹配 "XL"、"2XL"）
+      if(filterWord){
+        var words=d.spec.toLowerCase().split(/[\\s\\(\\)\\-\\/]+/).filter(function(w){return w.length>0});
+        var sWords=(d.sku||'').toLowerCase().split(/[\\s\\(\\)\\-\\/]+/);
+        if(words.indexOf(filterWord)<0&&sWords.indexOf(filterWord)<0) return;
+      }
+      html+='<label class="matrix-spec"><input type="checkbox" data-sku="'+d.sku+'"><span>'+d.spec+'</span><input type="number" value="1" min="1" class="matrix-qty" onclick="event.stopPropagation()"></label>';
     });
     html+='</div></div>';
   });
   document.getElementById('modalMatrix').innerHTML=html||'<div style="text-align:center;padding:30px;color:var(--muted)">无匹配规格，请调整搜索词</div>';
 }
-function toggleMatrixAll(btn){
-  var inv=btn.dataset.inv; var all=btn.textContent==='全选';  // 当前文案=全选 → 要全部勾上
-  var card=btn.closest('.matrix-card'); if(!card) return;
-  var cbs=card.querySelectorAll('input[type=checkbox]');
-  var labels=card.querySelectorAll('.matrix-spec');
-  cbs.forEach(function(cb,i){cb.checked=all;labels[i].classList.toggle('checked',all)});
-  btn.textContent=all?'取消全选':'全选';
+function selectMatrixAll(){
+  var btn=document.getElementById('matrixSelAllBtn');
+  var isAll=btn.textContent==='全选';
+  document.querySelectorAll('#modalMatrix input[type=checkbox]').forEach(function(cb){
+    cb.checked=isAll;
+    cb.parentElement.classList.toggle('checked',isAll);
+  });
+  btn.textContent=isAll?'取消全选':'全选';
 }
 function addMatrixSelected(){
   var count=0;
@@ -3394,7 +3398,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-08 03:44:03", "友鹰热搜": "2026-07-07 09:01:07", "销售数据": "2026-07-08 06:03:59", "看板部署": "2026-07-08 06:04:28", "货憨憨订单": "2026-07-08 06:00:49", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-08 06:00:49"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-08 03:44:03", "友鹰热搜": "2026-07-07 09:01:07", "销售数据": "2026-07-08 06:03:59", "看板部署": "2026-07-08 06:06:30", "货憨憨订单": "2026-07-08 06:15:49", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-08 06:15:49"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3535,7 +3539,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='1d652814';
+  var VER='eddaacfe';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
