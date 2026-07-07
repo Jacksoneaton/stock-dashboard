@@ -910,7 +910,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">ee1bc5cc</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">2631bc62</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1340,7 +1340,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='ee1bc5cc_202607080522';
+  var ver='2631bc62_202607080525';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -1607,7 +1607,7 @@ function renderCharts(){
   }).sort(function(a,b){return a.days-b.days;}).slice(0,10);
   var restockHtml=restock.map(function(s,i){
     var cls=s.days<1?'e34d59':s.days<3?'ed7b2f':s.days<7?'0052d9':'1a1a2e';
-    return '<div class="rc"><span class="rc-rank">'+(i+1)+'</span>'+(s.img?'<img class="rc-img" src="'+s.img+'" onerror="this.style.display=\'none\'">':'<span class="rc-img" style="display:flex;align-items:center;justify-content:center;font-size:16px">📦</span>')+'<div class="rc-info"><div class="rc-code">'+s.sku+'</div><div class="rc-spec">'+s.spec+'</div><div class="rc-amt" style="color:#'+cls+'">仅剩 '+s.days+' 天</div></div></div>';
+    return '<div class="rc"><span class="rc-rank">'+(i+1)+'</span>'+(s.img?'<img class="rc-img" src="'+s.img+'" onerror="this.style.display=\\'none\\'">':'<span class="rc-img" style="display:flex;align-items:center;justify-content:center;font-size:16px">📦</span>')+'<div class="rc-info"><div class="rc-code">'+s.sku+'</div><div class="rc-spec">'+s.spec+'</div><div class="rc-amt" style="color:#'+cls+'">仅剩 '+s.days+' 天</div></div></div>';
   }).join('')||'<span style="color:rgba(0,0,0,.4);font-size:12px">暂无数据</span>';
   document.getElementById('restockBars').innerHTML=restockHtml;
   var sales=items.filter(function(s){return s.daily>0;}).sort(function(a,b){return b.daily-a.daily;}).slice(0,10);
@@ -1615,7 +1615,7 @@ function renderCharts(){
   var salesHtml='';
   sales.forEach(function(s){
     var pct=Math.max(3,(s.daily/maxDaily)*100);
-    salesHtml+='<div class="sr">'+(s.img?'<img class="sr-img" src="'+s.img+'" onerror="this.style.display=\'none\'">':'<span class="sr-img" style="display:inline-flex;align-items:center;justify-content:center;font-size:12px;background:#f0f4ff">📦</span>')+'<div class="sr-body"><span class="sr-spec">'+s.spec+'</span><div class="sr-bar-wrap"><div class="sr-bar-fill" style="width:'+pct+'%"></div></div></div><span class="sr-val">'+s.daily+'<small>/天</small></span></div>';
+    salesHtml+='<div class="sr">'+(s.img?'<img class="sr-img" src="'+s.img+'" onerror="this.style.display=\\'none\\'">':'<span class="sr-img" style="display:inline-flex;align-items:center;justify-content:center;font-size:12px;background:#f0f4ff">📦</span>')+'<div class="sr-body"><span class="sr-spec">'+s.spec+'</span><div class="sr-bar-wrap"><div class="sr-bar-fill" style="width:'+pct+'%"></div></div></div><span class="sr-val">'+s.daily+'<small>/天</small></span></div>';
   });
   document.getElementById('salesBars').innerHTML=salesHtml||'<span style="color:var(--dim);font-size:11px">暂无数据</span>';
   // 合并卡片子页签切换
@@ -1676,7 +1676,7 @@ function renderCards(groups,filter,search){
       var cls=specState(s);if(getTransit(s.sku)>0) cls+=' transit';return '<span class="spec-tag '+cls+'">'+s.spec+'<i>|</i><span class="n">'+s.stock+'</span></span>';
     }).join('');
     var imgHtml='';
-    if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.style.display=\'none\'" alt="">';
+    if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.style.display=\\'none\\'" alt="">';
     else imgHtml='<div class="ph">'+getIcon(g.title)+'</div>';
     var dotCls='';
     if(specs.some(function(s){return s.stock===0})) dotCls='critical';
@@ -2350,7 +2350,7 @@ function renderReplenTable(items){
     return '<tr>'+
       '<td><span class="tier-badge '+(i.tier==='A'?'a':i.tier==='B'?'b':'c')+'">'+i.tier+'</span></td>'+
       '<td style="font-family:monospace;font-size:10px;color:var(--cyan)">'+i.sku+'</td>'+
-      '<td style="text-align:center">'+(i.img?'<img class="rep-img" src="'+i.img+'" onerror="this.style.display=\'none\'">':'<span class="rep-img" style="display:inline-flex;align-items:center;justify-content:center;font-size:14px;background:#f0f4ff;height:32px">📦</span>')+'</td>'+
+      '<td style="text-align:center">'+(i.img?'<img class="rep-img" src="'+i.img+'" onerror="this.style.display=\\'none\\'">':'<span class="rep-img" style="display:inline-flex;align-items:center;justify-content:center;font-size:14px;background:#f0f4ff;height:32px">📦</span>')+'</td>'+
       '<td style="color:var(--muted)">'+i.spec+'</td>'+
       '<td style="text-align:center;font-family:monospace;font-weight:700;color:'+(i.stock===0?'var(--red)':'var(--text)')+'">'+i.stock+'</td>'+
       '<td style="text-align:center;font-family:monospace">'+i.daily+'</td>'+
@@ -2445,7 +2445,7 @@ function renderSuggested(){
     var daily=s.daily||s.daily_avg||0;
     var suggestQty=s.suggest_qty||s.suggest||0;
     var pic=s.itemPic||'';
-    var picHtml=pic ? '<img src="'+pic+'" style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin-right:12px;flex-shrink:0;background:#f0f4ff" onerror="this.style.display=\'none\'">' : '';
+    var picHtml=pic ? '<img src="'+pic+'" style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin-right:12px;flex-shrink:0;background:#f0f4ff" onerror="this.style.display=\\'none\\'">' : '';
     var specHtml=spec ? '<span class="sug-spec">'+spec+'</span>' : '';
     return '<tr>'+
       '<td style="display:flex;align-items:center">'+picHtml+'<div>'+specHtml+'<span class="sug-mid">#'+id+'</span></div></td>'+
@@ -2529,7 +2529,7 @@ function renderDecisionTab(){
   if(d.decline.length){
     html+='<div class="decision-block"><h3>📉 衰退预警</h3>';
     d.decline.forEach(function(x){
-      var decImgHtml=x.img?'<img class="expand-img" src="'+x.img+'" loading="lazy" onerror="this.style.display=\'none\'">':'';
+      var decImgHtml=x.img?'<img class="expand-img" src="'+x.img+'" loading="lazy" onerror="this.style.display=\\'none\\'">':'';
       html+='<div class="expand-card">'+
         decImgHtml+
         '<div class="expand-body">'+
@@ -2551,7 +2551,7 @@ function renderDecisionTab(){
     d.expand_specs.forEach(function(x){
       var missing=x.missing||[];
       var existing=x.existing||[];
-      var imgHtml=x.img?'<img class="expand-img" src="'+x.img+'" loading="lazy" onerror="this.style.display=\'none\'">':'';
+      var imgHtml=x.img?'<img class="expand-img" src="'+x.img+'" loading="lazy" onerror="this.style.display=\\'none\\'">':'';
       // 已有规格标签
       var existTags='';
       if(existing.length){
@@ -2585,7 +2585,7 @@ function renderDecisionTab(){
     d.trial_new.forEach(function(x){
       var sug=x.suggestion||'';
       var tagColor=sug.indexOf('全码')>=0?'var(--green)':'var(--cyan)';
-      var trialImgHtml=x.img?'<img class="expand-img" src="'+x.img+'" loading="lazy" onerror="this.style.display=\'none\'">':'';
+      var trialImgHtml=x.img?'<img class="expand-img" src="'+x.img+'" loading="lazy" onerror="this.style.display=\\'none\\'">':'';
       var soldSpecsHtml='';
       var soldSpecs=x.sold_specs||[];
       if(soldSpecs.length){
@@ -2617,7 +2617,7 @@ function renderDecisionTab(){
     html+='<div class="decision-block"><h3>🔴 断货倒计时</h3>';
     d.oos_soon.forEach(function(x){
       var daysColor=x.days_left<=1?'var(--red)':x.days_left<=3?'var(--yellow)':'var(--text)';
-      var oosImgHtml=x.img?'<img class="expand-img" src="'+x.img+'" loading="lazy" onerror="this.style.display=\'none\'">':'';
+      var oosImgHtml=x.img?'<img class="expand-img" src="'+x.img+'" loading="lazy" onerror="this.style.display=\\'none\\'">':'';
       html+='<div class="expand-card">'+
         oosImgHtml+
         '<div class="expand-body">'+
@@ -2723,7 +2723,7 @@ function renderDatavizTab(){
   });
   salesRank.sort(function(a,b){return b.daily-a.daily;});
   var salesHtml=salesRank.slice(0,10).map(function(s,i){
-    return '<div class="sr-item"><span class="sr-rank">'+(i+1)+'</span>'+(s.img?'<img class="sr-img" src="'+s.img+'" onerror="this.style.display=\'none\'">':'<div class="sr-img" style="display:flex;align-items:center;justify-content:center;font-size:16px">📦</div>')+'<div class="sr-info"><div class="sr-name">'+s.title+'</div><div class="sr-sub">'+s.code+'</div></div><div class="sr-bar-wrap"><div class="sr-bar-fill" style="width:'+Math.round(s.daily/(salesRank[0]?salesRank[0].daily:1)*100)+'%"></div></div><div class="sr-val">'+s.daily.toFixed(1)+'件/天</div></div>';
+    return '<div class="sr-item"><span class="sr-rank">'+(i+1)+'</span>'+(s.img?'<img class="sr-img" src="'+s.img+'" onerror="this.style.display=\\'none\\'">':'<div class="sr-img" style="display:flex;align-items:center;justify-content:center;font-size:16px">📦</div>')+'<div class="sr-info"><div class="sr-name">'+s.title+'</div><div class="sr-sub">'+s.code+'</div></div><div class="sr-bar-wrap"><div class="sr-bar-fill" style="width:'+Math.round(s.daily/(salesRank[0]?salesRank[0].daily:1)*100)+'%"></div></div><div class="sr-val">'+s.daily.toFixed(1)+'件/天</div></div>';
   }).join('')||'<span style="color:var(--dim);font-size:12px">暂无销售数据</span>';
   document.getElementById('dvSales').innerHTML='<div class="sr-list">'+salesHtml+'</div>';
 
@@ -2874,7 +2874,7 @@ function renderSalesTab(){
   orderList.reverse();
   var cardsHtml=orderList.slice(0,50).map(function(ord){
     var itemRows=ord.items.map(function(g){
-      var pic=g.itemPic?('<img src="'+g.itemPic.replace('cf.shopee.tw','down-tw.img.susercontent.com').replace(/_tn$/,'@resize_w100_nl.webp')+'" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="this.style.display=\'none\'">'):'';
+      var pic=g.itemPic?('<img src="'+g.itemPic.replace('cf.shopee.tw','down-tw.img.susercontent.com').replace(/_tn$/,'@resize_w100_nl.webp')+'" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="this.style.display=\\'none\\'">'):'';
       return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px">'+
         pic+
         '<div style="flex:1;min-width:0">'+
@@ -3375,7 +3375,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-08 03:44:03", "友鹰热搜": "2026-07-07 09:01:07", "销售数据": "2026-07-08 05:18:56", "看板部署": "2026-07-08 05:19:18", "货憨憨订单": "2026-07-08 05:15:49", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-08 05:15:49"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-08 03:44:03", "友鹰热搜": "2026-07-07 09:01:07", "销售数据": "2026-07-08 05:18:56", "看板部署": "2026-07-08 05:22:41", "货憨憨订单": "2026-07-08 05:15:49", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-08 05:15:49"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3516,7 +3516,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='ee1bc5cc';
+  var VER='2631bc62';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
@@ -3589,7 +3589,7 @@ function renderEstimateTab(){
     }).join('');
     
     var imgHtml='';
-    if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.style.display=\'none\'" alt="">';
+    if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.style.display=\\'none\\'" alt="">';
     else imgHtml='<div class="ph">'+getIcon(g.title)+'</div>';
     
     var dotCls='ok';
