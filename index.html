@@ -912,7 +912,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">83887c0f</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">c2a7bb2d</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1341,7 +1341,7 @@ var _transitReady = false;
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='83887c0f_202607090733';
+  var ver='c2a7bb2d_202607090737';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -2123,7 +2123,12 @@ function buildMatrix(invs,query){
     var items=DATA.filter(function(d){return d.invCode===inv});
     var title=items[0].title||''; var img=items[0].img||'';
     items.sort(function(a,b){
-      return (a.spec||'').localeCompare(b.spec||'');
+      // 按颜色+尺码排序：末尾尺码按标准权重，颜色按字母
+      var sizeRank={S:1,M:2,L:3,XL:4,XXL:5,'2XL':6,'3XL':7,'4XL':8,'5XL':9,'均碼':99};
+      var sa=(a.spec||'').match(/(S|M|L|X{1,2}L|2XL|3XL|4XL|5XL|均碼)(码)?$/);
+      var sb=(b.spec||'').match(/(S|M|L|X{1,2}L|2XL|3XL|4XL|5XL|均碼)(码)?$/);
+      var ra=sizeRank[sa?sa[1]:'']||50, rb=sizeRank[sb?sb[1]:'']||50;
+      return ra!==rb ? ra-rb : (a.spec||'').localeCompare(b.spec||'');
     });
     var qlo=query.toLowerCase();
     var spaceIdx=qlo.indexOf(' ');
@@ -3304,7 +3309,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-08 17:00:10", "友鹰热搜": "2026-07-08 09:02:06", "销售数据": "2026-07-09 07:33:25", "看板部署": "2026-07-09 07:29:10", "货憨憨订单": "2026-07-09 07:30:09", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-09 07:30:09"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-08 17:00:10", "友鹰热搜": "2026-07-08 09:02:06", "销售数据": "2026-07-09 07:33:25", "看板部署": "2026-07-09 07:33:49", "货憨憨订单": "2026-07-09 07:30:09", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-09 07:30:09"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3445,7 +3450,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='83887c0f';
+  var VER='c2a7bb2d';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
