@@ -927,7 +927,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">35a0f6ef</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">156c30ba</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -967,7 +967,9 @@ footer a{color:var(--dim);text-decoration:none}
         </div>
       </div>
       <div class="filter-bar" id="filterBar"></div>
-      <div class="card-grid" id="cardGrid"></div>
+      <div id="inv-group-miaon"><h3 class="owner-head">━━ 喵系 ━━</h3><div class="card-grid" id="miaonCardGrid"></div></div>
+      <div id="inv-group-wearing-notes"><h3 class="owner-head">━━ WN ━━</h3><div class="card-grid" id="wnCardGrid"></div></div>
+      <div id="inv-group-soft-fabric"><h3 class="owner-head">━━ 柔感 ━━</h3><div class="card-grid" id="softCardGrid"></div></div>
       <footer>数据自动同步</footer>
     </div>
     <!-- 预估 -->
@@ -1464,7 +1466,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='35a0f6ef_202607110018';
+  var ver='156c30ba_202607110024';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -1737,7 +1739,10 @@ function renderCharts(){
 var _lastChartsKey='';
 
 function renderCards(groups,filter,search){
-  var html='';
+  // 按归属店分组
+  var ownerOrder=['miaon','wearing-notes','soft-fabric'];
+  var gridMap={'miaon':'miaonCardGrid','wearing-notes':'wnCardGrid','soft-fabric':'softCardGrid'};
+  var byOwner={'miaon':[],'wearing-notes':[],'soft-fabric':[]};
   groups.forEach(function(g){
     var specs=g.specs;
     if(filter==='out'&&!specs.some(function(s){return s.stock===0})) return;
@@ -1746,41 +1751,57 @@ function renderCards(groups,filter,search){
       var lo=search.toLowerCase();
       if(g.invCode.toLowerCase().indexOf(lo)===-1&&g.title.toLowerCase().indexOf(lo)===-1&&!specs.some(function(s){return s.sku.toLowerCase().indexOf(lo)>-1})) return;
     }
-    var specsHtml=specs.map(function(s){
-      var cls=specState(s);if(getTransit(s.sku)>0) cls+=' transit';return '<span class="spec-tag '+cls+'">'+s.spec+'<i>|</i><span class="n">'+s.stock+'</span></span>';
-    }).join('');
-    var imgHtml='';
-    if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.style.display=\'none\'" alt="">';
-    else imgHtml='<div class="ph">'+getIcon(g.title)+'</div>';
-    var dotCls='';
-    if(specs.some(function(s){return s.stock===0})) dotCls='critical';
-    else if(specs.some(function(s){return s.stock>0&&s.stock<=3})) dotCls='low';
-    else dotCls='ok';
-    var cs=cardState(specs);
-    var transitSkus=specs.filter(function(s){return getTransit(s.sku)>0}).length;
-    var repTotal=specs.reduce(function(sum,s){
-      var r=REPLENISH[s.sku];return sum+(r&&r.suggest?r.suggest:0);
-    },0);
-    html+='<div class="card '+cs+'">'+
-      '<div class="card-gear" onclick="event.stopPropagation();openThresh(\''+g.invCode+'\')" title="设置阈值">⚙</div>'+
-      '<div class="card-img">'+imgHtml+'<div class="stock-dot '+dotCls+'"></div></div>'+
-      '<div class="card-body">'+
-        '<div class="card-inv" onclick="copyText(\''+g.invCode+'\')" title="点击复制">'+g.invCode+
-          getThreshBadgeHtml(g.invCode, specs)+
-        '</div>'+
-        '<div class="card-title">'+g.title+'</div>'+
-        '<div class="specs">'+specsHtml+'</div>'+
-        '<div class="card-footer">'+
-          '<span class="total-stock">📦 '+g.stock+'件 · '+specs.length+'规格</span>'+
-          (transitSkus>0?'<span class="transit-hint">🚚 '+transitSkus+'个有在途</span>':'')+
-          (repTotal>0?'<span class="replenish-tag need">⚠️ 补'+repTotal+'件</span>':'<span class="replenish-tag ok">✓ 够用</span>')+
-        '</div>'+
-      '</div></div>';
+    var owner=PRODUCT_OWNER[g.invCode]||'wearing-notes';
+    byOwner[owner]=byOwner[owner]||[];
+    byOwner[owner].push(g);
+  });
+  // 渲染每个归属店的卡片
+  var allHtml='';
+  ownerOrder.forEach(function(owner){
+    var ownerGroups=byOwner[owner]||[];
+    var html='';
+    ownerGroups.forEach(function(g){
+      var specs=g.specs;
+      var specsHtml=specs.map(function(s){
+        var cls=specState(s);if(getTransit(s.sku)>0) cls+=' transit';return '<span class="spec-tag '+cls+'">'+s.spec+'<i>|</i><span class="n">'+s.stock+'</span></span>';
+      }).join('');
+      var imgHtml='';
+      if(g.img) imgHtml='<img src="'+g.img+'" onerror="this.style.display=\'none\'" alt="">';
+      else imgHtml='<div class="ph">'+getIcon(g.title)+'</div>';
+      var dotCls='';
+      if(specs.some(function(s){return s.stock===0})) dotCls='critical';
+      else if(specs.some(function(s){return s.stock>0&&s.stock<=3})) dotCls='low';
+      else dotCls='ok';
+      var cs=cardState(specs);
+      var transitSkus=specs.filter(function(s){return getTransit(s.sku)>0}).length;
+      var repTotal=specs.reduce(function(sum,s){
+        var r=REPLENISH[s.sku];return sum+(r&&r.suggest?r.suggest:0);
+      },0);
+      html+='<div class="card '+cs+'">'+
+        '<div class="card-gear" onclick="event.stopPropagation();openThresh(\''+g.invCode+'\')" title="设置阈值">⚙</div>'+
+        '<div class="card-img">'+imgHtml+'<div class="stock-dot '+dotCls+'"></div></div>'+
+        '<div class="card-body">'+
+          '<div class="card-inv" onclick="copyText(\''+g.invCode+'\')" title="点击复制">'+g.invCode+
+            getThreshBadgeHtml(g.invCode, specs)+
+          '</div>'+
+          '<div class="card-title">'+g.title+'</div>'+
+          '<div class="specs">'+specsHtml+'</div>'+
+          '<div class="card-footer">'+
+            '<span class="total-stock">📦 '+g.stock+'件 · '+specs.length+'规格</span>'+
+            (transitSkus>0?'<span class="transit-hint">🚚 '+transitSkus+'个有在途</span>':'')+
+            (repTotal>0?'<span class="replenish-tag need">⚠️ 补'+repTotal+'件</span>':'<span class="replenish-tag ok">✓ 够用</span>')+
+          '</div>'+
+        '</div></div>';
+    });
+    var gridEl=document.getElementById(gridMap[owner]);
+    var wrapperEl=document.getElementById('inv-group-'+owner);
+    if(gridEl) gridEl.innerHTML=html||'<div style="text-align:center;color:var(--dim);padding:20px">无匹配</div>';
+    if(wrapperEl) wrapperEl.style.display=html?'':'none';
+    allHtml+=html;
   });
   // 内容没变就跳过 DOM 更新，避免图片闪烁
-  if(html===_lastCardsHTML&&filter===_lastCardsFilter&&search===_lastCardsSearch) return;
-  _lastCardsHTML=html;_lastCardsFilter=filter;_lastCardsSearch=search;
-  document.getElementById('cardGrid').innerHTML=html||'<div style="text-align:center;color:var(--dim);padding:40px">无匹配商品</div>';
+  if(allHtml===_lastCardsHTML&&filter===_lastCardsFilter&&search===_lastCardsSearch) return;
+  _lastCardsHTML=allHtml;_lastCardsFilter=filter;_lastCardsSearch=search;
 }
 
 var currentFilter='all',currentSearch='';
@@ -3469,7 +3490,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-10 17:00:33", "友鹰热搜": "2026-07-10 09:01:43", "销售数据": "2026-07-11 00:18:55", "看板部署": "2026-07-11 00:04:15", "货憨憨订单": "2026-07-11 00:15:46", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-11 00:15:46"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-10 17:00:33", "友鹰热搜": "2026-07-10 09:01:43", "销售数据": "2026-07-11 00:18:55", "看板部署": "2026-07-11 00:19:30", "货憨憨订单": "2026-07-11 00:15:46", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-11 00:15:46"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3610,7 +3631,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='35a0f6ef';
+  var VER='156c30ba';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
