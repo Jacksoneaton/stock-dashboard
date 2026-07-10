@@ -927,7 +927,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">02d320a1</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">c7bcf4f9</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1258,6 +1258,13 @@ try { var THRESHOLDS = {"wearing-notes": {}, "miaon": {}, "soft-fabric": {}}; } 
 var RELAY_BASE = 'https://hermes-jackson.jacksoneaton.net';
 // \u5546\u54c1\u4e3b\u5e93\u5b58\u5f52\u5c5e
 var PRODUCT_OWNER = {};
+// 从顺运宝 sku 字段自动识别归属店
+DATA.forEach(function(d){
+  var sku=(d.sku||'').toLowerCase();
+  if(sku.indexOf('wearing notes')>=0) PRODUCT_OWNER[d.invCode]='wearing-notes';
+  else if(sku.indexOf('喵系')>=0||sku.indexOf('miao')>=0) PRODUCT_OWNER[d.invCode]='miaon';
+  else if(sku.indexOf('柔感')>=0||sku.indexOf('soft')>=0) PRODUCT_OWNER[d.invCode]='soft-fabric';
+});
 
 function buildStoreNav(){
   var html='';
@@ -1281,8 +1288,6 @@ var _thresholdsLoaded = false;
 
 function loadThresholds(callback){
   fetch(RELAY_BASE+'/api/thresholds').then(function(r){return r.json()}).then(function(data){
-    // 提取归属店映射
-    if(data._owners){for(var inv in data._owners) PRODUCT_OWNER[inv]=data._owners[inv];delete data._owners;}
     for(var sid in data){
       if(!THRESHOLDS[sid]) THRESHOLDS[sid]={};
       for(var inv in data[sid]) THRESHOLDS[sid][inv]=data[sid][inv];
@@ -1304,10 +1309,9 @@ function loadThresholds(callback){
   });
 }
 
-function saveThreshToServer(storeId, invCode, sku, value, oldValue, owner, callback){
+function saveThreshToServer(storeId, invCode, sku, value, oldValue, callback){
   var body={storeId:storeId, invCode:invCode, value:value, oldValue:oldValue||0};
   if(sku) body.sku=sku;
-  if(owner) body.owner=owner;
   fetch(RELAY_BASE+'/api/thresholds',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
   .then(function(r){return r.json()}).catch(function(e){console.warn('Thresholds save failed:',e)})
   .finally(function(){
@@ -1319,8 +1323,6 @@ function saveThreshToServer(storeId, invCode, sku, value, oldValue, owner, callb
     else delete THRESHOLDS[storeId][invCode];}
     var t=THRESHOLDS[storeId][invCode];
     if(t&&t.product===0&&Object.keys(t.skus||{}).length===0) delete THRESHOLDS[storeId][invCode];
-    // 保存归属店到 PRODUCT_OWNER
-    if(owner) PRODUCT_OWNER[invCode]=owner;
     localStorage.setItem('hermes_thresholds',JSON.stringify(THRESHOLDS));
     if(callback) callback();
   });
@@ -1336,11 +1338,7 @@ function openThresh(invCode){
   DATA.forEach(function(d){if(d.invCode===invCode){title=d.title;specs.push(d);}});
   specs.forEach(function(s){if(!seen[s.spec]){seen[s.spec]=true;uniq.push(s);}});
   document.getElementById('threshTitle').textContent='⚙ '+invCode+' · '+uniq.length+'规格';
-  var owner=PRODUCT_OWNER[invCode]||currentStore;
-  var h='<div class="row"><span style="flex:1">归属店</span><select id="threshOwner">';
-  STORES.forEach(function(s){h+='<option value="'+s.id+'"'+(s.id===owner?' selected':'')+'>'+s.short+' - '+s.name+'</option>';});
-  h+='</select></div>';
-  h+='<div class="row" style="margin-top:8px">商品预警线 <input type="number" id="threshVal" value="'+(info.product||0)+'" min="0"> 件</div>';
+  var h='<div class="row">商品预警线 <input type="number" id="threshVal" value="'+(info.product||0)+'" min="0"> 件</div>';
   h+='<div class="row" style="font-size:10px;color:var(--muted)">'+title+'</div>';
   h+='<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;font-size:11px;color:var(--muted)">📐 规格预警线</div>';
   uniq.forEach(function(s){var v=info.skus[s.spec]||0;h+='<div class="row"><span style="flex:1">'+s.spec+'</span><input type="number" class="sku-thresh-val" data-spec="'+s.spec.replace(/"/g,'&quot;')+'" value="'+v+'" min="0"> 件</div>';});
@@ -1355,14 +1353,7 @@ function saveThresh(){
   if(!_threshEditing) return;
   var sid=_threshEditing.storeId,inv=_threshEditing.invCode;
   var pv=parseInt(document.getElementById('threshVal').value)||0;
-  var ownerEl=document.getElementById('threshOwner');
-  var newOwner=ownerEl?ownerEl.value:currentStore;
-  // 保存归属店
-  if(newOwner!==(PRODUCT_OWNER[inv]||'wearing-notes')){
-    saveThreshToServer(sid,inv,'',pv,getThresh(inv),newOwner);
-  }else{
-    saveThreshToServer(sid,inv,'',pv,getThresh(inv));
-  }
+  saveThreshToServer(sid,inv,'',pv,getThresh(inv));
   document.querySelectorAll('.sku-thresh-val').forEach(function(inp){
     var sp=inp.dataset.spec,v=parseInt(inp.value)||0,ov=getThreshInfo(inv).skus[sp]||0;
     if(v!==ov) saveThreshToServer(sid,inv,sp,v,ov);
@@ -1473,7 +1464,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='02d320a1_202607102348';
+  var ver='c7bcf4f9_202607102358';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -3478,7 +3469,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-10 17:00:33", "友鹰热搜": "2026-07-10 09:01:43", "销售数据": "2026-07-10 23:48:54", "看板部署": "2026-07-10 23:34:14", "货憨憨订单": "2026-07-10 23:45:45", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-10 23:45:45"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-10 17:00:33", "友鹰热搜": "2026-07-10 09:01:43", "销售数据": "2026-07-10 23:48:54", "看板部署": "2026-07-10 23:49:15", "货憨憨订单": "2026-07-10 23:45:45", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-10 23:45:45"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3619,7 +3610,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='02d320a1';
+  var VER='c7bcf4f9';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
