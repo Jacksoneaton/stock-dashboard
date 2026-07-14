@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>内部数据</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --line:#e8eaed; --text:#1f2329;
+    --muted:#8a9099; --cyan:#0b83d9; --red:#e5484d; --green:#2ea043;
+    --shadow:0 1px 3px rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+  /* 密码门 */
+  #gate{position:fixed;inset:0;background:#1f2329;display:flex;align-items:center;justify-content:center;z-index:999}
+  #gate.hidden{display:none}
+  .gate-box{background:#fff;border-radius:12px;padding:32px 28px;width:300px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+  .gate-box h2{font-size:16px;margin-bottom:6px}
+  .gate-box p{font-size:12px;color:var(--muted);margin-bottom:18px}
+  .gate-box input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;text-align:center;letter-spacing:2px}
+  .gate-box input:focus{outline:none;border-color:var(--cyan)}
+  .gate-box button{width:100%;margin-top:12px;padding:10px;background:var(--cyan);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+  .gate-err{color:var(--red);font-size:12px;margin-top:10px;min-height:16px}
+  /* 主体 */
+  #app{max-width:1100px;margin:0 auto;padding:20px 16px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .topbar h1{font-size:18px;font-weight:600}
+  .topbar .sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .pill{padding:6px 14px;border:1px solid var(--line);background:var(--card);border-radius:20px;font-size:13px;cursor:pointer;color:var(--muted)}
+  .pill.active{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .card-head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+  .card-head h3{font-size:14px;font-weight:600}
+  .card-head .cnt{font-size:12px;color:var(--muted)}
+  .card-body{padding:6px 0}
+  .cmp-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line)}
+  .cmp-row:last-child{border-bottom:none}
+  .cmp-img{width:48px;height:48px;border-radius:8px;object-fit:cover;background:var(--bg);flex-shrink:0}
+  .cmp-info{flex:1;min-width:0}
+  .cmp-name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cmp-meta{font-size:11px;color:var(--muted);margin-top:2px}
+  .cmp-diff{text-align:right;flex-shrink:0}
+  .cmp-diff .big{font-size:16px;font-weight:700;color:var(--red)}
+  .cmp-diff .lbl{font-size:10px;color:var(--muted)}
+  .cmp-stores{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .store-tag{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--line)}
+  .store-tag b{color:var(--cyan)}
+  .store-tag.lo b{color:var(--green)}
+  .store-tag.hi b{color:var(--red)}
+  .empty{padding:40px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div id="gate">
+  <div class="gate-box">
+    <h2>内部数据</h2>
+    <p>请输入访问密码</p>
+    <input id="pw" type="password" placeholder="密码" autocomplete="off">
+    <button onclick="tryUnlock()">进入</button>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div>
+      <h1>内部数据面板</h1>
+      <div class="sub">仅供内部使用 · 更新于 <span id="genAt">—</span></div>
+    </div>
+  </div>
+  <div class="tabs" id="tabs">
+    <div class="pill active" data-tab="price">跨店比价</div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+var _PW = '111plqawsok';
+var DATA = {"rows": [{"code": "QTW0000015-03", "name": "【台灣出貨】 正品 泰國八仙 鼻通 薄荷 提神 打瞌睡 提神醒腦 POY-SIAN 泰國薄荷棒 開車鼻吸棒 可聞可塗", "spec": "6支裝 【性價比裝】", "img": "https://cf.shopee.tw/file/sg-11134202-7rdvl-mcadr1jdrvbvd2_tn", "diff": 93, "lo": 18, "hi": 111, "stores": [{"store": "美顏美妝店", "price": 18, "orig": 18}, {"store": "好幫手百貨旗艦店", "price": 111, "orig": 368}]}, {"code": "QTW00216-03", "name": "【正品+免運🚀】🪄Kissme奇士美極細眼線筆 花漾美姬 持久極細抗暈眼線液筆 0.1mm極細筆尖 最新款 零阻力超順滑", "spec": "03棕黑色-一代眼綫筆", "img": "https://cf.shopee.tw/file/tw-11134207-81ztf-mhx7n884sagz06_tn", "diff": 20, "lo": 118, "hi": 138, "stores": [{"store": "Sakura美妝", "price": 118, "orig": 236}, {"store": "悅己顏美妝", "price": 138, "orig": 138}]}], "count": 2, "generated_at": "2026-07-14 19:15:54"};
+
+function tryUnlock(){
+  var v = document.getElementById('pw').value;
+  if(v === _PW){
+    try{ localStorage.setItem('_neibu_ok','1'); }catch(e){}
+    showApp();
+  }else{
+    document.getElementById('gateErr').textContent = '密码错误';
+  }
+}
+document.getElementById('pw').addEventListener('keydown',function(e){ if(e.key==='Enter') tryUnlock(); });
+
+function showApp(){
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('app').style.display = 'block';
+  render();
+}
+
+function render(){
+  document.getElementById('genAt').textContent = (DATA && DATA.generated_at) ? DATA.generated_at : '—';
+  renderPrice();
+}
+
+function renderPrice(){
+  var rows = (DATA && DATA.rows) ? DATA.rows : [];
+  var h = '<div class="card"><div class="card-head"><h3>🔀 同款跨店比价（QTW规格）</h3><span class="cnt">'+rows.length+' 条</span></div><div class="card-body">';
+  if(rows.length === 0){
+    h += '<div class="empty">暂无跨店同款数据</div>';
+  }else{
+    rows.forEach(function(r){
+      var img = r.img ? '<img class="cmp-img" src="'+r.img+'" onerror="this.style.visibility=\'hidden\'">' : '<div class="cmp-img"></div>';
+      var tags = r.stores.map(function(s,i){
+        var cls = i===0 ? 'lo' : (i===r.stores.length-1 ? 'hi' : '');
+        return '<span class="store-tag '+cls+'">'+s.store+' <b>$'+s.price+'</b></span>';
+      }).join('');
+      h += '<div class="cmp-row">'+img+
+        '<div class="cmp-info"><div class="cmp-name" title="'+esc(r.name)+'">'+esc(r.name||r.code)+'</div>'+
+        '<div class="cmp-meta">'+r.code+(r.spec?' · '+esc(r.spec):'')+'</div>'+
+        '<div class="cmp-stores">'+tags+'</div></div>'+
+        '<div class="cmp-diff"><div class="big">$'+r.diff+'</div><div class="lbl">最大差价</div></div>'+
+        '</div>';
+    });
+  }
+  h += '</div></div>';
+  document.getElementById('content').innerHTML = h;
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// 已解锁过 → 直接进
+if(localStorage.getItem('_neibu_ok') === '1'){ showApp(); }
+else{ setTimeout(function(){ document.getElementById('pw').focus(); }, 100); }
+</script>
+</body>
+</html>
