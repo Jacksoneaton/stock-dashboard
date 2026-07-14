@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jackson · 导航中心</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    min-height:100vh;
+    background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);
+    color:#e2e8f0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px;
+  }
+  .header{text-align:center;margin-bottom:40px}
+  .header h1{font-size:28px;font-weight:700;letter-spacing:1px;margin-bottom:8px}
+  .header p{font-size:13px;color:#94a3b8}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:18px;
+    width:100%;max-width:720px;
+  }
+  .nav-card{
+    display:flex;flex-direction:column;align-items:flex-start;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:16px;
+    padding:24px;
+    text-decoration:none;color:inherit;
+    transition:all .2s ease;
+    cursor:pointer;
+    position:relative;overflow:hidden;
+  }
+  .nav-card:hover{
+    background:rgba(255,255,255,.1);
+    border-color:var(--accent);
+    transform:translateY(-4px);
+    box-shadow:0 12px 30px rgba(0,0,0,.3);
+  }
+  .nav-card .icon{font-size:36px;margin-bottom:14px}
+  .nav-card .title{font-size:18px;font-weight:600;margin-bottom:6px}
+  .nav-card .desc{font-size:12px;color:#94a3b8;line-height:1.5}
+  .nav-card .arrow{position:absolute;top:24px;right:24px;font-size:18px;color:#64748b;transition:all .2s}
+  .nav-card:hover .arrow{color:var(--accent);transform:translateX(4px)}
+  .nav-card .bar{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+  .footer{margin-top:36px;font-size:11px;color:#64748b;text-align:center}
+  .lock-badge{display:inline-block;font-size:10px;background:rgba(239,68,68,.2);color:#fca5a5;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>Jackson 导航中心</h1>
+    <p>点击卡片进入对应系统</p>
+  </div>
+  <div class="grid">
+    <a class="nav-card" style="--accent:#38bdf8" href="https://jacksoneaton.github.io/stock-dashboard/">
+      <div class="bar"></div>
+      <span class="arrow">→</span>
+      <div class="icon">⚡</div>
+      <div class="title">Jackson看板</div>
+      <div class="desc">Wearing Notes 主店数据 · 销量库存排行</div>
+    </a>
+    <a class="nav-card" style="--accent:#818cf8" href="https://jacksoneaton.github.io/stock-dashboard/%E5%85%AC%E5%8F%B8%E7%9C%8B%E6%9D%BF/">
+      <div class="bar"></div>
+      <span class="arrow">→</span>
+      <div class="icon">🏢</div>
+      <div class="title">公司看板</div>
+      <div class="desc">全店铺聚合 · 订单/库存/保留规格</div>
+    </a>
+    <a class="nav-card" style="--accent:#f472b6" href="https://jacksoneaton.github.io/stock-dashboard/x9k2m-neibu/">
+      <div class="bar"></div>
+      <span class="arrow">→</span>
+      <div class="icon">🔒</div>
+      <div class="title">内部数据<span class="lock-badge">需密码</span></div>
+      <div class="desc">跨店比价 · 仅内部使用</div>
+    </a>
+    <a class="nav-card" style="--accent:#4ade80" href="https://hermes-jackson.jacksoneaton.net">
+      <div class="bar"></div>
+      <span class="arrow">→</span>
+      <div class="icon">🤖</div>
+      <div class="title">AI 客服</div>
+      <div class="desc">速销易智能回复系统</div>
+    </a>
+  </div>
+  <div class="footer">Jackson 跨境电商 · 内部系统导航</div>
+</body>
+</html>
