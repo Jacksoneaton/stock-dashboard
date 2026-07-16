@@ -968,7 +968,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">bffb7351</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">cc160d0d</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -995,7 +995,7 @@ footer a{color:var(--dim);text-decoration:none}
           <span class="ah-chev">&#9660;</span>
         </div>
         <div class="alert-body">
-          <table class="alert-table"><thead><tr><th>编码</th><th>规格</th><th>实盘</th><th>在售</th><th>差额</th></tr></thead><tbody id="invAlertBody"></tbody></table>
+          <table class="alert-table"><thead><tr><th>编码</th><th>规格</th><th>Shopee</th><th>实际库存</th><th>差额</th></tr></thead><tbody id="invAlertBody"></tbody></table>
           <div class="alert-foot"><button class="btn-dismiss" onclick="dismissInvAlert()">全部已处理 &#183; 一键清除</button></div>
         </div>
       </div>
@@ -1511,14 +1511,15 @@ function renderInvAlert(){
   if (!alerts.length) { bar.classList.remove('show'); bar.classList.remove('open'); return; }
   
   bar.classList.add('show');
-  msg.textContent = '库存差异  ' + alerts.length + ' 个规格的虾皮在售与顺运宝实盘不一致';
+  msg.textContent = '库存差异  ' + alerts.length + ' 个规格 Shopee 与实际库存不一致';
   
   var html = '';
   for (var i = 0; i < alerts.length; i++) {
     var a = alerts[i];
     var diff = a.diff || 0;
     var dcls = diff < 0 ? 'neg' : (diff > 0 ? 'pos' : '');
-    html += '<tr><td class="code">' + h_esc(a.code) + '</td><td>' + h_esc(a.spec || '') + '</td><td>' + a.actual + '</td><td>' + a.onSale + '</td><td class="diff ' + dcls + '">' + (diff >= 0 ? '+' : '') + diff + '</td></tr>';
+    var dtxt = diff > 0 ? ('超' + diff + '件') : (diff < 0 ? ('少' + Math.abs(diff) + '件') : '0');
+    html += '<tr><td class="code">' + h_esc(a.code) + '</td><td>' + h_esc(a.spec || '') + '</td><td>' + a.onSale + '</td><td>' + a.actual + '</td><td class="diff ' + dcls + '">' + dtxt + '</td></tr>';
   }
   body.innerHTML = html;
 }
@@ -1564,7 +1565,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='bffb7351_202607170634';
+  var ver='cc160d0d_202607170638';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -3620,7 +3621,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-16 17:01:40", "友鹰热搜": "2026-07-16 09:01:00", "销售数据": "2026-07-17 06:34:27", "看板部署": "2026-07-17 06:29:07", "货憨憨订单": "2026-07-17 06:30:57", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-17 06:30:57"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-16 17:01:40", "友鹰热搜": "2026-07-16 09:01:00", "销售数据": "2026-07-17 06:34:27", "看板部署": "2026-07-17 06:34:47", "货憨憨订单": "2026-07-17 06:30:57", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-17 06:30:57"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3761,7 +3762,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='bffb7351';
+  var VER='cc160d0d';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
