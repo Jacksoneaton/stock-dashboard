@@ -959,6 +959,8 @@ footer a{color:var(--dim);text-decoration:none}
 <div class="container">
   <!-- Sync status -->
   <div class="sync-bar" id="syncBar"><span class="sync-dot"></span><span id="syncMsg">加载中...</span></div>
+  <!-- token 状态条 -->
+  
   <!-- 数据新鲜度警告 -->
   <div id="staleBanner" class="stale-banner" style="display:none"></div>
   <!-- 系统健康状态 — 常驻显示 -->
@@ -1566,7 +1568,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='f1f27408_202607180504';
+  var ver='f1f27408_202607180507';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -3622,7 +3624,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-17 22:56:42", "友鹰热搜": "2026-07-17 09:00:59", "销售数据": "2026-07-18 05:04:07", "看板部署": "2026-07-18 04:49:40", "货憨憨订单": "2026-07-18 05:00:28", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-18 05:00:28", "虾皮在售": "2026-07-17 22:55:57"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-17 22:56:42", "友鹰热搜": "2026-07-17 09:00:59", "销售数据": "2026-07-18 05:04:07", "看板部署": "2026-07-18 05:04:41", "货憨憨订单": "2026-07-18 05:00:28", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-18 05:00:28", "虾皮在售": "2026-07-17 22:55:57"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 18, 26],   // 2次/日(15:00/23:00)，最长间隔16h
