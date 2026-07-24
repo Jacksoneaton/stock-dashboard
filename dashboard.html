@@ -371,6 +371,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .modal-box .added-item .sku{color:var(--cyan);font-weight:600;font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
 .modal-box .added-item .qty{color:var(--text);font-weight:700}
 .modal-box .added-item .remove{color:var(--muted);cursor:pointer;margin-left:auto;font-size:14px;padding:0 4px}
+
+/* ─── 在途弹窗规格矩阵 ─── */
+.matrix-grid{max-height:220px;overflow-y:auto;margin-bottom:8px}
+.matrix-card{background:#f8f9fb;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.matrix-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.matrix-selall{font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:#fff;color:var(--text);cursor:pointer;white-space:nowrap;margin-left:auto}
+.matrix-selall:hover{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+.matrix-img{width:32px;height:32px;border-radius:6px;object-fit:cover;background:var(--dim)}
+.matrix-title{font-size:12px;font-weight:600;color:var(--text);line-height:1.4}
+.matrix-specs{display:flex;flex-wrap:wrap;gap:4px}
+.matrix-spec{display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:11px;cursor:pointer;transition:all .15s}
+.matrix-spec:hover{border-color:var(--cyan)}
+.matrix-spec.checked{border-color:var(--cyan);background:rgba(99,102,241,.06)}
+.matrix-spec input[type=checkbox]{width:14px;height:14px;accent-color:var(--cyan);cursor:pointer}
+.matrix-spec span{flex:1;white-space:nowrap}
+.matrix-qty{width:36px;height:22px;font-size:11px;text-align:center;border:1px solid var(--border);border-radius:4px}
+.matrix-add-btn{margin-top:6px;padding:7px 16px;border-radius:8px;font-size:12px;cursor:pointer;border:none;font-weight:600;background:var(--cyan);color:#fff}
+.matrix-add-btn:hover{opacity:.85}
+.matrix-selall-global{font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:#fff;color:var(--text);cursor:pointer;white-space:nowrap;margin-left:auto;margin-bottom:4px}
+.matrix-selall-global:hover{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+.btn-save{background:var(--cyan);color:#fff}
+.btn-cancel{background:#f1f3f5;color:var(--muted)}
 .modal-box .added-item .remove:hover{color:var(--red)}
 .modal-box .btns{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
 .modal-box button{padding:8px 18px;border-radius:8px;font-size:12px;cursor:pointer;border:none;font-weight:600}
@@ -895,7 +917,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">27fe53244</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">4b15807c9</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1012,7 +1034,10 @@ footer a{color:var(--dim);text-decoration:none}
   <div class="modal-box">
     <h3>+ 添加在途</h3>
     <input class="search" placeholder="搜索 SKU / 商品名..." oninput="filterModal(this.value)">
+    <button class="matrix-selall-global" id="matrixSelAllBtn" style="display:none" onclick="selectMatrixAll()">全选</button>
     <div class="results" id="modalResults"></div>
+    <div class="matrix-grid" id="modalMatrix" style="display:none"></div>
+    <button class="matrix-add-btn" id="matrixAddBtn" style="display:none;margin-bottom:6px" onclick="addMatrixSelected()">✓ 添加选中规格</button>
     <div class="added-list" id="modalAdded"></div>
     <div class="field-row">
       <label>包裹名</label>
@@ -1323,7 +1348,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='27fe53244_202607240901';
+  var ver='4b15807c9_202607240902';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -2127,10 +2152,84 @@ function renderModalAdded(){
 }
 
 function filterModal(q){
-  var lo=q.toLowerCase();
+  var lo=q.toLowerCase().trim();
+  // 多词搜索：第一段找产品编码，后续段留给矩阵内部过滤
+  var parts=lo.split(/\s+/).filter(function(p){return p.length>0});
+  var firstWord=parts[0]||'';
+  var matched=[];
   document.querySelectorAll('#modalResults .r-item').forEach(function(i){
-    i.style.display=i.textContent.toLowerCase().indexOf(lo)>=0?'':'none';
+    var txt=i.textContent.toLowerCase();
+    var hit=firstWord.length===0||txt.indexOf(firstWord)>=0;
+    i.style.display=hit?'':'none';
+    if(hit) matched.push(i.dataset.sku);
   });
+  var matrix=document.getElementById('modalMatrix');
+  var results=document.getElementById('modalResults');
+  var btn=document.getElementById('matrixAddBtn');
+
+  // 搜索词 ≥2字符 且匹配项来自 ≤3 个产品 → 展示规格矩阵
+  if(lo.length>=2&&matched.length>0){
+    var invs={}; matched.forEach(function(sku){
+      var d=DATA.find(function(x){return x.sku===sku});
+      if(d&&d.invCode) invs[d.invCode]=(invs[d.invCode]||0)+1;
+    });
+    if(Object.keys(invs).length>=1&&Object.keys(invs).length<=3){
+      results.style.display='none';
+      buildMatrix(invs,lo);
+      matrix.style.display=''; btn.style.display=''; document.getElementById('matrixSelAllBtn').style.display='';
+      return;
+    }
+  }
+  // 默认：平铺列表
+  results.style.display=''; matrix.style.display='none'; btn.style.display='none'; document.getElementById('matrixSelAllBtn').style.display='none';
+}
+function buildMatrix(invs,query){
+  var html='';
+  Object.keys(invs).forEach(function(inv){
+    var items=DATA.filter(function(d){return d.invCode===inv});
+    var title=items[0].title||''; var img=items[0].img||'';
+    items.sort(function(a,b){
+      var am=a.spec?a.spec.length:0; var bm=b.spec?b.spec.length:0; return bm-am;
+    });
+    var qlo=query.toLowerCase();
+    var spaceIdx=qlo.indexOf(' ');
+    var filterWord=spaceIdx>=0?qlo.substring(spaceIdx+1).trim():'';
+    html+='<div class="matrix-card" data-inv="'+inv+'">';
+    html+='<div class="matrix-header">'+(img?'<img class="matrix-img" src="'+img+'" onerror="this.hidden=true">':'')+'<div class="matrix-title">'+title.substr(0,32)+'</div>';
+    html+='</div><div class="matrix-specs">';
+    items.forEach(function(d){
+      // 有二级过滤词：按单词精确匹配（"L" 不匹配 "XL"、"2XL"）
+      if(filterWord){
+        var words=d.spec.toLowerCase().split(/[\s()\-/]+/).filter(function(w){return w.length>0});
+        var sWords=(d.sku||'').toLowerCase().split(/[\s()\-/]+/);
+        if(words.indexOf(filterWord)<0&&sWords.indexOf(filterWord)<0) return;
+      }
+      html+='<label class="matrix-spec"><input type="checkbox" data-sku="'+d.sku+'"><span>'+d.spec+'</span><input type="number" value="1" min="1" class="matrix-qty" onclick="event.stopPropagation()"></label>';
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('modalMatrix').innerHTML=html||'<div style="text-align:center;padding:30px;color:var(--muted)">无匹配规格，请调整搜索词</div>';
+}
+function selectMatrixAll(){
+  var btn=document.getElementById('matrixSelAllBtn');
+  var isAll=btn.textContent==='全选';
+  document.querySelectorAll('#modalMatrix input[type=checkbox]').forEach(function(cb){
+    cb.checked=isAll;
+    cb.parentElement.classList.toggle('checked',isAll);
+  });
+  btn.textContent=isAll?'取消全选':'全选';
+}
+function addMatrixSelected(){
+  var count=0;
+  document.querySelectorAll('#modalMatrix input[type=checkbox]:checked').forEach(function(cb){
+    var sku=cb.dataset.sku; var d=DATA.find(function(x){return x.sku===sku}); if(!d) return;
+    var qty=parseInt(cb.parentElement.querySelector('.matrix-qty').value)||1;
+    var exist=_modalAdded.find(function(i){return i.sku===sku});
+    if(exist){exist.qty+=qty} else {_modalAdded.push({sku:sku,qty:qty,spec:d.spec,txt:d.title.substr(0,20)+' '+d.spec})}
+    count++;
+  });
+  if(count===0){showToast('请勾选至少一个规格');return}
+  renderModalAdded(); showToast('已添加 '+count+' 个规格');
 }
 
 function confirmTransitAdd(){
@@ -3271,7 +3370,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-23 22:56:06", "友鹰热搜": "2026-07-24 09:01:14", "销售数据": "2026-07-24 08:48:30", "看板部署": "2026-07-24 08:48:54", "货憨憨订单": "2026-07-24 09:00:17", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 1, "orders_pull": "2026-07-24 09:00:17", "虾皮在售": "2026-07-23 22:55:23"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-23 22:56:06", "友鹰热搜": "2026-07-24 09:01:14", "销售数据": "2026-07-24 08:48:30", "看板部署": "2026-07-24 09:01:33", "货憨憨订单": "2026-07-24 09:00:17", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 1, "orders_pull": "2026-07-24 09:00:17", "虾皮在售": "2026-07-23 22:55:23"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3412,7 +3511,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测：每30s检查是否有新版看板
 (function(){
-  var VER='27fe53244';
+  var VER='4b15807c9';
   var banner=document.getElementById('updateBanner'), badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
   setInterval(function(){
