@@ -915,7 +915,7 @@ footer a{color:var(--dim);text-decoration:none}
     <span class="health-item"><span class="health-dot" id="hdSales"></span><span id="htSales">销售</span><span class="health-sync" onclick="triggerSync('sales')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-item"><span class="health-dot" id="hdDeploy"></span><span id="htDeploy">看板</span><span class="health-sync" onclick="triggerSync('deploy')" title="手动同步"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span></span>
     <span class="health-summary" id="healthSum">检查中...</span>
-    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">826e7f802</span>
+    <span style="font-size:9px;opacity:0.4;font-family:'JetBrains Mono',monospace" id="verBadge">82a070c0f</span>
   </div>
   <!-- 新版检测横幅 -->
   <div id="updateBanner" class="update-banner" style="display:none" onclick="location.reload(true)">🔄 新版本已发布，点击刷新</div>
@@ -1345,7 +1345,7 @@ var _ghToken='ghp_YneKWp8d2aXdV80v' + 'fWA2pgIkC68uae1SQRnW';
 
 // Auto-clear stale localStorage cache when new data version detected
 (function(){
-  var ver='826e7f802_202607241044';
+  var ver='82a070c0f_202607241045';
   var stored=localStorage.getItem('hermes_data_ver');
   if(stored!==ver){
     ['hermes_transit_data','hermes_dash_sub','hermes_trends_sub','hermes_last_pkg'].forEach(function(k){localStorage.removeItem(k)});
@@ -1390,15 +1390,16 @@ function loadTransit(cb){
             _transitData=remote.packages;
             try{localStorage.setItem('hermes_transit',JSON.stringify(_transitData));}catch(e){}
             setSyncStatus('synced','已同步 · GitHub');
+            showToast('已同步 '+remote.packages.length+' 个包裹');
             renderTransitTab();
             refreshAll();
           }
         }
-      }catch(e){console.error('Transit parse error:',e)}
-    }else{console.warn('Transit GET status:',g.status)}
+      }catch(e){setSyncStatus('error','数据解析失败');showToast('数据解析失败')}
+    }else{setSyncStatus('error','请求失败 '+g.status);showToast('请求失败 '+g.status)}
   };
-  g.onerror=function(){console.warn('Transit GET network error')};
-  g.ontimeout=function(){console.warn('Transit GET timeout')};
+  g.onerror=function(){setSyncStatus('error','网络异常');showToast('网络异常')};
+  g.ontimeout=function(){setSyncStatus('error','请求超时');showToast('请求超时')};
   g.send();
 }
 
@@ -3347,7 +3348,7 @@ function renderBlueGrid(entries, isYouying){
 }
 
 // ====== 更新时间戳 ======
-var DATA_SOURCES = {"顺运宝库存": "2026-07-23 22:56:06", "友鹰热搜": "2026-07-24 09:01:14", "销售数据": "2026-07-24 10:33:32", "看板部署": "2026-07-24 10:41:28", "货憨憨订单": "2026-07-24 10:30:21", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 1, "orders_pull": "2026-07-24 10:30:21", "虾皮在售": "2026-07-23 22:55:23"};
+var DATA_SOURCES = {"顺运宝库存": "2026-07-23 22:56:06", "友鹰热搜": "2026-07-24 09:01:14", "销售数据": "2026-07-24 10:33:32", "看板部署": "2026-07-24 10:44:32", "货憨憨订单": "2026-07-24 10:45:21", "tasks": {"货憨憨订单": {"last_success": "2026-06-22 15:04:04", "records_pulled": "9", "new_added": 0, "total_after": 1258}}, "货憨憨订单_新增": 0, "orders_pull": "2026-07-24 10:45:21", "虾皮在售": "2026-07-23 22:55:23"};
 // 健康状态映射: DATA_SOURCES key → [element id, label, warn_h, crit_h]
 var HEALTH_MAP = {
   '顺运宝库存': ['hdStock','htStock', 10, 18],   // 3次/日，正常间隔≤8h
@@ -3488,7 +3489,7 @@ function setHealth(dotId,cls,labelId,text){
 updateTimestamps();
 // 版本检测已禁用 — 不再弹刷新提示
 (function(){
-  var VER='826e7f802';
+  var VER='82a070c0f';
   var badge=document.getElementById('verBadge');
   if(badge)badge.textContent=VER;
 })();
