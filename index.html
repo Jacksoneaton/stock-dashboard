@@ -1429,6 +1429,7 @@ function loadTransit(cb){
           localStorage.setItem('hermes_transit',JSON.stringify(_transitData));
           if(localOnly.length>0){
             setSyncStatus('synced','已加载 · '+localOnly.length+'个包裹未同步');
+            saveTransitToGitHub(_transitData);
           } else {
             setSyncStatus('synced','已加载');
           }
